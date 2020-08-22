@@ -333,8 +333,8 @@ func main() {
 	done := make(chan bool, 1)
 
 	// Iterate through the server ports and spawn a Goroutine for each
-	for a := *startingPortPtr; a < listners; a++ {
-		go sshListener(a, done)
+	for portNumber := *startingPortPtr; portNumber < listners; portNumber++ {
+		go sshListener(portNumber, done)
 	}
 
 	// Recieve all the values from the channel (essentially wait on it to be empty)

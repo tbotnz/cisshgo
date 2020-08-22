@@ -11,7 +11,7 @@ import (
 )
 
 // ssh listernet
-func ssh_listener(a int, done chan bool) {
+func sshListener(a int, done chan bool) {
 
 	// SHOW_VERSION_PAGING_ENABLED := `Cisco IOS XE Software, Version 16.04.01
 	// Cisco IOS Software [Everest], CSR1000V Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.4.1, RELEASE SOFTWARE (fc2)
@@ -38,11 +38,11 @@ func ssh_listener(a int, done chan bool) {
 	//  --More--
 	// `
 
-	supported_commands := make(map[string]string)
+	supportedCommands := make(map[string]string)
 
 	hostname := "test_device"
 
-	supported_commands["show version"] = `Cisco IOS XE Software, Version 16.04.01
+	supportedCommands["show version"] = `Cisco IOS XE Software, Version 16.04.01
 Cisco IOS Software [Everest], CSR1000V Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.4.1, RELEASE SOFTWARE (fc2)
 Technical Support: http://www.cisco.com/techsupport
 Copyright (c) 1986-2016 by Cisco Systems, Inc.
@@ -86,7 +86,7 @@ Processor board ID 9FKLJWM5EB0
 0K bytes of  at webui:.
 Configuration register is 0x2102`
 
-	supported_commands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
+	supportedCommands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
 FastEthernet0/0            10.0.2.27       YES NVRAM  up                    up
 Serial0/0                  unassigned      YES NVRAM  administratively down down
 FastEthernet0/1            unassigned      YES NVRAM  administratively down down
@@ -121,8 +121,8 @@ Vlan1                      unassigned      YES NVRAM  up                    down
 			}
 			response := line
 			log.Println(line)
-			if supported_commands[response] != "" {
-				term.Write(append([]byte(supported_commands[response]), '\n'))
+			if supportedCommands[response] != "" {
+				term.Write(append([]byte(supportedCommands[response]), '\n'))
 			} else if response == "" {
 				term.Write(append([]byte(response)))
 			} else if response == "exit" {
@@ -145,7 +145,7 @@ Vlan1                      unassigned      YES NVRAM  up                    down
 func main() {
 	done := make(chan bool, 1)
 	for a := 10000; a < 10050; a++ {
-		go ssh_listener(a, done)
+		go sshListener(a, done)
 	}
 	<-done
 }

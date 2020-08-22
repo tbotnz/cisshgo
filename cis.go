@@ -44,8 +44,7 @@ func ssh_listener(a int, done chan bool) {
 	
 	hostname := "test_device"
 
-	supported_commands["show version"] = `
-Cisco IOS XE Software, Version 16.04.01
+	supported_commands["show version"] = `Cisco IOS XE Software, Version 16.04.01
 Cisco IOS Software [Everest], CSR1000V Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.4.1, RELEASE SOFTWARE (fc2)
 Technical Support: http://www.cisco.com/techsupport
 Copyright (c) 1986-2016 by Cisco Systems, Inc.
@@ -89,8 +88,7 @@ Processor board ID 9FKLJWM5EB0
 0K bytes of  at webui:.
 Configuration register is 0x2102`
 
-	supported_commands["show ip interface brief"] = `
-Interface                  IP-Address      OK? Method Status                Protocol
+	supported_commands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
 FastEthernet0/0            10.0.2.27       YES NVRAM  up                    up
 Serial0/0                  unassigned      YES NVRAM  administratively down down
 FastEthernet0/1            unassigned      YES NVRAM  administratively down down

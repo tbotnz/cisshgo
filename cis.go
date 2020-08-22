@@ -311,11 +311,17 @@ end`
 	//prt :=  portString
 	log.Printf("starting cis.go ssh server on port %s\n", portString)
 
-	log.Fatal(ssh.ListenAndServe(portString, nil,
-		ssh.PasswordAuth(func(ctx ssh.Context, pass string) bool {
-			return pass == password
-		}),
-	))
+	log.Fatal(
+		ssh.ListenAndServe(
+			portString,
+			nil,
+			ssh.PasswordAuth(
+				func(ctx ssh.Context, pass string) bool {
+					return pass == password
+				},
+			),
+		),
+	)
 
 	done <- true
 }

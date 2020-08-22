@@ -1,15 +1,12 @@
-
 package main
-
-
 
 import (
 	// "fmt"
 	// "io"
-	"log"
 	"github.com/gliderlabs/ssh"
-	"strconv"
 	"golang.org/x/crypto/ssh/terminal"
+	"log"
+	"strconv"
 )
 
 // ssh listernet
@@ -39,9 +36,9 @@ func ssh_listener(a int, done chan bool) {
 	// States and local country laws governing import, export, transfer and
 	//  --More--
 	// `
-	
+
 	supported_commands := make(map[string]string)
-	
+
 	hostname := "test_device"
 
 	supported_commands["show version"] = `Cisco IOS XE Software, Version 16.04.01
@@ -113,33 +110,31 @@ FastEthernet3/14           unassigned      YES unset  up                    down
 FastEthernet3/15           unassigned      YES unset  up                    down
 Vlan1                      unassigned      YES NVRAM  up                    down`
 
-
-
 	ssh.Handle(func(s ssh.Session) {
 		// io.WriteString(s, fmt.Sprintf(SHOW_VERSION_PAGING_DISABLED))
 		term := terminal.NewTerminal(s, hostname+"#")
-        for {
-            line, err := term.ReadLine()
-            if err != nil {
-                break
-            }
-            response := line
-            log.Println(line)
-            if supported_commands[response] != "" {
-                term.Write(append([]byte(supported_commands[response]), '\n'))
-			} else if response == "" {
-                term.Write(append([]byte(response)))
-			} else if response == "exit" {
-                break;
-			} else {
-                term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
+		for {
+			line, err := term.ReadLine()
+			if err != nil {
+				break
 			}
-        }
-        log.Println("terminal closed")		
+			response := line
+			log.Println(line)
+			if supported_commands[response] != "" {
+				term.Write(append([]byte(supported_commands[response]), '\n'))
+			} else if response == "" {
+				term.Write(append([]byte(response)))
+			} else if response == "exit" {
+				break
+			} else {
+				term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
+			}
+		}
+		log.Println("terminal closed")
 	})
 
 	s := strconv.Itoa(a)
-	str3 := ":"+s
+	str3 := ":" + s
 	log.Printf("starting ssh server on port %s\n", str3)
 	log.Fatal(ssh.ListenAndServe(str3, nil))
 
@@ -150,6 +145,6 @@ func main() {
 	done := make(chan bool, 1)
 	for a := 10000; a < 10050; a++ {
 		go ssh_listener(a, done)
-	 }
+	}
 	<-done
 }

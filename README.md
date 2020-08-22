@@ -23,7 +23,7 @@ go run cis.go
 ```
 
 ## using
-ssh into one of the open ports and run "show version" or "show ip interface brief"
+ssh into one of the open ports with ```admin``` as password and run "show version" or "show ip interface brief" or "show running-config"
 ```
 test_device#show version
 Cisco IOS XE Software, Version 16.04.01

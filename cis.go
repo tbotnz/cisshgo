@@ -1,8 +1,10 @@
 package main
 
 import (
-	// "fmt"
 	// "io"
+
+	"flag"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -134,18 +136,30 @@ Vlan1                      unassigned      YES NVRAM  up                    down
 		log.Println("terminal closed")
 	})
 
-	s := strconv.Itoa(a)
-	str3 := ":" + s
-	log.Printf("starting ssh server on port %s\n", str3)
-	log.Fatal(ssh.ListenAndServe(str3, nil))
+	portString := strconv.Itoa(a)
+	log.Printf("starting ssh server on port %s\n", portString)
+	log.Fatal(ssh.ListenAndServe(fmt.Sprintf(":%s", portString), nil))
 
 	done <- true
 }
 
 func main() {
+
+	// Gather command line arguments
+	listnersPtr := flag.Int("listners", 50, "How many listeners do you wish to spawn?")
+	startingPortPtr := flag.Int("startingPort", 10000, "What port do you want to start at?")
+
+	flag.Parse()
+	listners := *startingPortPtr + *listnersPtr
+
+	// Make a Channel for handling Goroutines, name of `done` expects a bool as return value
 	done := make(chan bool, 1)
-	for a := 10000; a < 10050; a++ {
+
+	// Iterate through the server ports and spawn a Goroutine for each
+	for a := *startingPortPtr; a < listners; a++ {
 		go sshListener(a, done)
 	}
+
+	// Recieve all the values from the channel (essentially wait on it to be empty)
 	<-done
 }

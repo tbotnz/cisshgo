@@ -1,6 +1,8 @@
 ---
 cisco:
   csr1000v:
+    hostname: "cisgo1000v"
+    password: "admin"
     command_transcripts:
       'show ip interface brief': 'transcripts/cisco/csr1000v/show_ip_interface_brief.txt'
       'show running-config': 'transcripts/cisco/csr1000v/show_running-config.txt'

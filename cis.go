@@ -29,7 +29,9 @@ func sshListener(portNumber int, done chan bool) {
 	contextHierarchy["#"] = ">"
 	contextHierarchy[">"] = "exit"
 
-	hostname := "cisgo1000v"
+	defaultHostname := "cisgo1000v"
+	defaultContextState := ">"
+	hostname := defaultHostname
 	password := "admin"
 
 	specialCommands["show version"] = `Cisco IOS XE Software, Version 16.04.01
@@ -74,7 +76,8 @@ Processor board ID 9FKLJWM5EB0
 3985132K bytes of physical memory.
 7774207K bytes of virtual hard disk at bootflash:.
 0K bytes of  at webui:.
-Configuration register is 0x2102`
+Configuration register is 0x2102
+`
 
 	basicCommands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
 FastEthernet0/0            10.0.2.27       YES NVRAM  up                    up
@@ -276,7 +279,7 @@ end
 
 		// io.WriteString(s, fmt.Sprintf(SHOW_VERSION_PAGING_DISABLED))
 		term := terminal.NewTerminal(s, hostname+contextSearch["base"])
-		contextState := ">"
+		contextState := defaultContextState
 		for {
 			line, err := term.ReadLine()
 			if err != nil {
@@ -285,7 +288,13 @@ end
 
 			response := line
 			log.Println(line)
-			if basicCommands[response] != "" {
+			if response == "reset state" {
+				log.Println("resetting internal state")
+				contextState = defaultContextState
+				hostname = defaultHostname
+				term.SetPrompt(hostname + contextState)
+
+			} else if basicCommands[response] != "" {
 				// lookup supported commands for response
 				term.Write(append([]byte(basicCommands[response]), '\n'))
 
@@ -318,6 +327,9 @@ end
 					hostname = strings.Join(fields[1:], " ")
 					log.Printf("Setting hostname to %s\n", hostname)
 					term.SetPrompt(hostname + contextState)
+
+				} else {
+					term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
 				}
 
 			} else {

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -11,7 +13,8 @@ import (
 // ssh listernet
 func sshListener(portNumber int, done chan bool) {
 
-	supportedCommands := make(map[string]string)
+	basicCommands := make(map[string]string)
+	specialCommands := make(map[string]string)
 	contextSearch := make(map[string]string)
 	contextHierarchy := make(map[string]string)
 
@@ -21,7 +24,7 @@ func sshListener(portNumber int, done chan bool) {
 	contextSearch["enable"] = "#"
 	contextSearch["en"] = "#"
 	contextSearch["base"] = ">"
-	
+
 	contextHierarchy["(config)#"] = "#"
 	contextHierarchy["#"] = ">"
 	contextHierarchy[">"] = "exit"
@@ -29,7 +32,7 @@ func sshListener(portNumber int, done chan bool) {
 	hostname := "cisgo1000v"
 	password := "admin"
 
-	supportedCommands["show version"] = `Cisco IOS XE Software, Version 16.04.01
+	specialCommands["show version"] = `Cisco IOS XE Software, Version 16.04.01
 Cisco IOS Software [Everest], CSR1000V Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.4.1, RELEASE SOFTWARE (fc2)
 Technical Support: http://www.cisco.com/techsupport
 Copyright (c) 1986-2016 by Cisco Systems, Inc.
@@ -44,7 +47,7 @@ documentation or "License Notice" file accompanying the IOS-XE software,
 or the applicable URL provided on the flyer accompanying the IOS-XE
 software.
 ROM: IOS-XE ROMMON
-csr1000v uptime is 4 hours, 55 minutes
+%[1]v uptime is 4 hours, 55 minutes
 Uptime for this control processor is 4 hours, 56 minutes
 System returned to ROM by reload
 System image file is "bootflash:packages.conf"
@@ -73,7 +76,7 @@ Processor board ID 9FKLJWM5EB0
 0K bytes of  at webui:.
 Configuration register is 0x2102`
 
-	supportedCommands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
+	basicCommands["show ip interface brief"] = `Interface                  IP-Address      OK? Method Status                Protocol
 FastEthernet0/0            10.0.2.27       YES NVRAM  up                    up
 Serial0/0                  unassigned      YES NVRAM  administratively down down
 FastEthernet0/1            unassigned      YES NVRAM  administratively down down
@@ -98,7 +101,7 @@ FastEthernet3/14           unassigned      YES unset  up                    down
 FastEthernet3/15           unassigned      YES unset  up                    down
 Vlan1                      unassigned      YES NVRAM  up                    down`
 
-	supportedCommands["show running-config"] = `Building configuration...
+	specialCommands["show running-config"] = `Building configuration...
 
 Current configuration : 2114 bytes
 !
@@ -107,7 +110,7 @@ service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname herpa derpa
+hostname %[1]s
 !
 boot-start-marker
 boot-end-marker
@@ -265,8 +268,10 @@ line vty 5 15
  transport input ssh
 !
 !
-end`
-
+end
+`
+	basicCommands["terminal length 0"] = " "
+	basicCommands["terminal width 511"] = " "
 	ssh.Handle(func(s ssh.Session) {
 
 		// io.WriteString(s, fmt.Sprintf(SHOW_VERSION_PAGING_DISABLED))
@@ -277,31 +282,51 @@ end`
 			if err != nil {
 				break
 			}
+
 			response := line
 			log.Println(line)
-			if supportedCommands[response] != "" {
+			if basicCommands[response] != "" {
 				// lookup supported commands for response
-				term.Write(append([]byte(supportedCommands[response]), '\n'))
+				term.Write(append([]byte(basicCommands[response]), '\n'))
+
 			} else if response == "" {
 				// return if nothing is entered
 				term.Write(append([]byte(response)))
+
 			} else if contextSearch[response] != "" {
 				// switch contexts as needed
 				term.SetPrompt(string(hostname + contextSearch[response]))
 				contextState = contextSearch[response]
-			} else if response == "exit" {
+
+			} else if response == "exit" || response == "end" {
 				// drop down configs if required
 				if contextHierarchy[contextState] == "exit" {
 					break
+
 				} else {
 					term.SetPrompt(string(hostname + contextHierarchy[contextState]))
 					contextState = contextHierarchy[contextState]
 				}
+
+			} else if specialCommands[response] != "" {
+				term.Write(append([]byte(fmt.Sprintf(specialCommands[response], hostname))))
+
+			} else if contextState != ">" { // we're in config mode
+				fields := strings.Fields(response)
+				command := fields[0]
+				if command == "hostname" {
+					hostname = strings.Join(fields[1:], " ")
+					log.Printf("Setting hostname to %s\n", hostname)
+					term.SetPrompt(hostname + contextState)
+				}
+
 			} else {
 				term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
 			}
+
 		}
 		log.Println("terminal closed")
+
 	})
 
 	portString := ":" + strconv.Itoa(portNumber)

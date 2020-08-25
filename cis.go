@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -11,7 +12,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type fakeDevice struct {
+// FakeDevice Struct for the device we will be simulating
+type FakeDevice struct {
 	vendor            string            // Vendor of this fake device
 	platform          string            // Platform of this fake device
 	hostname          string            // Hostname of the fake device
@@ -21,17 +23,38 @@ type fakeDevice struct {
 	contextHierarchy  map[string]string // The heiarchy of the available contexts
 }
 
+// TranscriptMapPlatform struct for use inside of a TranscriptMap struct
+type TranscriptMapPlatform struct {
+	Vendor             string            `yaml:"vendor" json:"vendor"`
+	Hostname           string            `yaml:"hostname" json:"hostname"`
+	Password           string            `yaml:"password" json:"password"`
+	CommandTranscripts map[string]string `yaml:"command_transcripts" json:"command_transcripts"`
+}
+
+// TranscriptMap Struct for modeling the TranscriptMap YAML
+type TranscriptMap struct {
+	Platforms []map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
+}
+
 func sshFakeDeviceInit(
 	vendor string,
 	platform string,
-	transcriptMapYAML map[interface{}]interface{},
-) *fakeDevice {
+	myTranscriptMap TranscriptMap,
+) *FakeDevice {
 
-	myFakeDevice := fakeDevice{
-		vendor:   vendor,
-		platform: platform,
-		hostname: transcriptMapYAML[vendor][platform]["hostname"],
-		password: transcriptMapYAML["cisco"]["csr1000v"]["password"],
+	// Find the hostname, password, and other info in the data for this device
+	var deviceHostname string
+	var devicePassword string
+	for _, fakeDevicePlatform := range myTranscriptMap.Platforms {
+		fmt.Printf("\nPlatform Map: %+v\n", fakeDevicePlatform)
+		for k, v := range fakeDevicePlatform {
+			if k == platform {
+				fmt.Printf("\nKey: %+v\n", k)
+				fmt.Printf("\nValue: %+v\n", v)
+				deviceHostname = v.Hostname
+				devicePassword = v.Password
+			}
+		}
 	}
 
 	supportedCommands := make(map[string]string)
@@ -53,17 +76,29 @@ func sshFakeDeviceInit(
 	supportedCommands["show ip interface brief"] = ``
 	supportedCommands["show running-config"] = ``
 
+	myFakeDevice := FakeDevice{
+		vendor:            vendor,
+		platform:          platform,
+		hostname:          deviceHostname,
+		password:          devicePassword,
+		supportedCommands: supportedCommands,
+		contextSearch:     contextSearch,
+		contextHierarchy:  contextHierarchy,
+	}
+
+	fmt.Printf("\n%+v\n", myFakeDevice)
+
 	return &myFakeDevice
 }
 
 // ssh listernet
-func sshListener(myFakeDevice *fakeDevice, portNumber int, done chan bool) {
+func sshListener(myFakeDevice *FakeDevice, portNumber int, done chan bool) {
 
 	ssh.Handle(func(s ssh.Session) {
 
 		// io.WriteString(s, fmt.Sprintf(SHOW_VERSION_PAGING_DISABLED))
 		term := terminal.NewTerminal(s, myFakeDevice.hostname+myFakeDevice.contextSearch["base"])
-		contextState := ">"
+		contextState := myFakeDevice.contextSearch["base"]
 		for {
 			line, err := term.ReadLine()
 			if err != nil {
@@ -135,18 +170,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	transcriptMapYAML := make(map[interface{}]interface{})
-	err = yaml.Unmarshal([]byte(transcriptMapRaw), &transcriptMapYAML)
+	fmt.Printf("Raw Transcript Map from file:\n\n%s\n", transcriptMapRaw)
+
+	myTranscriptMap := TranscriptMap{}
+	err = yaml.UnmarshalStrict([]byte(transcriptMapRaw), &myTranscriptMap)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	// fmt.Printf("%s", transcriptMapYAML)
+	fmt.Printf("YAML Parsed Transcript Map:\n\n%+v\n", myTranscriptMap)
 
 	// Init our fake device
 	myFakeDevice := sshFakeDeviceInit(
 		"cisco",
-		"csr100v",
-		transcriptMapYAML,
+		"csr1000v",
+		myTranscriptMap,
 	)
 
 	// Make a Channel for handling Goroutines, name of `done` expects a bool as return value

@@ -117,6 +117,7 @@ const (
 	keyCtrlD     = 4
 	keyCtrlU     = 21
 	keyEnter     = '\r'
+	keyNewline   = '\n'
 	keyEscape    = 27
 	keyBackspace = 127
 	keyUnknown   = 0xd800 /* UTF-16 surrogate area */ + iota
@@ -522,7 +523,7 @@ func (t *Terminal) handleKey(key rune) (line string, ok bool) {
 				t.setLine(runes, len(runes))
 			}
 		}
-	case keyEnter:
+	case keyNewline: //replaced keyEnter
 		t.moveCursorToPos(len(t.line))
 		t.queue([]rune("\r\n"))
 		line = string(t.line)

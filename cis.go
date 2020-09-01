@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -29,6 +28,8 @@ type TranscriptMapPlatform struct {
 	Hostname           string            `yaml:"hostname" json:"hostname"`
 	Password           string            `yaml:"password" json:"password"`
 	CommandTranscripts map[string]string `yaml:"command_transcripts" json:"command_transcripts"`
+	ContextSearch      map[string]string `yaml:"context_search" json:"context_search"`
+	ContextHierarchy   map[string]string `yaml:"context_hierarchy" json:"context_hierarchy"`
 }
 
 // TranscriptMap Struct for modeling the TranscriptMap YAML
@@ -42,40 +43,39 @@ func sshFakeDeviceInit(
 	myTranscriptMap TranscriptMap,
 ) *FakeDevice {
 
+	supportedCommands := make(map[string]string)
+	contextSearch := make(map[string]string)
+	contextHierarchy := make(map[string]string)
+	commandTranscriptFiles := make(map[string]string)
+
 	// Find the hostname, password, and other info in the data for this device
 	var deviceHostname string
 	var devicePassword string
 	for _, fakeDevicePlatform := range myTranscriptMap.Platforms {
-		fmt.Printf("\nPlatform Map: %+v\n", fakeDevicePlatform)
+		// fmt.Printf("\nPlatform Map:\n%+v\n", fakeDevicePlatform)
 		for k, v := range fakeDevicePlatform {
 			if k == platform {
-				fmt.Printf("\nKey: %+v\n", k)
-				fmt.Printf("\nValue: %+v\n", v)
+				// fmt.Printf("\nKey: %+v\n", k)
+				// fmt.Printf("Value: %+v\n", v)
 				deviceHostname = v.Hostname
 				devicePassword = v.Password
+				contextSearch = v.ContextSearch
+				contextHierarchy = v.ContextHierarchy
+				commandTranscriptFiles = v.CommandTranscripts
 			}
 		}
 	}
 
-	supportedCommands := make(map[string]string)
-	contextSearch := make(map[string]string)
-	contextHierarchy := make(map[string]string)
+	// Iterate through the command transcripts and read their contents into our fake device
+	for k, v := range commandTranscriptFiles {
+		output, err := ioutil.ReadFile(v)
+		if err != nil {
+			log.Fatal(err)
+		}
+		supportedCommands[k] = string(output)
+	}
 
-	contextSearch["conf t"] = "(config)#"
-	contextSearch["configure terminal"] = "(config)#"
-	contextSearch["configure t"] = "(config)#"
-	contextSearch["enable"] = "#"
-	contextSearch["en"] = "#"
-	contextSearch["base"] = ">"
-
-	contextHierarchy["(config)#"] = "#"
-	contextHierarchy["#"] = ">"
-	contextHierarchy[">"] = "exit"
-
-	supportedCommands["show version"] = ``
-	supportedCommands["show ip interface brief"] = ``
-	supportedCommands["show running-config"] = ``
-
+	// Create our fake device and return it
 	myFakeDevice := FakeDevice{
 		vendor:            vendor,
 		platform:          platform,
@@ -86,8 +86,7 @@ func sshFakeDeviceInit(
 		contextHierarchy:  contextHierarchy,
 	}
 
-	fmt.Printf("\n%+v\n", myFakeDevice)
-
+	//fmt.Printf("\n%+v\n", myFakeDevice)
 	return &myFakeDevice
 }
 
@@ -170,14 +169,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	fmt.Printf("Raw Transcript Map from file:\n\n%s\n", transcriptMapRaw)
+	// fmt.Printf("Raw Transcript Map from file:\n\n%s\n", transcriptMapRaw)
 
 	myTranscriptMap := TranscriptMap{}
 	err = yaml.UnmarshalStrict([]byte(transcriptMapRaw), &myTranscriptMap)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	fmt.Printf("YAML Parsed Transcript Map:\n\n%+v\n", myTranscriptMap)
+	// fmt.Printf("YAML Parsed Transcript Map:\n\n%+v\n", myTranscriptMap)
 
 	// Init our fake device
 	myFakeDevice := sshFakeDeviceInit(

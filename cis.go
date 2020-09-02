@@ -37,6 +37,14 @@ type TranscriptMap struct {
 	Platforms []map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
 }
 
+func readFile(filename string) string {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(content)
+}
+
 func sshFakeDeviceInit(
 	vendor string,
 	platform string,
@@ -68,11 +76,7 @@ func sshFakeDeviceInit(
 
 	// Iterate through the command transcripts and read their contents into our fake device
 	for k, v := range commandTranscriptFiles {
-		output, err := ioutil.ReadFile(v)
-		if err != nil {
-			log.Fatal(err)
-		}
-		supportedCommands[k] = string(output)
+		supportedCommands[k] = readFile(v)
 	}
 
 	// Create our fake device and return it
@@ -90,7 +94,7 @@ func sshFakeDeviceInit(
 	return &myFakeDevice
 }
 
-// ssh listernet
+// ssh listner function that creates a fake device and terminal session
 func sshListener(myFakeDevice *FakeDevice, portNumber int, done chan bool) {
 
 	ssh.Handle(func(s ssh.Session) {
@@ -99,23 +103,27 @@ func sshListener(myFakeDevice *FakeDevice, portNumber int, done chan bool) {
 		term := terminal.NewTerminal(s, myFakeDevice.hostname+myFakeDevice.contextSearch["base"])
 		contextState := myFakeDevice.contextSearch["base"]
 		for {
-			line, err := term.ReadLine()
+			userInput, err := term.ReadLine()
 			if err != nil {
 				break
 			}
-			response := line
-			log.Println(line)
-			if myFakeDevice.supportedCommands[response] != "" {
-				// lookup supported commands for response
-				term.Write(append([]byte(myFakeDevice.supportedCommands[response]), '\n'))
-			} else if response == "" {
+			log.Println(userInput)
+
+			// Handle any responses provided at the terminal of the fakeDevice
+			if myFakeDevice.supportedCommands[userInput] != "" {
+				// lookup supported commands for the user input
+				term.Write(append([]byte(myFakeDevice.supportedCommands[userInput]), '\n'))
+
+			} else if userInput == "" {
 				// return if nothing is entered
-				term.Write(append([]byte(response)))
-			} else if myFakeDevice.contextSearch[response] != "" {
+				term.Write(append([]byte(userInput)))
+
+			} else if myFakeDevice.contextSearch[userInput] != "" {
 				// switch contexts as needed
-				term.SetPrompt(string(myFakeDevice.hostname + myFakeDevice.contextSearch[response]))
-				contextState = myFakeDevice.contextSearch[response]
-			} else if response == "exit" {
+				term.SetPrompt(string(myFakeDevice.hostname + myFakeDevice.contextSearch[userInput]))
+				contextState = myFakeDevice.contextSearch[userInput]
+
+			} else if userInput == "exit" || userInput == "end" {
 				// drop down configs if required
 				if myFakeDevice.contextHierarchy[contextState] == "exit" {
 					break
@@ -123,8 +131,9 @@ func sshListener(myFakeDevice *FakeDevice, portNumber int, done chan bool) {
 					term.SetPrompt(string(myFakeDevice.hostname + myFakeDevice.contextHierarchy[contextState]))
 					contextState = myFakeDevice.contextHierarchy[contextState]
 				}
+
 			} else {
-				term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
+				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
 			}
 		}
 		log.Println("terminal closed")

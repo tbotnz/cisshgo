@@ -4,10 +4,7 @@ simple concurrent ssh server posing as cisco ios
 ## installation
 install dependencies
 
-```
-go get github.com/gliderlabs/ssh
-go get golang.org/x/crypto/ssh/terminal
-```
+All dependencies are included in the `/vendor` folder, so no installation step is necessary. 
 
 ## starting
 ```
@@ -21,6 +18,19 @@ go run cis.go
 2020/08/22 00:17:34 starting ssh server on port :10026
 2020/08/22 00:17:34 starting ssh server on port :10027
 ```
+
+alternatively you can compile and run in separate steps (useful for docker images, etc):
+
+```bash
+user@LAPTOP-6PM8GPB2:/mnt/c/projects/cisgo-ios$ go build cis.go
+user@LAPTOP-6PM8GPB2:/mnt/c/projects/cisgo-ios$ ./cis
+2020/09/02 15:46:31 starting cis.go ssh server on port :10008
+2020/09/02 15:46:31 starting cis.go ssh server on port :10005
+2020/09/02 15:46:31 starting cis.go ssh server on port :10000
+2020/09/02 15:46:31 starting cis.go ssh server on port :10006
+...
+```
+
 
 ## using
 ssh into one of the open ports with ```admin``` as password and run "show version" or "show ip interface brief" or "show running-config"

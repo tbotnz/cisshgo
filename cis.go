@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"io/ioutil"
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 	"log"
 	"strconv"
 	"strings"
@@ -10,9 +14,84 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// ssh listernet
+const (
+	defaultHostname     = "cisgo1000v"
+	defaultContextState = ">"
+	password            = "admin"
+)
+
+func readFile(filename string) string {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(content)
+}
+
+type commandGroup struct {
+	basic    map[string]string
+	hostname map[string]string
+	mode     map[string]string
+}
+
+func newCommandGroup() *commandGroup {
+	cmds := new(commandGroup)
+	cmds.basic = make(map[string]string)
+	cmds.basic["terminal length 0"] = " "
+	cmds.basic["terminal width 511"] = " "
+	cmds.basic["show ip interface brief"] = readFile("config/show_ip_int_bri.txt")
+
+	cmds.hostname = make(map[string]string)
+	cmds.hostname["show version"] = readFile("config/show_version.txt")
+	cmds.hostname["show running-config"] = readFile("config/show_running-config.txt")
+
+	cmds.mode = make(map[string]string)
+	cmds.mode["conf t"] = "(config)#"
+	cmds.mode["configure terminal"] = "(config)#"
+	cmds.mode["configure t"] = "(config)#"
+	cmds.mode["enable"] = "#"
+	cmds.mode["en"] = "#"
+	cmds.mode["base"] = ">"
+	return cmds
+}
+
+type internalState struct {
+	hostname    string
+	currentMode string // >, #, or (config)#
+	prompt      string
+}
+
+func (s *internalState) setMode(mode string) {
+	s.currentMode = mode
+	s.prompt = s.hostname + s.currentMode
+}
+
+func (s *internalState) setHostname(hostname string) {
+	s.hostname = hostname
+	s.prompt = s.hostname + s.currentMode
+}
+
+func (s *internalState) exit() bool {
+	switch s.currentMode {
+	case ">":
+		return false
+	case "#":
+		s.setMode(">")
+	case "(config)#":
+		s.setMode("#")
+	}
+	return true
+}
+
+func newState() *internalState {
+	// log.Println("created new internalState")
+	return &internalState{defaultHostname, defaultContextState, defaultHostname + defaultContextState}
+}
+
+// ssh listener
 func sshListener(portNumber int, done chan bool) {
 
+<<<<<<< HEAD
 	basicCommands := make(map[string]string)
 	specialCommands := make(map[string]string)
 	contextSearch := make(map[string]string)
@@ -25,10 +104,17 @@ func sshListener(portNumber int, done chan bool) {
 	contextSearch["en"] = "#"
 	contextSearch["base"] = ">"
 
+=======
+	commandGroup := newCommandGroup()
+
+	contextHierarchy := make(map[string]string)
+
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 	contextHierarchy["(config)#"] = "#"
 	contextHierarchy["#"] = ">"
 	contextHierarchy[">"] = "exit"
 
+<<<<<<< HEAD
 	defaultHostname := "cisgo1000v"
 	defaultContextState := ">"
 	hostname := defaultHostname
@@ -280,12 +366,20 @@ end
 		// io.WriteString(s, fmt.Sprintf(SHOW_VERSION_PAGING_DISABLED))
 		term := terminal.NewTerminal(s, hostname+contextSearch["base"])
 		contextState := defaultContextState
+=======
+	thisState := newState()
+
+	ssh.Handle(func(s ssh.Session) {
+
+		term := terminal.NewTerminal(s, thisState.prompt)
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 		for {
-			line, err := term.ReadLine()
+			response, err := term.ReadLine()
 			if err != nil {
 				break
 			}
 
+<<<<<<< HEAD
 			response := line
 			log.Println(line)
 			if response == "reset state" {
@@ -297,26 +391,61 @@ end
 			} else if basicCommands[response] != "" {
 				// lookup supported commands for response
 				term.Write(append([]byte(basicCommands[response]), '\n'))
+=======
+			log.Println(response)
+			if response == "reset state" {
+				log.Println("resetting internal state")
+				thisState = newState()
+				term.SetPrompt(thisState.prompt)
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 
 			} else if response == "" {
 				// return if nothing is entered
 				term.Write(append([]byte(response)))
 
+<<<<<<< HEAD
 			} else if contextSearch[response] != "" {
 				// switch contexts as needed
 				term.SetPrompt(string(hostname + contextSearch[response]))
 				contextState = contextSearch[response]
+=======
+			} else if commandGroup.basic[response] != "" {
+				// lookup supported commands for response
+				term.Write(append([]byte(commandGroup.basic[response]), '\n'))
+
+			} else if commandGroup.mode[response] != "" {
+				// switch contexts as needed
+				thisState.setMode(commandGroup.mode[response])
+				term.SetPrompt(thisState.prompt)
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 
 			} else if response == "exit" || response == "end" {
 				// drop down configs if required
-				if contextHierarchy[contextState] == "exit" {
-					break
-
+				if thisState.exit() { // "true" means we're still active, "false" means we're done
+					term.SetPrompt(thisState.prompt)
 				} else {
-					term.SetPrompt(string(hostname + contextHierarchy[contextState]))
-					contextState = contextHierarchy[contextState]
+					break
+<<<<<<< HEAD
+=======
 				}
 
+			} else if commandGroup.hostname[response] != "" {
+				term.Write([]byte(fmt.Sprintf(commandGroup.hostname[response], thisState.hostname)))
+
+			} else if thisState.currentMode != ">" { // we're in config mode
+				fields := strings.Fields(response)
+				command := fields[0]
+				if command == "hostname" {
+					thisState.setHostname(strings.Join(fields[1:], " "))
+					log.Printf("Setting hostname to %s\n", thisState.hostname)
+					term.SetPrompt(thisState.prompt)
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
+
+				} else {
+					term.Write([]byte("% Ambiguous command:  \"" + response + "\"\n"))
+				}
+
+<<<<<<< HEAD
 			} else if specialCommands[response] != "" {
 				term.Write(append([]byte(fmt.Sprintf(specialCommands[response], hostname))))
 
@@ -332,8 +461,10 @@ end
 					term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
 				}
 
+=======
+>>>>>>> 18e2db823bd72f1ca6aae353301b724a26204b6e
 			} else {
-				term.Write(append([]byte("% Ambiguous command:  \""+response+"\""), '\n'))
+				term.Write([]byte("% Ambiguous command:  \"" + response + "\"\n"))
 			}
 
 		}

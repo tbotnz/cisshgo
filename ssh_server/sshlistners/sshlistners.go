@@ -1,4 +1,5 @@
-// Package sshlistners SSH related functions and helpers for cisgo-ios
+// Package sshlistners contains SSH Listners for cisgo-ios to utilize when building
+// fake devices to emulate network equipment
 package sshlistners
 
 import (

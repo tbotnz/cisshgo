@@ -1,8 +1,10 @@
-// Package handlers SSH related functions and helpers for cisgo-ios
+// Package handlers contains SSH Handlers for specific device types
+// in order to best emulate their actual behavior.
 package handlers
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -30,6 +32,9 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 			}
 			log.Println(userInput)
 
+			// Split user input into fields for use further down the handler
+			userInputFields := strings.Fields(userInput)
+
 			// Handle any responses provided at the terminal of the fakeDevice
 			if myFakeDevice.SupportedCommands[userInput] != "" {
 				// lookup supported commands for the user input
@@ -44,6 +49,12 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				term.SetPrompt(string(myFakeDevice.Hostname + myFakeDevice.ContextSearch[userInput]))
 				ContextState = myFakeDevice.ContextSearch[userInput]
 
+			} else if userInputFields[0] == "hostname" && ContextState == "(config)#" {
+				// Set the hostname to the values after "hostname" in the userInputFields
+				myFakeDevice.Hostname = strings.Join(userInputFields[1:], " ")
+				log.Printf("Setting hostname to %s\n", myFakeDevice.Hostname)
+				term.SetPrompt(myFakeDevice.Hostname + ContextState)
+
 			} else if userInput == "exit" || userInput == "end" {
 				// Back out of the lower contexts, i.e. drop from "(config)#" to "#"
 				if myFakeDevice.ContextHierarchy[ContextState] == "exit" {
@@ -54,6 +65,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				}
 
 			} else {
+				// If all else fails, we did not recognize the input!
 				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
 			}
 		}

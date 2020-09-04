@@ -13,7 +13,7 @@ documentation or "License Notice" file accompanying the IOS-XE software,
 or the applicable URL provided on the flyer accompanying the IOS-XE
 software.
 ROM: IOS-XE ROMMON
-%[1]v uptime is 4 hours, 55 minutes
+csr1000v uptime is 4 hours, 55 minutes
 Uptime for this control processor is 4 hours, 56 minutes
 System returned to ROM by reload
 System image file is "bootflash:packages.conf"

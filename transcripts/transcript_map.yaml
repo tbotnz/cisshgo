@@ -1,0 +1,23 @@
+---
+platforms:
+  - csr1000v:
+      vendor: "cisco"
+      hostname: "cisgo1000v"
+      password: "admin"
+      command_transcripts:
+        "show ip interface brief": "transcripts/cisco/csr1000v/show_ip_interface_brief.txt"
+        "show running-config": "transcripts/cisco/csr1000v/show_running-config.txt"
+        "show version": "transcripts/cisco/csr1000v/show_version.txt"
+        "terminal length 0": "transcripts/generic_empty_return.txt"
+        "terminal width 511": "transcripts/generic_empty_return.txt"
+      context_hierarchy:
+        "(config)#": "#"
+        "#": ">"
+        ">": "exit"
+      context_search:
+        "conf t": "(config)#"
+        "configure terminal": "(config)#"
+        "configure t": "(config)#"
+        "enable": "#"
+        "en": "#"
+        "base": ">"

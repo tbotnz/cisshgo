@@ -7,7 +7,7 @@ service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname %[1]s
+hostname herpa derpa
 !
 boot-start-marker
 boot-end-marker
@@ -52,38 +52,38 @@ ip scp server enable
 !
 !
 interface FastEthernet0/0
-description netpalm
-ip address 10.0.2.27 255.255.255.0
-duplex auto
-speed auto
+ description netpalm
+ ip address 10.0.2.27 255.255.255.0
+ duplex auto
+ speed auto
 !
 interface Serial0/0
-no ip address
-shutdown
-clock rate 2000000
+ no ip address
+ shutdown
+ clock rate 2000000
 !
 interface FastEthernet0/1
-no ip address
-shutdown
-duplex auto
-speed auto
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
 !
 interface Serial0/1
-no ip address
-shutdown
-clock rate 2000000
+ no ip address
+ shutdown
+ clock rate 2000000
 !
 interface FastEthernet1/0
-no ip address
-shutdown
-duplex auto
-speed auto
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
 !
 interface FastEthernet2/0
-no ip address
-shutdown
-duplex auto
-speed auto
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
 !
 interface FastEthernet3/0
 !
@@ -118,7 +118,7 @@ interface FastEthernet3/14
 interface FastEthernet3/15
 !
 interface Vlan1
-no ip address
+ no ip address
 !
 ip forward-protocol nd
 !
@@ -148,21 +148,21 @@ control-plane
 !
 !
 line con 0
-exec-timeout 0 0
-privilege level 15
-logging synchronous
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
 line aux 0
-exec-timeout 0 0
-privilege level 15
-logging synchronous
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
 line vty 0 4
-privilege level 15
-login local
-transport input ssh
+ privilege level 15
+ login local
+ transport input ssh
 line vty 5 15
-privilege level 15
-login local
-transport input ssh
+ privilege level 15
+ login local
+ transport input ssh
 !
 !
 end

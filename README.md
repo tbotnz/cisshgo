@@ -3,19 +3,29 @@ Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Ci
 
 ## Usage
 
-1. Clone the repository and change into that directory
+1. Clone the repository and change into that directory (All dependencies are included in the `/vendor` folder, so no installation step is necessary.)
 2. Execute `go run cis.go` as shown below:
-```
-go run cis.go 
+
+```bash
+$ go run cis.go 
 2020/08/22 00:17:34 starting ssh server on port :10049
 2020/08/22 00:17:34 starting ssh server on port :10023
 2020/08/22 00:17:34 starting ssh server on port :10024
-2020/08/22 00:17:34 starting ssh server on port :10000
-2020/08/22 00:17:34 starting ssh server on port :10001
-2020/08/22 00:17:34 starting ssh server on port :10025
-2020/08/22 00:17:34 starting ssh server on port :10026
-2020/08/22 00:17:34 starting ssh server on port :10027
+... <snip>
 ```
+
+Alternatively you can compile and run in separate steps (useful for docker images, etc):
+
+```bash
+$ go build cisgo-ios cis.go
+$ ./cisgo-ios
+2020/09/02 15:46:31 starting cis.go ssh server on port :10008
+2020/09/02 15:46:31 starting cis.go ssh server on port :10005
+2020/09/02 15:46:31 starting cis.go ssh server on port :10000
+2020/09/02 15:46:31 starting cis.go ssh server on port :10006
+... <snip>
+```
+
 3. SSH into one of the open ports with `admin` as the password. By default, you can run "show version"
  or "show ip interface brief" or "show running-config". Other commands can be added by modifying the
  transcript_map.yaml file and supplying transcripts as needed.

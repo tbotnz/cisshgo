@@ -1,15 +1,10 @@
 # cisgo-ios
-simple concurrent ssh server posing as cisco ios
+Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
 
-## installation
-install dependencies
+## Usage
 
-```
-go get github.com/gliderlabs/ssh
-go get golang.org/x/crypto/ssh/terminal
-```
-
-## starting
+1. Clone the repository and change into that directory
+2. Execute `go run cis.go` as shown below:
 ```
 go run cis.go 
 2020/08/22 00:17:34 starting ssh server on port :10049
@@ -21,9 +16,12 @@ go run cis.go
 2020/08/22 00:17:34 starting ssh server on port :10026
 2020/08/22 00:17:34 starting ssh server on port :10027
 ```
+3. SSH into one of the open ports with `admin` as the password. By default, you can run "show version"
+ or "show ip interface brief" or "show running-config". Other commands can be added by modifying the
+ transcript_map.yaml file and supplying transcripts as needed.
 
-## using
-ssh into one of the open ports with ```admin``` as password and run "show version" or "show ip interface brief" or "show running-config"
+Example output:
+
 ```
 test_device#show version
 Cisco IOS XE Software, Version 16.04.01
@@ -42,3 +40,66 @@ or the applicable URL provided on the flyer accompanying the IOS-XE
 software.
 ROM: IOS-XE ROMMON
 ```
+
+## Advanced Usage
+
+There are several options available to control the behavior
+ of cisgo-ios see the below output of `-help`:
+
+```
+  -listners int
+    	How many listeners do you wish to spawn? (default 50)
+  -startingPort int
+    	What port do you want to start at? (default 10000)
+  -transcriptMap string
+    	What file contains the map of commands to transcipted output? (default "transcripts/transcript_map.yaml")
+```
+
+For example, if you only wish to lauch with a single SSH listner for a testing process,
+ you could simply apply `-listners 1` to the run command:
+
+```
+go run cis.go -listners 1
+2020/09/03 19:41:04 Starting cis.go ssh server on port :10000
+```
+
+## Expanding Platform Support
+
+cisgo-ios is built modularly to support easy expansion or customization. Potential options for enhancement are outlined below.
+
+### Adding Additional Command Transcripts
+
+If you wish to add additional command transcripts, you simply need to include a plain text file in the appropriate
+ `vendor/platform` folder, and create an entry in the `transcript_map.yaml` file under the appropriate vendor/platform:
+
+```
+---
+platforms:
+  - csr1000v:
+      command_transcripts:
+        "my new fancy command": "transcripts/cisco/csr1000v/my_new_fancy_command.txt"
+```
+
+On the next execution of cisgo-ios it will read this map and respond to `my new fancy command`
+
+### Adding Additional "Cisco-style" Platforms
+
+If you wish to add a completely new Cisco-style device, that is one with `configure terminal`
+ leading to a `(config)#` mode for example, you can simply supply additional device types and transcripts
+ in the transcript_map.yaml file.
+
+This however does not work if a device follows a different interaction pattern than the Cisco standard,
+ for example a Juniper or F5 device, for that see the following section.
+
+### Adding Additional Non-"Cisco-style" Platforms
+
+**NOTE** This feature is not fully implemented yet!
+
+If you wish to add a platform that is _not_ the "Cisco-style" of interaction, for example a Juniper or F5 device,
+ you will need to implement a new `handler` module for it under `ssh_server/handlers` and add it to the 
+ device mapping in code in `cis.go` where it chooses the SSH listner and handler.
+
+The "handler" controls the basics of how we will emulate the SSH session, and provides a list of
+ `if...else if...else if...` options to roughly simulate the device experience. Because many network
+  devices vary in their CLI and interactions, the conditional tree that each requires will vary.
+  This is implemented via the "handler" functionality.

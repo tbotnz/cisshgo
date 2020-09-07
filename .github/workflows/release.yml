@@ -1,0 +1,46 @@
+---
+name: release
+# pipeline triggers on push to master with the tag starting with `v` (semver enforcing)
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  # even when there are no tests, test job will ensure that project builds successfully
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+      - run: go test -cover ./...
+        env:
+          CGO_ENABLED: 0
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+
+      # upx is the binary compressor
+      - name: Install upx
+        run: sudo apt update && sudo apt install upx -y
+
+      # uncomment if automated docker image build is enabled in .goreleaser.yml
+      # - name: Login to dockerhub
+      #   run: docker login -u user -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Release with goreleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: release --rm-dist -f .goreleaser.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

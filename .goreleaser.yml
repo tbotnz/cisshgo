@@ -1,0 +1,60 @@
+project_name: cisgo-ios
+builds:
+  - env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    hooks:
+      post: upx "{{ .Path }}"
+# uncomment and modify if automated docker build/push is needed
+# dockers:
+#   - goos: linux
+#     goarch: amd64
+#     binaries:
+#       - cisgo-ios
+#     image_templates:
+#       - "hellt/cisgo-ios:latest"
+#       - 'hellt/cisgo-ios:{{ replace .Version "v" ""}}'
+#     dockerfile: Dockerfile
+#     skip_push: false
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+nfpms:
+  - id: cisgo-ios
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      amd64: x86_64
+      darwin: darwin
+      linux: linux
+    vendor: cisgo-ios
+    homepage: https://github.com/tbotnz/cisgo-ios
+    maintainer: tbotnz
+    description: Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
+    license: Apache 2.0
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/local/bin

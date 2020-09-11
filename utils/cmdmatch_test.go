@@ -2,49 +2,53 @@ package utils
 
 import "testing"
 
+type inputMatch struct {
+	match           bool   // boolean of if a match is expected
+	matchedCommand  string // string of expected match to this input
+	multipleMatches bool   // Were multiple commands matched?
+}
+
 func TestCmdMatch(t *testing.T) {
 
 	// Create a fake SupportedCommands map
 	mySupportedCommands := map[string]string{
-		"show version": "a version of stuff",
-		"show vlan":    "some vlan stuff",
+		"show version":    "a version of stuff",
+		"show vlan":       "some vlan stuff",
+		"show vlan brief": "some more brief vlan stuff",
+		"reboot":          "oh noes!",
 	}
 
-	input1 := "show version" // Should match "show version"
-	input2 := "sho ver"      // Should match "show version"
-	input3 := "sho vlan"     // Should match "show vlan"
-	input4 := "s v"          // Should return no match
+	inputs := make(map[string]inputMatch)
 
-	match1, matchedCommand1 := CmdMatch(input1, mySupportedCommands)
-	if match1 != true {
-		t.Errorf(
-			"CmdMatch('%s', %v) = (%t, '%s'); want (true, 'a version of stuff')",
-			input1, mySupportedCommands, match1, matchedCommand1,
-		)
-	}
+	inputs["show version"] = inputMatch{true, "show version", false}      // Should match "show version"
+	inputs["show ver"] = inputMatch{true, "show version", false}          // Should match "show version"
+	inputs["sho vlan"] = inputMatch{true, "show vlan", false}             // Should match "show vlan"
+	inputs["s v"] = inputMatch{true, "", true}                            // Should return no match
+	inputs["show version made-up"] = inputMatch{false, "", false}         // Should return no match
+	inputs["no version"] = inputMatch{false, "", false}                   // Should return no match
+	inputs["Sho vLan BrIef"] = inputMatch{true, "show vlan brief", false} // Should match "show vlan brief"
+	inputs["show vlan!"] = inputMatch{false, "", false}                   // Should return no match
 
-	match2, matchedCommand2 := CmdMatch(input2, mySupportedCommands)
-	if match2 != true {
-		t.Errorf(
-			"CmdMatch('%s', %v) = (%t, '%s'); want (true, 'a version of stuff')",
-			input2, mySupportedCommands, match2, matchedCommand2,
-		)
-	}
-
-	match3, matchedCommand3 := CmdMatch(input3, mySupportedCommands)
-	if match3 != true {
-		t.Errorf(
-			"CmdMatch('%s', %v) = (%t, '%s); want (true, 'some vlan stuff')",
-			input3, mySupportedCommands, match3, matchedCommand3,
-		)
-	}
-
-	match4, matchedCommand4 := CmdMatch(input4, mySupportedCommands)
-	if match4 != false {
-		t.Errorf(
-			"CmdMatch('%s', %v) = (%t, '%s'); want (false, '')",
-			input4, mySupportedCommands, match4, matchedCommand4,
-		)
+	for input, expected := range inputs {
+		match, matchedCommand, multipleMatches, err := CmdMatch(input, mySupportedCommands)
+		if err != nil {
+			t.Errorf("Unknown Error: %s", err)
+		}
+		if match != expected.match ||
+			matchedCommand != expected.matchedCommand ||
+			multipleMatches != expected.multipleMatches {
+			t.Errorf(
+				"CmdMatch('%s', %v) = (%t, '%s', %t); want (%t, '%s', %t)",
+				input,
+				mySupportedCommands,
+				match,
+				matchedCommand,
+				multipleMatches,
+				expected.match,
+				expected.matchedCommand,
+				expected.multipleMatches,
+			)
+		}
 	}
 
 }

@@ -7,13 +7,16 @@ import (
 	"github.com/tbotnz/cisgo-ios/utils"
 )
 
+// SupportedCommands is a map of the commands a FakeDevice supports and it's corresponding output
+type SupportedCommands map[string]string
+
 // FakeDevice Struct for the device we will be simulating
 type FakeDevice struct {
 	Vendor            string            // Vendor of this fake device
 	Platform          string            // Platform of this fake device
 	Hostname          string            // Hostname of the fake device
 	Password          string            // Password of the fake device
-	SupportedCommands map[string]string // What commands this fake device supports
+	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
 	ContextHierarchy  map[string]string // The heiarchy of the available contexts
 }

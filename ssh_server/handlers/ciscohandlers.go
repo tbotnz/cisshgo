@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/tbotnz/cisgo-ios/fakedevices"
+	"github.com/tbotnz/cisgo-ios/utils"
 )
 
 // GenericCiscoHandler function handles generic Cisco style sessions
@@ -32,29 +33,19 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 			}
 			log.Println(userInput)
 
-			// Split user input into fields for use further down the handler
-			userInputFields := strings.Fields(userInput)
-
-			// Handle any responses provided at the terminal of the fakeDevice
-			if myFakeDevice.SupportedCommands[userInput] != "" {
-				// lookup supported commands for the user input
-				term.Write(append([]byte(myFakeDevice.SupportedCommands[userInput]), '\n'))
-
-			} else if userInput == "" {
+			// Handle any empty input (assumed to just be a carriage return)
+			if userInput == "" {
 				// return nothing but a newline if nothing is entered
 				term.Write([]byte(""))
+				continue
+			}
 
-			} else if myFakeDevice.ContextSearch[userInput] != "" {
+			// Handle any context switching
+			if myFakeDevice.ContextSearch[userInput] != "" {
 				// switch contexts as needed
 				term.SetPrompt(string(myFakeDevice.Hostname + myFakeDevice.ContextSearch[userInput]))
 				ContextState = myFakeDevice.ContextSearch[userInput]
-
-			} else if userInputFields[0] == "hostname" && ContextState == "(config)#" {
-				// Set the hostname to the values after "hostname" in the userInputFields
-				myFakeDevice.Hostname = strings.Join(userInputFields[1:], " ")
-				log.Printf("Setting hostname to %s\n", myFakeDevice.Hostname)
-				term.SetPrompt(myFakeDevice.Hostname + ContextState)
-
+				continue
 			} else if userInput == "exit" || userInput == "end" {
 				// Back out of the lower contexts, i.e. drop from "(config)#" to "#"
 				if myFakeDevice.ContextHierarchy[ContextState] == "exit" {
@@ -62,11 +53,41 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				} else {
 					term.SetPrompt(string(myFakeDevice.Hostname + myFakeDevice.ContextHierarchy[ContextState]))
 					ContextState = myFakeDevice.ContextHierarchy[ContextState]
+					continue
 				}
+			}
 
+			// Split user input into fields
+			userInputFields := strings.Fields(userInput)
+
+			// Handle hostname changes
+			if userInputFields[0] == "hostname" && ContextState == "(config)#" {
+				// Set the hostname to the values after "hostname" in the userInputFields
+				myFakeDevice.Hostname = strings.Join(userInputFields[1:], " ")
+				log.Printf("Setting hostname to %s\n", myFakeDevice.Hostname)
+				term.SetPrompt(myFakeDevice.Hostname + ContextState)
+				continue
+			}
+
+			// Run userInput through the command matcher
+			match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, myFakeDevice.SupportedCommands)
+			if err != nil {
+				log.Println(err)
+				break
+			}
+
+			if match && !multipleMatches {
+				// Write the output of our matched command
+				term.Write(append([]byte(myFakeDevice.SupportedCommands[matchedCommand]), '\n'))
+				continue
+			} else if multipleMatches {
+				// Multiple commands were matched, throw ambigious command
+				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
+				continue
 			} else {
 				// If all else fails, we did not recognize the input!
 				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
+				continue
 			}
 		}
 		log.Println("terminal closed")

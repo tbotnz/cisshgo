@@ -113,3 +113,6 @@ The "handler" controls the basics of how we will emulate the SSH session, and pr
  `if...else if...else if...` options to roughly simulate the device experience. Because many network
   devices vary in their CLI and interactions, the conditional tree that each requires will vary.
   This is implemented via the "handler" functionality.
+
+### Disclaimer
+Cisco IOS is the property/trademark of Cisco.

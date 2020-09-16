@@ -77,8 +77,17 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 			}
 
 			if match && !multipleMatches {
+				// Render the matched command output
+				output, err := fakedevices.TranscriptReader(
+					myFakeDevice.SupportedCommands[matchedCommand],
+					myFakeDevice,
+				)
+				if err != nil {
+					log.Fatal(err)
+				}
+
 				// Write the output of our matched command
-				term.Write(append([]byte(myFakeDevice.SupportedCommands[matchedCommand]), '\n'))
+				term.Write(append([]byte(output), '\n'))
 				continue
 			} else if multipleMatches {
 				// Multiple commands were matched, throw ambigious command

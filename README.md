@@ -77,6 +77,36 @@ go run cis.go -listners 1
 
 cisgo-ios is built modularly to support easy expansion or customization. Potential options for enhancement are outlined below.
 
+### Customized Output in Command Transcripts
+
+If you wish to modify elements of the transcript dynamically, for example the hostname,
+ you can instantiate templateable sections into your transcript.
+
+For example, in the packaged output of `show_version.txt` the hostname is listed as:
+
+```
+ROM: IOS-XE ROMMON
+{{.Hostname}} uptime is 4 hours, 55 minutes
+Uptime for this control processor is 4 hours, 56 minutes
+```
+
+Any value in the `fakedevices.FakeDevice` struct can be referenced in this way, today these are:
+
+```
+type FakeDevice struct {
+	Vendor            string            // Vendor of this fake device
+	Platform          string            // Platform of this fake device
+	Hostname          string            // Hostname of the fake device
+	Password          string            // Password of the fake device
+	SupportedCommands SupportedCommands // What commands this fake device supports
+	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
+	ContextHierarchy  map[string]string // The heiarchy of the available contexts
+}
+```
+
+If you wish to template additional/different values, they will need to be added to the FakeDevice struct
+ and then instantiated in the transcript with a reference to `{{.MyNewAttribute}}`.
+
 ### Adding Additional Command Transcripts
 
 If you wish to add additional command transcripts, you simply need to include a plain text file in the appropriate

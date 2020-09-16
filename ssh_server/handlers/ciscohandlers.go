@@ -40,18 +40,31 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				continue
 			}
 
+			// Run userInput through the command matcher to look for contextSwitching commands
+			matchPrompt, matchedPrompt, multiplePromptMatches, err := utils.CmdMatch(
+				userInput, myFakeDevice.ContextSearch,
+			)
+			if err != nil {
+				log.Println(err)
+				break
+			}
+
 			// Handle any context switching
-			if myFakeDevice.ContextSearch[userInput] != "" {
+			if matchPrompt && !multiplePromptMatches {
 				// switch contexts as needed
-				term.SetPrompt(string(myFakeDevice.Hostname + myFakeDevice.ContextSearch[userInput]))
-				ContextState = myFakeDevice.ContextSearch[userInput]
+				term.SetPrompt(string(
+					myFakeDevice.Hostname + myFakeDevice.ContextSearch[matchedPrompt],
+				))
+				ContextState = myFakeDevice.ContextSearch[matchedPrompt]
 				continue
 			} else if userInput == "exit" || userInput == "end" {
 				// Back out of the lower contexts, i.e. drop from "(config)#" to "#"
 				if myFakeDevice.ContextHierarchy[ContextState] == "exit" {
 					break
 				} else {
-					term.SetPrompt(string(myFakeDevice.Hostname + myFakeDevice.ContextHierarchy[ContextState]))
+					term.SetPrompt(string(
+						myFakeDevice.Hostname + myFakeDevice.ContextHierarchy[ContextState],
+					))
 					ContextState = myFakeDevice.ContextHierarchy[ContextState]
 					continue
 				}
@@ -69,7 +82,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				continue
 			}
 
-			// Run userInput through the command matcher
+			// Run userInput through the command matcher to look at supportedCommands
 			match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, myFakeDevice.SupportedCommands)
 			if err != nil {
 				log.Println(err)

@@ -15,9 +15,6 @@ platforms:
         "#": ">"
         ">": "exit"
       context_search:
-        "conf t": "(config)#"
         "configure terminal": "(config)#"
-        "configure t": "(config)#"
         "enable": "#"
-        "en": "#"
         "base": ">"

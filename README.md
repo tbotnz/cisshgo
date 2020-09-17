@@ -1,4 +1,4 @@
-# cisgo-ios
+# cisshgo
 Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
 
 ## Usage
@@ -54,7 +54,7 @@ ROM: IOS-XE ROMMON
 ## Advanced Usage
 
 There are several options available to control the behavior
- of cisgo-ios see the below output of `-help`:
+ of cisshgo see the below output of `-help`:
 
 ```
   -listners int

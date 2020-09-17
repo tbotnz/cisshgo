@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/tbotnz/cisgo-ios/utils"
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 // SupportedCommands is a map of the commands a FakeDevice supports and it's corresponding output
@@ -30,7 +30,7 @@ func readFile(filename string) string {
 	return string(content)
 }
 
-// InitGenric builds a FakeDevice struct for use with cisgo-ios
+// InitGenric builds a FakeDevice struct for use with cisshgo
 func InitGenric(
 	vendor string,
 	platform string,

@@ -1,4 +1,4 @@
-module github.com/tbotnz/cisgo-ios
+module github.com/tbotnz/cisshgo
 
 go 1.15
 

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/tbotnz/cisgo-ios/fakedevices"
-	"github.com/tbotnz/cisgo-ios/ssh_server/handlers"
-	"github.com/tbotnz/cisgo-ios/ssh_server/sshlistners"
-	"github.com/tbotnz/cisgo-ios/utils"
+	"github.com/tbotnz/cisshgo/fakedevices"
+	"github.com/tbotnz/cisshgo/ssh_server/handlers"
+	"github.com/tbotnz/cisshgo/ssh_server/sshlistners"
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 func main() {

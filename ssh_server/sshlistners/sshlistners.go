@@ -1,4 +1,4 @@
-// Package sshlistners contains SSH Listners for cisgo-ios to utilize when building
+// Package sshlistners contains SSH Listners for cisshgo to utilize when building
 // fake devices to emulate network equipment
 package sshlistners
 
@@ -8,8 +8,8 @@ import (
 
 	"github.com/gliderlabs/ssh"
 
-	"github.com/tbotnz/cisgo-ios/fakedevices"
-	"github.com/tbotnz/cisgo-ios/ssh_server/handlers"
+	"github.com/tbotnz/cisshgo/fakedevices"
+	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 )
 
 // GenericListner function that creates a fake device and terminal session
@@ -25,7 +25,7 @@ func GenericListner(
 	myHandler(myFakeDevice)
 
 	portString := ":" + strconv.Itoa(portNumber)
-	log.Printf("Starting cis.go ssh server on port %s\n", portString)
+	log.Printf("Starting cissh.go ssh server on port %s\n", portString)
 
 	log.Fatal(
 		// Actually kick off the SSH server and listen on the given port

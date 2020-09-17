@@ -9,8 +9,8 @@ import (
 	"github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/tbotnz/cisgo-ios/fakedevices"
-	"github.com/tbotnz/cisgo-ios/utils"
+	"github.com/tbotnz/cisshgo/fakedevices"
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 // GenericCiscoHandler function handles generic Cisco style sessions

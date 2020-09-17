@@ -23,7 +23,7 @@ type TranscriptMap struct {
 	Platforms []map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
 }
 
-// ParseArgs parses command line arguments for cisgo-ios
+// ParseArgs parses command line arguments for cisshgo
 func ParseArgs() (int, *int, TranscriptMap) {
 	// Gather command line arguments and parse them
 	listnersPtr := flag.Int("listners", 50, "How many listeners do you wish to spawn?")

@@ -2,7 +2,7 @@
 platforms:
   - csr1000v:
       vendor: "cisco"
-      hostname: "cisgo1000v"
+      hostname: "cisshgo1000v"
       password: "admin"
       command_transcripts:
         "show ip interface brief": "transcripts/cisco/csr1000v/show_ip_interface_brief.txt"

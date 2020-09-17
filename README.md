@@ -4,10 +4,10 @@ Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Ci
 ## Usage
 
 1. Clone the repository and change into that directory (All dependencies are included in the `/vendor` folder, so no installation step is necessary.)
-2. Execute `go run cis.go` as shown below:
+2. Execute `go run cissh.go` as shown below:
 
 ```bash
-$ go run cis.go 
+$ go run cissh.go 
 2020/08/22 00:17:34 starting ssh server on port :10049
 2020/08/22 00:17:34 starting ssh server on port :10023
 2020/08/22 00:17:34 starting ssh server on port :10024
@@ -17,12 +17,12 @@ $ go run cis.go
 Alternatively you can compile and run in separate steps (useful for docker images, etc):
 
 ```bash
-$ go build cisgo-ios cis.go
-$ ./cisgo-ios
-2020/09/02 15:46:31 starting cis.go ssh server on port :10008
-2020/09/02 15:46:31 starting cis.go ssh server on port :10005
-2020/09/02 15:46:31 starting cis.go ssh server on port :10000
-2020/09/02 15:46:31 starting cis.go ssh server on port :10006
+$ go build cisshgo cissh.go
+$ ./cisshgo
+2020/09/02 15:46:31 starting cissh.go ssh server on port :10008
+2020/09/02 15:46:31 starting cissh.go ssh server on port :10005
+2020/09/02 15:46:31 starting cissh.go ssh server on port :10000
+2020/09/02 15:46:31 starting cissh.go ssh server on port :10006
 ... <snip>
 ```
 
@@ -69,13 +69,13 @@ For example, if you only wish to lauch with a single SSH listner for a testing p
  you could simply apply `-listners 1` to the run command:
 
 ```
-go run cis.go -listners 1
-2020/09/03 19:41:04 Starting cis.go ssh server on port :10000
+go run cissh.go -listners 1
+2020/09/03 19:41:04 Starting cissh.go ssh server on port :10000
 ```
 
 ## Expanding Platform Support
 
-cisgo-ios is built modularly to support easy expansion or customization. Potential options for enhancement are outlined below.
+cisshgo is built modularly to support easy expansion or customization. Potential options for enhancement are outlined below.
 
 ### Customized Output in Command Transcripts
 
@@ -120,7 +120,7 @@ platforms:
         "my new fancy command": "transcripts/cisco/csr1000v/my_new_fancy_command.txt"
 ```
 
-On the next execution of cisgo-ios it will read this map and respond to `my new fancy command`
+On the next execution of cisshgo it will read this map and respond to `my new fancy command`
 
 ### Adding Additional "Cisco-style" Platforms
 
@@ -137,7 +137,7 @@ This however does not work if a device follows a different interaction pattern t
 
 If you wish to add a platform that is _not_ the "Cisco-style" of interaction, for example a Juniper or F5 device,
  you will need to implement a new `handler` module for it under `ssh_server/handlers` and add it to the 
- device mapping in code in `cis.go` where it chooses the SSH listner and handler.
+ device mapping in code in `cissh.go` where it chooses the SSH listner and handler.
 
 The "handler" controls the basics of how we will emulate the SSH session, and provides a list of
  `if...else if...else if...` options to roughly simulate the device experience. Because many network

@@ -26,17 +26,17 @@ type TranscriptMap struct {
 // ParseArgs parses command line arguments for cisshgo
 func ParseArgs() (int, *int, TranscriptMap) {
 	// Gather command line arguments and parse them
-	listnersPtr := flag.Int("listners", 50, "How many listeners do you wish to spawn?")
+	listenersPtr := flag.Int("listeners", 50, "How many listeners do you wish to spawn?")
 	startingPortPtr := flag.Int("startingPort", 10000, "What port do you want to start at?")
 	transcriptMapPtr := flag.String(
 		"transcriptMap",
 		"transcripts/transcript_map.yaml",
-		"What file contains the map of commands to transcipted output?",
+		"What file contains the map of commands to transcribed output?",
 	)
 	flag.Parse()
 
-	// How many total listners will we have?
-	numListners := *startingPortPtr + *listnersPtr
+	// How many total listeners will we have?
+	numListeners := *startingPortPtr + *listenersPtr
 
 	// Gather the command transcripts and create a map of vendor/platform/command
 	transcriptMapRaw, err := ioutil.ReadFile(*transcriptMapPtr)
@@ -52,5 +52,5 @@ func ParseArgs() (int, *int, TranscriptMap) {
 	}
 	// fmt.Printf("YAML Parsed Transcript Map:\n\n%+v\n", myTranscriptMap)
 
-	return numListners, startingPortPtr, myTranscriptMap
+	return numListeners, startingPortPtr, myTranscriptMap
 }

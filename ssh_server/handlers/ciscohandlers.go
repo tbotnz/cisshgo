@@ -103,7 +103,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				term.Write(append([]byte(output), '\n'))
 				continue
 			} else if multipleMatches {
-				// Multiple commands were matched, throw ambigious command
+				// Multiple commands were matched, throw ambiguous command
 				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
 				continue
 			} else {

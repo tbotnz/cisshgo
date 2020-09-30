@@ -18,7 +18,7 @@ type FakeDevice struct {
 	Password          string            // Password of the fake device
 	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
-	ContextHierarchy  map[string]string // The heiarchy of the available contexts
+	ContextHierarchy  map[string]string // The hierarchy of the available contexts
 }
 
 // readFile abstracts the standard error handling of opening and reading a file into a string
@@ -30,8 +30,8 @@ func readFile(filename string) string {
 	return string(content)
 }
 
-// InitGenric builds a FakeDevice struct for use with cisshgo
-func InitGenric(
+// InitGeneric builds a FakeDevice struct for use with cisshgo
+func InitGeneric(
 	vendor string,
 	platform string,
 	myTranscriptMap utils.TranscriptMap,

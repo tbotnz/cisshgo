@@ -12,8 +12,8 @@ import (
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 )
 
-// GenericListner function that creates a fake device and terminal session
-func GenericListner(
+// GenericListener function that creates a fake device and terminal session
+func GenericListener(
 	myFakeDevice *fakedevices.FakeDevice,
 	portNumber int,
 	myHandler handlers.PlatformHandler,

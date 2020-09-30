@@ -57,30 +57,30 @@ There are several options available to control the behavior
  of cisshgo see the below output of `-help`:
 
 ```
-  -listners int
+  -listeners int
     	How many listeners do you wish to spawn? (default 50)
   -startingPort int
     	What port do you want to start at? (default 10000)
   -transcriptMap string
-    	What file contains the map of commands to transcipted output? (default "transcripts/transcript_map.yaml")
+    	What file contains the map of commands to transcribed output? (default "transcripts/transcript_map.yaml")
 ```
 
-For example, if you only wish to lauch with a single SSH listner for a testing process,
- you could simply apply `-listners 1` to the run command:
+For example, if you only wish to launch with a single SSH listener for a testing process,
+ you could simply apply `-listeners 1` to the run command:
 
 ```
-go run cissh.go -listners 1
+go run cissh.go -listeners 1
 2020/09/03 19:41:04 Starting cissh.go ssh server on port :10000
 ```
 
 ## Expanding Platform Support
 
-cisshgo is built modularly to support easy expansion or customization. Potential options for enhancement are outlined below.
+cisshgo is built with modularity in mind to support easy expansion or customization. Potential options for enhancement are outlined below.
 
 ### Customized Output in Command Transcripts
 
 If you wish to modify elements of the transcript dynamically, for example the hostname,
- you can instantiate templateable sections into your transcript.
+ you can instantiate templated sections into your transcript.
 
 For example, in the packaged output of `show_version.txt` the hostname is listed as:
 
@@ -100,7 +100,7 @@ type FakeDevice struct {
 	Password          string            // Password of the fake device
 	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
-	ContextHierarchy  map[string]string // The heiarchy of the available contexts
+	ContextHierarchy  map[string]string // The hierarchy of the available contexts
 }
 ```
 
@@ -137,7 +137,7 @@ This however does not work if a device follows a different interaction pattern t
 
 If you wish to add a platform that is _not_ the "Cisco-style" of interaction, for example a Juniper or F5 device,
  you will need to implement a new `handler` module for it under `ssh_server/handlers` and add it to the 
- device mapping in code in `cissh.go` where it chooses the SSH listner and handler.
+ device mapping in code in `cissh.go` where it chooses the SSH listener and handler.
 
 The "handler" controls the basics of how we will emulate the SSH session, and provides a list of
  `if...else if...else if...` options to roughly simulate the device experience. Because many network

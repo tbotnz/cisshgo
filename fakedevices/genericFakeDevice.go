@@ -15,6 +15,7 @@ type FakeDevice struct {
 	Vendor            string            // Vendor of this fake device
 	Platform          string            // Platform of this fake device
 	Hostname          string            // Hostname of the fake device
+	DefaultHostname   string            // Default Hostname of the fake device (for resetting)
 	Password          string            // Password of the fake device
 	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
@@ -69,7 +70,8 @@ func InitGeneric(
 	myFakeDevice := FakeDevice{
 		Vendor:            vendor,
 		Platform:          platform,
-		Hostname:          deviceHostname,
+        Hostname:          deviceHostname,
+        DefaultHostname:   deviceHostname,
 		Password:          devicePassword,
 		SupportedCommands: supportedCommands,
 		ContextSearch:     contextSearch,

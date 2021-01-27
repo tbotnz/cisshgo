@@ -70,8 +70,8 @@ func InitGeneric(
 	myFakeDevice := FakeDevice{
 		Vendor:            vendor,
 		Platform:          platform,
-        Hostname:          deviceHostname,
-        DefaultHostname:   deviceHostname,
+		Hostname:          deviceHostname,
+		DefaultHostname:   deviceHostname,
 		Password:          devicePassword,
 		SupportedCommands: supportedCommands,
 		ContextSearch:     contextSearch,

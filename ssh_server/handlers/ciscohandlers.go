@@ -68,6 +68,14 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 					ContextState = myFakeDevice.ContextHierarchy[ContextState]
 					continue
 				}
+			} else if userInput == "reset state" {
+				term.Write(append([]byte("Resetting State..."), '\n'))
+				ContextState = myFakeDevice.ContextSearch["base"]
+				myFakeDevice.Hostname = myFakeDevice.DefaultHostname
+				term.SetPrompt(string(
+					myFakeDevice.Hostname + ContextState,
+				))
+				continue 
 			}
 
 			// Split user input into fields
@@ -108,7 +116,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				continue
 			} else {
 				// If all else fails, we did not recognize the input!
-				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
+				term.Write(append([]byte("% Unknown command:  \""+userInput+"\""), '\n'))
 				continue
 			}
 		}

@@ -10,6 +10,7 @@ platforms:
         "show version": "transcripts/cisco/csr1000v/show_version.txt"
         "terminal length 0": "transcripts/generic_empty_return.txt"
         "terminal width 511": "transcripts/generic_empty_return.txt"
+        "write mem": "transcripts/cisco/csr1000v/write_mem.txt"
       context_hierarchy:
         "(config)#": "#"
         "#": ">"

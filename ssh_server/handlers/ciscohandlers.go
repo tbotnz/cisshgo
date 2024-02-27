@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gliderlabs/ssh"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/utils"
@@ -23,7 +23,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 		ContextState := myFakeDevice.ContextSearch["base"]
 
 		// Setup a terminal with the hostname + initial context state as a prompt
-		term := terminal.NewTerminal(s, myFakeDevice.Hostname+ContextState)
+		term := term.NewTerminal(s, myFakeDevice.Hostname+ContextState)
 
 		// Iterate over any user input that is provided at the terminal
 		for {
@@ -75,7 +75,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				term.SetPrompt(string(
 					myFakeDevice.Hostname + ContextState,
 				))
-				continue 
+				continue
 			}
 
 			// Split user input into fields

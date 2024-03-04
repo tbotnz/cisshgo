@@ -13,6 +13,7 @@ type TranscriptMapPlatform struct {
 	Vendor             string            `yaml:"vendor" json:"vendor"`
 	Hostname           string            `yaml:"hostname" json:"hostname"`
 	Password           string            `yaml:"password" json:"password"`
+	DefaultEnter       string            `yaml:"default_enter" json:"default_enter"`
 	CommandTranscripts map[string]string `yaml:"command_transcripts" json:"command_transcripts"`
 	ContextSearch      map[string]string `yaml:"context_search" json:"context_search"`
 	ContextHierarchy   map[string]string `yaml:"context_hierarchy" json:"context_hierarchy"`

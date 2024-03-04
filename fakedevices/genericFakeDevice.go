@@ -12,11 +12,13 @@ type SupportedCommands map[string]string
 
 // FakeDevice Struct for the device we will be simulating
 type FakeDevice struct {
-	Vendor            string            // Vendor of this fake device
-	Platform          string            // Platform of this fake device
-	Hostname          string            // Hostname of the fake device
-	DefaultHostname   string            // Default Hostname of the fake device (for resetting)
-	Password          string            // Password of the fake device
+	Vendor          string // Vendor of this fake device
+	Platform        string // Platform of this fake device
+	Hostname        string // Hostname of the fake device
+	DefaultHostname string // Default Hostname of the fake device (for resetting)
+	Password        string // Password of the fake device
+	DefaultEnter    string // What character does this device consider to be "Enter" or "Return"
+	// Note that in normal *nix terminals DefaultEnter is `\r` but Cisco uses `\n`, because insanity.
 	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
 	ContextHierarchy  map[string]string // The hierarchy of the available contexts
@@ -46,6 +48,7 @@ func InitGeneric(
 	// Find the hostname, password, and other info in the data for this device
 	var deviceHostname string
 	var devicePassword string
+	var defaultEnter string
 	for _, fakeDevicePlatform := range myTranscriptMap.Platforms {
 		// fmt.Printf("\nPlatform Map:\n%+v\n", fakeDevicePlatform)
 		for k, v := range fakeDevicePlatform {
@@ -54,6 +57,7 @@ func InitGeneric(
 				// fmt.Printf("Value: %+v\n", v)
 				deviceHostname = v.Hostname
 				devicePassword = v.Password
+				defaultEnter = v.DefaultEnter
 				contextSearch = v.ContextSearch
 				contextHierarchy = v.ContextHierarchy
 				commandTranscriptFiles = v.CommandTranscripts
@@ -73,6 +77,7 @@ func InitGeneric(
 		Hostname:          deviceHostname,
 		DefaultHostname:   deviceHostname,
 		Password:          devicePassword,
+		DefaultEnter:      defaultEnter,
 		SupportedCommands: supportedCommands,
 		ContextSearch:     contextSearch,
 		ContextHierarchy:  contextHierarchy,

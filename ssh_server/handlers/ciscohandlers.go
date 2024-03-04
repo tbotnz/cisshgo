@@ -22,8 +22,8 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 		// Setup our initial "context" or prompt
 		ContextState := myFakeDevice.ContextSearch["base"]
 
-		// Setup a terminal with the hostname + initial context state as a prompt
-		term := term.NewTerminal(s, myFakeDevice.Hostname+ContextState)
+		// Setup a terminal with the hostname + initial context state as a prompt , myFakeDevice.DefaultEnter
+		term := term.NewCustomTerminal(s, myFakeDevice.Hostname+ContextState, myFakeDevice.DefaultEnter)
 
 		// Iterate over any user input that is provided at the terminal
 		for {

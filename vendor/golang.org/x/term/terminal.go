@@ -55,8 +55,9 @@ type Terminal struct {
 	// concurrent processing of a key press and a Write() call.
 	lock sync.Mutex
 
-	c      io.ReadWriter
-	prompt []rune
+	c        io.ReadWriter
+	prompt   []rune
+	keyEnter []rune
 
 	// line is the current line being entered.
 	line []rune
@@ -105,6 +106,27 @@ func NewTerminal(c io.ReadWriter, prompt string) *Terminal {
 		Escape:       &vt100EscapeCodes,
 		c:            c,
 		prompt:       []rune(prompt),
+		keyEnter:     []rune("\r"),
+		termWidth:    80,
+		termHeight:   24,
+		echo:         true,
+		historyIndex: -1,
+	}
+}
+
+// NewCustomTerminal runs a VT100 terminal on the given ReadWriter.
+// If the ReadWriter is a local terminal, that terminal must first have been put into
+// raw mode.
+// prompt is a string that is written at the start of each input line (i.e.
+// "> ").
+// keyEnter is a string of characters that the terminal will interpret as the Enter key
+// Unix terminals utilize `\r`, however some network equipment vendors (Cisco) use `\n`
+func NewCustomTerminal(c io.ReadWriter, prompt string, keyEnter string) *Terminal {
+	return &Terminal{
+		Escape:       &vt100EscapeCodes,
+		c:            c,
+		prompt:       []rune(prompt),
+		keyEnter:     []rune(keyEnter),
 		termWidth:    80,
 		termHeight:   24,
 		echo:         true,
@@ -116,7 +138,6 @@ const (
 	keyCtrlC     = 3
 	keyCtrlD     = 4
 	keyCtrlU     = 21
-	keyEnter     = '\r'
 	keyEscape    = 27
 	keyBackspace = 127
 	keyUnknown   = 0xd800 /* UTF-16 surrogate area */ + iota
@@ -451,7 +472,7 @@ func visualLength(runes []rune) int {
 // handleKey processes the given key and, optionally, returns a line of text
 // that the user has entered.
 func (t *Terminal) handleKey(key rune) (line string, ok bool) {
-	if t.pasteActive && key != keyEnter {
+	if t.pasteActive && key != t.keyEnter[0] {
 		t.addKeyToLine(key)
 		return
 	}
@@ -521,7 +542,7 @@ func (t *Terminal) handleKey(key rune) (line string, ok bool) {
 				t.setLine(runes, len(runes))
 			}
 		}
-	case keyEnter:
+	case t.keyEnter[0]:
 		t.moveCursorToPos(len(t.line))
 		t.queue([]rune("\r\n"))
 		line = string(t.line)

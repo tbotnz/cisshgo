@@ -4,6 +4,7 @@ platforms:
       vendor: "cisco"
       hostname: "cisshgo1000v"
       password: "admin"
+      default_enter: "\n"
       command_transcripts:
         "show ip interface brief": "transcripts/cisco/csr1000v/show_ip_interface_brief.txt"
         "show running-config": "transcripts/cisco/csr1000v/show_running-config.txt"

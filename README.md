@@ -1,118 +1,170 @@
 # cisshgo
+
 Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
 
-## Usage
+## Quick Start
 
-1. Clone the repository and change into that directory (All dependencies are included in the `/vendor` folder, so no installation step is necessary.)
-2. Execute `go run cissh.go` as shown below:
+### Using Pre-built Binaries
 
-```bash
-$ go run cissh.go 
-2020/08/22 00:17:34 starting ssh server on port :10049
-2020/08/22 00:17:34 starting ssh server on port :10023
-2020/08/22 00:17:34 starting ssh server on port :10024
-... <snip>
-```
-
-Alternatively you can compile and run in separate steps (useful for docker images, etc):
+Download the latest release from [GitHub Releases](https://github.com/tbotnz/cisshgo/releases) and run:
 
 ```bash
-$ go build cisshgo cissh.go
-$ ./cisshgo
-2020/09/02 15:46:31 starting cissh.go ssh server on port :10008
-2020/09/02 15:46:31 starting cissh.go ssh server on port :10005
-2020/09/02 15:46:31 starting cissh.go ssh server on port :10000
-2020/09/02 15:46:31 starting cissh.go ssh server on port :10006
-... <snip>
+./cisshgo
 ```
 
-3. SSH into one of the open ports with `admin` as the password. By default, you can run "show version"
- or "show ip interface brief" or "show running-config". Other commands can be added by modifying the
- transcript_map.yaml file and supplying transcripts as needed.
+### Building from Source
 
-Example output:
+#### Quick Run
 
+```bash
+go run cissh.go
 ```
+
+#### Build and Run
+
+```bash
+go build -o cisshgo cissh.go
+./cisshgo
+```
+
+### Using Docker
+
+Pull and run the latest release:
+
+```bash
+docker run -d -p 10000-10049:10000-10049 tbotnz/cisshgo:latest
+```
+
+Or run with custom options:
+
+```bash
+docker run -d -p 10000:10000 tbotnz/cisshgo:latest -listeners 1 -startingPort 10000
+```
+
+Or build locally:
+
+```bash
+docker build -t cisshgo .
+docker run -d -p 10000-10049:10000-10049 cisshgo
+```
+
+### Using GoReleaser (for maintainers)
+
+Build a local snapshot release:
+
+```bash
+goreleaser release --snapshot --clean --skip=publish
+```
+
+## Releasing
+
+Releases are automated via GitHub Actions. To create a new release:
+
+1. Create and push a tag:
+
+   ```bash
+   git tag v0.1.2
+   git push origin v0.1.2
+   ```
+
+2. GitHub Actions will automatically:
+   - Build binaries for all platforms (linux/darwin/windows, amd64/arm64)
+   - Create multi-arch Docker images and push to Docker Hub
+   - Generate SBOMs for security compliance
+   - Create GitHub Release with binaries, archives, and checksums
+   - Build deb/rpm packages
+
+### Required Secrets
+
+The following secrets must be configured in the GitHub repository:
+
+- `DOCKER_USERNAME` - Docker Hub username
+- `DOCKER_PASSWORD` - Docker Hub token/password
+
+## Connecting
+
+SSH into any of the open ports with `admin` as the password:
+
+```bash
+ssh -p 10000 admin@localhost
+```
+
+Default password: `admin`
+
+## Example Session
+
+```text
 test_device#show version
 Cisco IOS XE Software, Version 16.04.01
 Cisco IOS Software [Everest], CSR1000V Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.4.1, RELEASE SOFTWARE (fc2)
 Technical Support: http://www.cisco.com/techsupport
 Copyright (c) 1986-2016 by Cisco Systems, Inc.
 Compiled Sun 27-Nov-16 13:02 by mcpre
-Cisco IOS-XE software, Copyright (c) 2005-2016 by cisco Systems, Inc.
-All rights reserved.  Certain components of Cisco IOS-XE software are
-licensed under the GNU General Public License ("GPL") Version 2.0.  The
-software code licensed under GPL Version 2.0 is free software that comes
-with ABSOLUTELY NO WARRANTY.  You can redistribute and/or modify such
-GPL code under the terms of GPL Version 2.0.  For more details, see the
-documentation or "License Notice" file accompanying the IOS-XE software,
-or the applicable URL provided on the flyer accompanying the IOS-XE
-software.
+...
 ROM: IOS-XE ROMMON
 ```
 
+Available commands:
+
+- `show version`
+- `show ip interface brief`
+- `show running-config`
+
+Additional commands can be added by modifying `transcripts/transcript_map.yaml`.
+
 ## Advanced Usage
 
-There are several options available to control the behavior
- of cisshgo see the below output of `-help`:
+### Command Line Options
 
-```
+```text
   -listeners int
-    	How many listeners do you wish to spawn? (default 50)
+        How many listeners do you wish to spawn? (default 50)
   -startingPort int
-    	What port do you want to start at? (default 10000)
+        What port do you want to start at? (default 10000)
   -transcriptMap string
-    	What file contains the map of commands to transcribed output? (default "transcripts/transcript_map.yaml")
+        What file contains the map of commands to transcribed output? (default "transcripts/transcript_map.yaml")
 ```
 
-For example, if you only wish to launch with a single SSH listener for a testing process,
- you could simply apply `-listeners 1` to the run command:
+### Example: Single Listener
 
-```
-go run cissh.go -listeners 1
-2020/09/03 19:41:04 Starting cissh.go ssh server on port :10000
+```bash
+./cisshgo -listeners 1 -startingPort 10000
 ```
 
 ## Expanding Platform Support
 
-cisshgo is built with modularity in mind to support easy expansion or customization. Potential options for enhancement are outlined below.
+cisshgo is built with modularity in mind to support easy expansion or customization.
 
 ### Customized Output in Command Transcripts
 
-If you wish to modify elements of the transcript dynamically, for example the hostname,
- you can instantiate templated sections into your transcript.
+Transcripts support Go templating. For example, in `show_version.txt`:
 
-For example, in the packaged output of `show_version.txt` the hostname is listed as:
-
-```
+```text
 ROM: IOS-XE ROMMON
 {{.Hostname}} uptime is 4 hours, 55 minutes
 Uptime for this control processor is 4 hours, 56 minutes
 ```
 
-Any value in the `fakedevices.FakeDevice` struct can be referenced in this way, today these are:
+Available template variables from `fakedevices.FakeDevice`:
 
-```
+```go
 type FakeDevice struct {
-	Vendor            string            // Vendor of this fake device
-	Platform          string            // Platform of this fake device
-	Hostname          string            // Hostname of the fake device
-	Password          string            // Password of the fake device
-	SupportedCommands SupportedCommands // What commands this fake device supports
-	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
-	ContextHierarchy  map[string]string // The hierarchy of the available contexts
+    Vendor            string            // Vendor of this fake device
+    Platform          string            // Platform of this fake device
+    Hostname          string            // Hostname of the fake device
+    Password          string            // Password of the fake device
+    SupportedCommands SupportedCommands // What commands this fake device supports
+    ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
+    ContextHierarchy  map[string]string // The hierarchy of the available contexts
 }
 ```
 
-If you wish to template additional/different values, they will need to be added to the FakeDevice struct
- and then instantiated in the transcript with a reference to `{{.MyNewAttribute}}`.
-
 ### Adding Additional Command Transcripts
 
-If you wish to add additional command transcripts, you simply need to include a plain text file in the appropriate
- `vendor/platform` folder, and create an entry in the `transcript_map.yaml` file under the appropriate vendor/platform:
+1. Create a plain text file in the appropriate `vendor/platform` folder
+2. Add an entry in `transcripts/transcript_map.yaml`:
 
-```
+```yaml
 ---
 platforms:
   - csr1000v:
@@ -120,29 +172,26 @@ platforms:
         "my new fancy command": "transcripts/cisco/csr1000v/my_new_fancy_command.txt"
 ```
 
-On the next execution of cisshgo it will read this map and respond to `my new fancy command`
-
 ### Adding Additional "Cisco-style" Platforms
 
-If you wish to add a completely new Cisco-style device, that is one with `configure terminal`
- leading to a `(config)#` mode for example, you can simply supply additional device types and transcripts
- in the transcript_map.yaml file.
-
-This however does not work if a device follows a different interaction pattern than the Cisco standard,
- for example a Juniper or F5 device, for that see the following section.
+Supply additional device types and transcripts in `transcript_map.yaml`.
+This works for devices with similar interaction patterns (e.g., `configure terminal` leading to `(config)#` mode).
 
 ### Adding Additional Non-"Cisco-style" Platforms
 
-**NOTE** This feature is not fully implemented yet!
+**NOTE:** This feature is not fully implemented yet!
 
-If you wish to add a platform that is _not_ the "Cisco-style" of interaction, for example a Juniper or F5 device,
- you will need to implement a new `handler` module for it under `ssh_server/handlers` and add it to the 
- device mapping in code in `cissh.go` where it chooses the SSH listener and handler.
+For platforms with different interaction patterns (e.g., Juniper, F5):
 
-The "handler" controls the basics of how we will emulate the SSH session, and provides a list of
- `if...else if...else if...` options to roughly simulate the device experience. Because many network
-  devices vary in their CLI and interactions, the conditional tree that each requires will vary.
-  This is implemented via the "handler" functionality.
+1. Implement a new handler module under `ssh_server/handlers`
+2. Add it to the device mapping in `cissh.go`
 
-### Disclaimer
+The handler controls SSH session emulation and provides conditional logic to simulate the device experience.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
 Cisco IOS is the property/trademark of Cisco.

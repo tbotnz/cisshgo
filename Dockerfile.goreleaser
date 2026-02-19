@@ -1,0 +1,5 @@
+FROM scratch
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/cisshgo /cisshgo
+COPY transcripts /transcripts
+ENTRYPOINT ["/cisshgo"]

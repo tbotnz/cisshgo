@@ -1,59 +1,78 @@
+version: 2
 project_name: cisshgo
+
 builds:
   - env:
       - CGO_ENABLED=0
     ldflags:
       - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
     goos:
       - linux
       - darwin
       - windows
     goarch:
       - amd64
-    hooks:
-      post: upx "{{ .Path }}"
-# uncomment and modify if automated docker build/push is needed
-# dockers:
-#   - goos: linux
-#     goarch: amd64
-#     binaries:
-#       - cisshgo
-#     image_templates:
-#       - "hellt/cisshgo:latest"
-#       - 'hellt/cisshgo:{{ replace .Version "v" ""}}'
-#     dockerfile: Dockerfile
-#     skip_push: false
+      - arm64
+    # UPX compression disabled - not recommended for modern Go (2026):
+    # - Triggers antivirus false positives
+    # - Go 1.26+ has better built-in binary optimization
+    # - ldflags "-s -w" already strips debug info for size reduction
+    # hooks:
+    #   post: upx "{{ .Path }}"
+
+dockers_v2:
+  - ids:
+      - cisshgo
+    images:
+      - "tbotnz/cisshgo"
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "{{ .Version }}"
+    dockerfile: Dockerfile.goreleaser
+    extra_files:
+      - transcripts
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
+sboms:
+  - artifacts: archive
+
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      amd64: x86_64
+  - formats: [tar.gz]
+    files:
+      - LICENSE
+      - README.md
+      - transcripts/**/*
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
+
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
-  name_template: "{{ .Tag }}"
+  version_template: "{{ .Tag }}"
+
 changelog:
   sort: asc
   filters:
     exclude:
       - "^docs:"
       - "^test:"
+
 nfpms:
   - id: cisshgo
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      amd64: x86_64
-      darwin: darwin
-      linux: linux
     vendor: cisshgo
     homepage: https://github.com/tbotnz/cisshgo
     maintainer: tbotnz
     description: Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
-    license: Apache 2.0
+    license: MIT
     formats:
       - deb
       - rpm

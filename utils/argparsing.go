@@ -2,8 +2,8 @@ package utils
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -39,7 +39,7 @@ func ParseArgs() (int, *int, TranscriptMap) {
 	numListeners := *startingPortPtr + *listenersPtr
 
 	// Gather the command transcripts and create a map of vendor/platform/command
-	transcriptMapRaw, err := ioutil.ReadFile(*transcriptMapPtr)
+	transcriptMapRaw, err := os.ReadFile(*transcriptMapPtr)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}

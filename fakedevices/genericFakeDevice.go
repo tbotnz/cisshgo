@@ -1,8 +1,8 @@
 package fakedevices
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/tbotnz/cisshgo/utils"
 )
@@ -24,7 +24,7 @@ type FakeDevice struct {
 
 // readFile abstracts the standard error handling of opening and reading a file into a string
 func readFile(filename string) string {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -137,15 +137,15 @@ func TestParseArgs(t *testing.T) {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	os.Args = []string{"cisshgo", "-listeners", "2", "-startingPort", "20000", "-transcriptMap", tmpFile}
 
-	numListeners, startingPortPtr, tm, err := ParseArgs()
+	numListeners, startingPort, tm, err := ParseArgs()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if numListeners != 20002 {
 		t.Errorf("numListeners = %d, want 20002", numListeners)
 	}
-	if *startingPortPtr != 20000 {
-		t.Errorf("startingPort = %d, want 20000", *startingPortPtr)
+	if startingPort != 20000 {
+		t.Errorf("startingPort = %d, want 20000", startingPort)
 	}
 	if len(tm.Platforms) != 1 {
 		t.Errorf("Platforms len = %d, want 1", len(tm.Platforms))

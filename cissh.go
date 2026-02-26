@@ -11,7 +11,7 @@ import (
 
 func run() error {
 	// Parse the command line arguments
-	numListeners, startingPortPtr, myTranscriptMap, err := utils.ParseArgs()
+	numListeners, startingPort, myTranscriptMap, err := utils.ParseArgs()
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func run() error {
 	done := make(chan bool, 1)
 
 	// Iterate through the server ports and spawn a Goroutine for each
-	for portNumber := *startingPortPtr; portNumber < numListeners; portNumber++ { // coverage-ignore // blocks on <-done
+	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore // blocks on <-done
 		go sshlistners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done)
 	}
 

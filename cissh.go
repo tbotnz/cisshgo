@@ -11,7 +11,7 @@ import (
 
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
-	"github.com/tbotnz/cisshgo/ssh_server/sshlistners"
+	"github.com/tbotnz/cisshgo/ssh_server/sshlisteners"
 	"github.com/tbotnz/cisshgo/utils"
 )
 
@@ -33,7 +33,7 @@ func run() error {
 
 	// Iterate through the server ports and spawn a Goroutine for each
 	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore // blocks on <-done
-		go sshlistners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done)
+		go sshlisteners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done)
 	}
 
 	// Wait on channel

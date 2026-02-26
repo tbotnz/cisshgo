@@ -27,10 +27,9 @@ jobs:
         run: go test -v -race ./...
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
-          install-mode: binary
 
       - name: Generate coverage profile
         run: go test -coverprofile=coverage.out -covermode=atomic ./...

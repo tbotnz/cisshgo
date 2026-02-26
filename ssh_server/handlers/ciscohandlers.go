@@ -104,7 +104,8 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 					myFakeDevice,
 				)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
+					break
 				}
 
 				// Write the output of our matched command

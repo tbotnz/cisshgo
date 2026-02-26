@@ -2,7 +2,6 @@ package fakedevices
 
 import (
 	"bytes"
-	"log"
 	"text/template"
 )
 
@@ -12,7 +11,7 @@ func TranscriptReader(transcript string, fakeDevice *FakeDevice) (string, error)
 	// Setup a template with our transcript
 	tmpl, err := template.New("fakeDeviceTemplate").Parse(transcript)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	// Setup a bytes buffer to accept the rendered template
@@ -20,7 +19,7 @@ func TranscriptReader(transcript string, fakeDevice *FakeDevice) (string, error)
 
 	// Render (Execute) the template with our input
 	if err := tmpl.Execute(&renderedTemplate, fakeDevice); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	return renderedTemplate.String(), nil

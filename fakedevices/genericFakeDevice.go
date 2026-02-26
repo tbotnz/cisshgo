@@ -1,7 +1,7 @@
 package fakedevices
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/tbotnz/cisshgo/utils"
@@ -23,12 +23,12 @@ type FakeDevice struct {
 }
 
 // readFile abstracts the standard error handling of opening and reading a file into a string
-func readFile(filename string) string {
+func readFile(filename string) (string, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("reading %s: %w", filename, err)
 	}
-	return string(content)
+	return string(content), nil
 }
 
 // InitGeneric builds a FakeDevice struct for use with cisshgo
@@ -36,7 +36,7 @@ func InitGeneric(
 	vendor string,
 	platform string,
 	myTranscriptMap utils.TranscriptMap,
-) *FakeDevice {
+) (*FakeDevice, error) {
 
 	supportedCommands := make(map[string]string)
 	contextSearch := make(map[string]string)
@@ -47,11 +47,8 @@ func InitGeneric(
 	var deviceHostname string
 	var devicePassword string
 	for _, fakeDevicePlatform := range myTranscriptMap.Platforms {
-		// fmt.Printf("\nPlatform Map:\n%+v\n", fakeDevicePlatform)
 		for k, v := range fakeDevicePlatform {
 			if k == platform {
-				// fmt.Printf("\nKey: %+v\n", k)
-				// fmt.Printf("Value: %+v\n", v)
 				deviceHostname = v.Hostname
 				devicePassword = v.Password
 				contextSearch = v.ContextSearch
@@ -63,7 +60,11 @@ func InitGeneric(
 
 	// Iterate through the command transcripts and read their contents into our supported commands
 	for k, v := range commandTranscriptFiles {
-		supportedCommands[k] = readFile(v)
+		content, err := readFile(v)
+		if err != nil {
+			return nil, err
+		}
+		supportedCommands[k] = content
 	}
 
 	// Create our fake device and return it
@@ -78,6 +79,5 @@ func InitGeneric(
 		ContextHierarchy:  contextHierarchy,
 	}
 
-	//fmt.Printf("\n%+v\n", myFakeDevice)
-	return &myFakeDevice
+	return &myFakeDevice, nil
 }

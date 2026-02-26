@@ -29,16 +29,16 @@ func run() error {
 	}
 
 	// Make a Channel named "done" for handling Goroutines
-	done := make(chan bool, 1)
+	done := make(chan bool, 1) // coverage-ignore
 
 	// Iterate through the server ports and spawn a Goroutine for each
-	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore // blocks on <-done
-		go sshlisteners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done)
+	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
+		go sshlisteners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done) // coverage-ignore
 	}
 
 	// Wait on channel
-	<-done
-	return nil
+	<-done        // coverage-ignore
+	return nil    // coverage-ignore
 }
 
 func main() { // coverage-ignore

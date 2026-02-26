@@ -7,7 +7,11 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
@@ -15,34 +19,37 @@ import (
 	"github.com/tbotnz/cisshgo/utils"
 )
 
-func run() error {
-	// Parse the command line arguments
+func run(ctx context.Context) error {
 	numListeners, startingPort, myTranscriptMap, err := utils.ParseArgs()
 	if err != nil {
 		return err
 	}
 
-	// Initialize our fake device
 	myFakeDevice, err := fakedevices.InitGeneric("cisco", "csr1000v", myTranscriptMap)
 	if err != nil {
 		return err
 	}
 
-	// Make a Channel named "done" for handling Goroutines
-	done := make(chan bool, 1) // coverage-ignore
-
-	// Iterate through the server ports and spawn a Goroutine for each
+	var wg sync.WaitGroup
 	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
-		go sshlisteners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done) // coverage-ignore
-	}
+		wg.Add(1)           // coverage-ignore
+		go func(port int) { // coverage-ignore
+			defer wg.Done()                                                                                             // coverage-ignore
+			if err := sshlisteners.GenericListener(ctx, myFakeDevice, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
+				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
+			} // coverage-ignore
+		}(portNumber) // coverage-ignore
+	} // coverage-ignore
 
-	// Wait on channel
-	<-done     // coverage-ignore
+	wg.Wait()  // coverage-ignore
 	return nil // coverage-ignore
 }
 
 func main() { // coverage-ignore
-	if err := run(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	if err := run(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

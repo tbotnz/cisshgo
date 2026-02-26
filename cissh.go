@@ -1,3 +1,9 @@
+// cisshgo is a lightweight SSH server that plays back pre-defined command
+// transcripts to emulate network equipment for testing purposes.
+//
+// Usage:
+//
+//	cisshgo [-listeners N] [-startingPort N] [-transcriptMap path]
 package main
 
 import (

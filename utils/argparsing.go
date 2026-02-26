@@ -1,3 +1,5 @@
+// Package utils provides CLI argument parsing and transcript map loading
+// for cisshgo.
 package utils
 
 import (

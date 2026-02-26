@@ -1,3 +1,5 @@
+// Package fakedevices provides types and initialization for simulated
+// network devices used by cisshgo.
 package fakedevices
 
 import (

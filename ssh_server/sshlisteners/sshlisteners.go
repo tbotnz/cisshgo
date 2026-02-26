@@ -19,16 +19,12 @@ func GenericListener(
 	myHandler handlers.PlatformHandler,
 	done chan bool,
 ) error {
-
-	// Prepare an SSH Handler for our fake device.
-	myHandler(myFakeDevice)
-
 	portString := ":" + strconv.Itoa(portNumber)
 	log.Printf("Starting cissh.go ssh server on port %s\n", portString)
 
 	err := ssh.ListenAndServe(
 		portString,
-		nil,
+		myHandler(myFakeDevice.Copy()),
 		ssh.PasswordAuth(
 			func(ctx ssh.Context, pass string) bool {
 				return pass == myFakeDevice.Password

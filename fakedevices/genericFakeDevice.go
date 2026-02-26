@@ -24,7 +24,23 @@ type FakeDevice struct {
 	ContextHierarchy  map[string]string // The hierarchy of the available contexts
 }
 
-// readFile abstracts the standard error handling of opening and reading a file into a string
+// Copy returns a deep copy of the FakeDevice, safe for use in a separate goroutine.
+func (fd *FakeDevice) Copy() *FakeDevice {
+	c := *fd
+	c.SupportedCommands = make(SupportedCommands, len(fd.SupportedCommands))
+	for k, v := range fd.SupportedCommands {
+		c.SupportedCommands[k] = v
+	}
+	c.ContextSearch = make(map[string]string, len(fd.ContextSearch))
+	for k, v := range fd.ContextSearch {
+		c.ContextSearch[k] = v
+	}
+	c.ContextHierarchy = make(map[string]string, len(fd.ContextHierarchy))
+	for k, v := range fd.ContextHierarchy {
+		c.ContextHierarchy[k] = v
+	}
+	return &c
+}
 func readFile(filename string) (string, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {

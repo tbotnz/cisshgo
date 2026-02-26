@@ -43,9 +43,6 @@ func newTestDevice() *fakedevices.FakeDevice {
 func startTestServer(t *testing.T, fd *fakedevices.FakeDevice) (string, func()) {
 	t.Helper()
 
-	// Register the handler
-	GenericCiscoHandler(fd)
-
 	// Find a free port
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -56,7 +53,7 @@ func startTestServer(t *testing.T, fd *fakedevices.FakeDevice) (string, func()) 
 
 	srv := &ssh.Server{
 		Addr:    addr,
-		Handler: ssh.DefaultHandler,
+		Handler: GenericCiscoHandler(fd),
 		PasswordHandler: func(ctx ssh.Context, pass string) bool {
 			return pass == fd.Password
 		},

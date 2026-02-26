@@ -88,6 +88,44 @@ func TestInitGeneric_UnknownPlatform(t *testing.T) {
 	}
 }
 
+func TestFakeDevice_Copy(t *testing.T) {
+	fd := &FakeDevice{
+		Vendor:            "cisco",
+		Platform:          "csr1000v",
+		Hostname:          "original",
+		DefaultHostname:   "original",
+		Password:          "secret",
+		SupportedCommands: SupportedCommands{"show version": "output"},
+		ContextSearch:     map[string]string{"base": ">"},
+		ContextHierarchy:  map[string]string{">": "exit"},
+	}
+
+	c := fd.Copy()
+
+	if c.Hostname != fd.Hostname {
+		t.Errorf("Hostname = %q, want %q", c.Hostname, fd.Hostname)
+	}
+
+	// Mutate copy and verify original is unchanged
+	c.Hostname = "modified"
+	c.SupportedCommands["show version"] = "changed"
+	c.ContextSearch["base"] = "changed"
+	c.ContextHierarchy[">"] = "changed"
+
+	if fd.Hostname == "modified" {
+		t.Error("Copy shares Hostname with original")
+	}
+	if fd.SupportedCommands["show version"] == "changed" {
+		t.Error("Copy shares SupportedCommands with original")
+	}
+	if fd.ContextSearch["base"] == "changed" {
+		t.Error("Copy shares ContextSearch with original")
+	}
+	if fd.ContextHierarchy[">"] == "changed" {
+		t.Error("Copy shares ContextHierarchy with original")
+	}
+}
+
 func TestInitGeneric_BadTranscriptFile(t *testing.T) {
 	tm := utils.TranscriptMap{
 		Platforms: []map[string]utils.TranscriptMapPlatform{

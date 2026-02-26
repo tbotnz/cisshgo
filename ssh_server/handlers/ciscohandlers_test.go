@@ -16,15 +16,15 @@ import (
 // newTestDevice creates a FakeDevice for testing without reading files from disk.
 func newTestDevice() *fakedevices.FakeDevice {
 	return &fakedevices.FakeDevice{
-		Vendor:   "cisco",
-		Platform: "csr1000v",
-		Hostname: "testhost",
+		Vendor:          "cisco",
+		Platform:        "csr1000v",
+		Hostname:        "testhost",
 		DefaultHostname: "testhost",
-		Password: "admin",
+		Password:        "admin",
 		SupportedCommands: fakedevices.SupportedCommands{
 			"show version":            "FakeOS version 1.0\n{{.Hostname}} uptime is 1 hour\n",
-			"show ip interface brief":  "Interface  IP-Address  OK?\n",
-			"terminal length 0":        "",
+			"show ip interface brief": "Interface  IP-Address  OK?\n",
+			"terminal length 0":       "",
 		},
 		ContextSearch: map[string]string{
 			"base":               ">",
@@ -55,7 +55,7 @@ func startTestServer(t *testing.T, fd *fakedevices.FakeDevice) (string, func()) 
 	ln.Close()
 
 	srv := &ssh.Server{
-		Addr: addr,
+		Addr:    addr,
 		Handler: ssh.DefaultHandler,
 		PasswordHandler: func(ctx ssh.Context, pass string) bool {
 			return pass == fd.Password

@@ -13,11 +13,11 @@ import (
 
 func TestGenericListener(t *testing.T) {
 	fd := &fakedevices.FakeDevice{
-		Vendor:   "cisco",
-		Platform: "csr1000v",
-		Hostname: "testhost",
+		Vendor:          "cisco",
+		Platform:        "csr1000v",
+		Hostname:        "testhost",
 		DefaultHostname: "testhost",
-		Password: "admin",
+		Password:        "admin",
 		SupportedCommands: fakedevices.SupportedCommands{
 			"show version": "version 1.0\n",
 		},

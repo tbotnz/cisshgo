@@ -7,10 +7,11 @@ import (
 
 // CmdMatch searches the provided supportedCommands to find a match for the provided userInput
 // Returns:
-//	match: bool
-// 	matchedCommand: string
-//  multipleMatches: bool
-//	error
+//
+//		match: bool
+//		matchedCommand: string
+//	 multipleMatches: bool
+//		error
 func CmdMatch(userInput string, supportedCommands map[string]string) (bool, string, bool, error) {
 
 	// Setup our return variables

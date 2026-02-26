@@ -1,4 +1,4 @@
-package sshlistners
+package sshlisteners
 
 import (
 	"net"

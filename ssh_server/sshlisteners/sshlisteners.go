@@ -1,6 +1,6 @@
-// Package sshlistners contains SSH Listeners for cisshgo to utilize when building
+// Package sshlisteners contains SSH Listeners for cisshgo to utilize when building
 // fake devices to emulate network equipment
-package sshlistners
+package sshlisteners
 
 import (
 	"log"

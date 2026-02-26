@@ -1,7 +1,7 @@
 # cisshgo
 
 [![CI](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml/badge.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
-[![coverage](https://raw.githubusercontent.com/tbotnz/cisshgo/badges/.badges/master/coverage.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
+[![coverage](https://raw.githubusercontent.com/tbotnz/cisshgo/badges/.badges/main/coverage.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tbotnz/cisshgo)](https://goreportcard.com/report/github.com/tbotnz/cisshgo)
 [![Go Reference](https://pkg.go.dev/badge/github.com/tbotnz/cisshgo.svg)](https://pkg.go.dev/github.com/tbotnz/cisshgo)
 [![Release](https://img.shields.io/github/v/release/tbotnz/cisshgo)](https://github.com/tbotnz/cisshgo/releases)

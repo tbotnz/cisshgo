@@ -40,7 +40,7 @@ jobs:
         with:
           config: ./.testcoverage.yml
           profile: coverage.out
-          git-token: ${{ github.ref_name == 'master' && secrets.GITHUB_TOKEN || '' }}
+          git-token: ${{ github.ref_name == 'main' && secrets.GITHUB_TOKEN || '' }}
           git-branch: badges
 
   coverage-report:

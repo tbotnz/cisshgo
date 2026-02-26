@@ -15,10 +15,8 @@ import (
 )
 
 // GenericCiscoHandler function handles generic Cisco style sessions
-func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
-
-	// Prepare the "ssh.DefaultHandler", this houses our device specific functionality
-	ssh.Handle(func(s ssh.Session) {
+func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
+	return func(s ssh.Session) {
 
 		// Exec mode: client sent a command directly (e.g., ssh host "show version")
 		if cmd := s.RawCommand(); cmd != "" {
@@ -53,7 +51,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 			}
 		}
 		log.Println("terminal closed")
-	})
+	}
 }
 
 // handleShellInput processes a single line of user input in interactive shell mode.

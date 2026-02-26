@@ -63,9 +63,7 @@ func startTestServer(t *testing.T, fd *fakedevices.FakeDevice) (string, func()) 
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != ssh.ErrServerClosed {
-			// server stopped
-		}
+		_ = srv.ListenAndServe()
 	}()
 
 	// Wait for server to be ready

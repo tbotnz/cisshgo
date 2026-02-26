@@ -1,0 +1,6 @@
+profile: coverage.out
+
+threshold:
+  # Minimum overall project coverage percentage required.
+  # Raise this as test coverage improves (see #35).
+  total: 60

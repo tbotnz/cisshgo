@@ -1,5 +1,7 @@
 # cisshgo
 
+![coverage](https://raw.githubusercontent.com/tbotnz/cisshgo/badges/.badges/master/coverage.svg)
+
 Simple, small, fast, concurrent SSH server to emulate network equipment (i.e. Cisco IOS) for testing purposes.
 
 ## Quick Start

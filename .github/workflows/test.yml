@@ -12,6 +12,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,5 +32,28 @@ jobs:
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: code-coverage
           path: coverage.out
+
+      - name: Check coverage threshold
+        uses: vladopajic/go-test-coverage@v2
+        with:
+          config: ./.testcoverage.yml
+          profile: coverage.out
+          git-token: ${{ github.ref_name == 'master' && secrets.GITHUB_TOKEN || '' }}
+          git-branch: badges
+
+  coverage-report:
+    name: Coverage report
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: fgrosse/go-coverage-report@v1.1.1
+        with:
+          coverage-artifact-name: code-coverage
+          coverage-file-name: coverage.out

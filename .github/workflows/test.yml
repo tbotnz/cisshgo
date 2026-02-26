@@ -26,6 +26,11 @@ jobs:
       - name: Run tests with race detection
         run: go test -v -race ./...
 
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+
       - name: Generate coverage profile
         run: go test -coverprofile=coverage.out -covermode=atomic ./...
 

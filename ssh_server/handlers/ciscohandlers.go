@@ -37,108 +37,100 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 		}
 
 		// Interactive shell mode
-		ContextState := myFakeDevice.ContextSearch["base"]
+		contextState := myFakeDevice.ContextSearch["base"]
+		t := term.NewTerminal(s, myFakeDevice.Hostname+contextState)
 
-		// Setup a terminal with the hostname + initial context state as a prompt
-		term := term.NewTerminal(s, myFakeDevice.Hostname+ContextState)
-
-		// Iterate over any user input that is provided at the terminal
 		for {
-			userInput, err := term.ReadLine()
+			userInput, err := t.ReadLine()
 			if err != nil {
 				break
 			}
 			log.Println(userInput)
 
-			// Handle any empty input (assumed to just be a carriage return)
-			if userInput == "" {
-				// return nothing but a newline if nothing is entered
-				term.Write([]byte(""))
-				continue
-			}
-
-			// Run userInput through the command matcher to look for contextSwitching commands
-			matchPrompt, matchedPrompt, multiplePromptMatches, err := utils.CmdMatch(
-				userInput, myFakeDevice.ContextSearch,
-			)
-			if err != nil {
-				log.Println(err) // coverage-ignore // CmdMatch never returns errors
+			done := handleShellInput(t, userInput, myFakeDevice, &contextState)
+			if done {
 				break
-			}
-
-			// Handle any context switching
-			if matchPrompt && !multiplePromptMatches {
-				// switch contexts as needed
-				term.SetPrompt(string(
-					myFakeDevice.Hostname + myFakeDevice.ContextSearch[matchedPrompt],
-				))
-				ContextState = myFakeDevice.ContextSearch[matchedPrompt]
-				continue
-			} else if userInput == "exit" || userInput == "end" {
-				// Back out of the lower contexts, i.e. drop from "(config)#" to "#"
-				if myFakeDevice.ContextHierarchy[ContextState] == "exit" {
-					break
-				} else {
-					term.SetPrompt(string(
-						myFakeDevice.Hostname + myFakeDevice.ContextHierarchy[ContextState],
-					))
-					ContextState = myFakeDevice.ContextHierarchy[ContextState]
-					continue
-				}
-			} else if userInput == "reset state" {
-				term.Write(append([]byte("Resetting State..."), '\n'))
-				ContextState = myFakeDevice.ContextSearch["base"]
-				myFakeDevice.Hostname = myFakeDevice.DefaultHostname
-				term.SetPrompt(string(
-					myFakeDevice.Hostname + ContextState,
-				))
-				continue
-			}
-
-			// Split user input into fields
-			userInputFields := strings.Fields(userInput)
-
-			// Handle hostname changes
-			if userInputFields[0] == "hostname" && ContextState == "(config)#" {
-				// Set the hostname to the values after "hostname" in the userInputFields
-				myFakeDevice.Hostname = strings.Join(userInputFields[1:], " ")
-				log.Printf("Setting hostname to %s\n", myFakeDevice.Hostname)
-				term.SetPrompt(myFakeDevice.Hostname + ContextState)
-				continue
-			}
-
-			// Run userInput through the command matcher to look at supportedCommands
-			match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, myFakeDevice.SupportedCommands)
-			if err != nil {
-				log.Println(err) // coverage-ignore // CmdMatch never returns errors
-				break
-			}
-
-			if match && !multipleMatches {
-				// Render the matched command output
-				output, err := fakedevices.TranscriptReader(
-					myFakeDevice.SupportedCommands[matchedCommand],
-					myFakeDevice,
-				)
-				if err != nil {
-					log.Println(err)
-					break
-				}
-
-				// Write the output of our matched command
-				term.Write(append([]byte(output), '\n'))
-				continue
-			} else if multipleMatches {
-				// Multiple commands were matched, throw ambiguous command
-				term.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
-				continue
-			} else {
-				// If all else fails, we did not recognize the input!
-				term.Write(append([]byte("% Unknown command:  \""+userInput+"\""), '\n'))
-				continue
 			}
 		}
 		log.Println("terminal closed")
-
 	})
+}
+
+// handleShellInput processes a single line of user input in interactive shell mode.
+// Returns true if the session should be terminated.
+func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string) bool {
+	if userInput == "" {
+		t.Write([]byte(""))
+		return false
+	}
+
+	// Check for context switching commands
+	matchPrompt, matchedPrompt, multiplePromptMatches, err := utils.CmdMatch(userInput, fd.ContextSearch)
+	if err != nil {
+		log.Println(err) // coverage-ignore // CmdMatch never returns errors
+		return true
+	}
+
+	if matchPrompt && !multiplePromptMatches {
+		t.SetPrompt(fd.Hostname + fd.ContextSearch[matchedPrompt])
+		*contextState = fd.ContextSearch[matchedPrompt]
+		return false
+	}
+
+	if userInput == "exit" || userInput == "end" {
+		if fd.ContextHierarchy[*contextState] == "exit" {
+			return true
+		}
+		t.SetPrompt(fd.Hostname + fd.ContextHierarchy[*contextState])
+		*contextState = fd.ContextHierarchy[*contextState]
+		return false
+	}
+
+	if userInput == "reset state" {
+		t.Write(append([]byte("Resetting State..."), '\n'))
+		*contextState = fd.ContextSearch["base"]
+		fd.Hostname = fd.DefaultHostname
+		t.SetPrompt(fd.Hostname + *contextState)
+		return false
+	}
+
+	// Handle hostname changes in config mode
+	userInputFields := strings.Fields(userInput)
+	if userInputFields[0] == "hostname" && *contextState == "(config)#" {
+		fd.Hostname = strings.Join(userInputFields[1:], " ")
+		log.Printf("Setting hostname to %s\n", fd.Hostname)
+		t.SetPrompt(fd.Hostname + *contextState)
+		return false
+	}
+
+	// Match against supported commands
+	return dispatchCommand(t, userInput, fd)
+}
+
+// dispatchCommand matches userInput against supported commands and writes the response.
+// Returns true if the session should be terminated.
+func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice) bool {
+	match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, fd.SupportedCommands)
+	if err != nil {
+		log.Println(err) // coverage-ignore // CmdMatch never returns errors
+		return true
+	}
+
+	if multipleMatches {
+		t.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))
+		return false
+	}
+
+	if !match {
+		t.Write(append([]byte("% Unknown command:  \""+userInput+"\""), '\n'))
+		return false
+	}
+
+	output, err := fakedevices.TranscriptReader(fd.SupportedCommands[matchedCommand], fd)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	t.Write(append([]byte(output), '\n'))
+	return false
 }

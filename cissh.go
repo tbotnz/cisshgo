@@ -37,8 +37,8 @@ func run() error {
 	}
 
 	// Wait on channel
-	<-done        // coverage-ignore
-	return nil    // coverage-ignore
+	<-done     // coverage-ignore
+	return nil // coverage-ignore
 }
 
 func main() { // coverage-ignore

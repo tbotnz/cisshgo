@@ -36,6 +36,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install Syft (for SBOM generation)
+        uses: anchore/sbom-action/download-syft@v0.23.0
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

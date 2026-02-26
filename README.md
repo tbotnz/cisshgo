@@ -39,13 +39,13 @@ go build -o cisshgo cissh.go
 Pull and run the latest release:
 
 ```bash
-docker run -d -p 10000-10049:10000-10049 tbotnz/cisshgo:latest
+docker run -d -p 10000-10049:10000-10049 ghcr.io/tbotnz/cisshgo:latest
 ```
 
 Or run with custom options:
 
 ```bash
-docker run -d -p 10000:10000 tbotnz/cisshgo:latest -listeners 1 -startingPort 10000
+docker run -d -p 10000:10000 ghcr.io/tbotnz/cisshgo:latest -listeners 1 -startingPort 10000
 ```
 
 Or build locally:

@@ -27,7 +27,7 @@ dockers_v2:
   - ids:
       - cisshgo
     images:
-      - "tbotnz/cisshgo"
+      - "ghcr.io/tbotnz/cisshgo"
     tags:
       - "latest"
       - "{{ .Tag }}"

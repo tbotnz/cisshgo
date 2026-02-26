@@ -229,3 +229,27 @@ func TestHandler_EmptyInput(t *testing.T) {
 		t.Errorf("expected prompt with hostname, got:\n%s", out)
 	}
 }
+
+func TestHandler_AmbiguousCommand(t *testing.T) {
+	fd := newTestDevice()
+	// Add commands that will be ambiguous with "s v"
+	fd.SupportedCommands["show vlan"] = "vlan info\n"
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	out := interact(t, addr, []string{"s v"})
+	if !strings.Contains(out, "Ambiguous command") {
+		t.Errorf("expected 'Ambiguous command' in output, got:\n%s", out)
+	}
+}
+
+func TestHandler_TranscriptReaderError(t *testing.T) {
+	fd := newTestDevice()
+	// Set a command with an invalid template to trigger TranscriptReader error
+	fd.SupportedCommands["show bad"] = "{{.Bad"
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	// Should not crash, just close the session
+	_ = interact(t, addr, []string{"show bad"})
+}

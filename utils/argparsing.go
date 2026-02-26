@@ -2,7 +2,7 @@ package utils
 
 import (
 	"flag"
-	"log"
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -23,9 +23,23 @@ type TranscriptMap struct {
 	Platforms []map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
 }
 
-// ParseArgs parses command line arguments for cisshgo
-func ParseArgs() (int, *int, TranscriptMap) {
-	// Gather command line arguments and parse them
+// LoadTranscriptMap reads and parses a transcript map YAML file.
+func LoadTranscriptMap(path string) (TranscriptMap, error) {
+	transcriptMapRaw, err := os.ReadFile(path)
+	if err != nil {
+		return TranscriptMap{}, fmt.Errorf("reading transcript map: %w", err)
+	}
+
+	myTranscriptMap := TranscriptMap{}
+	if err = yaml.UnmarshalStrict(transcriptMapRaw, &myTranscriptMap); err != nil {
+		return TranscriptMap{}, fmt.Errorf("parsing transcript map: %w", err)
+	}
+
+	return myTranscriptMap, nil
+}
+
+// ParseArgs parses command line arguments for cisshgo and returns the configuration.
+func ParseArgs() (int, *int, TranscriptMap, error) {
 	listenersPtr := flag.Int("listeners", 50, "How many listeners do you wish to spawn?")
 	startingPortPtr := flag.Int("startingPort", 10000, "What port do you want to start at?")
 	transcriptMapPtr := flag.String(
@@ -35,22 +49,11 @@ func ParseArgs() (int, *int, TranscriptMap) {
 	)
 	flag.Parse()
 
-	// How many total listeners will we have?
+	myTranscriptMap, err := LoadTranscriptMap(*transcriptMapPtr)
+	if err != nil {
+		return 0, nil, TranscriptMap{}, err
+	}
+
 	numListeners := *startingPortPtr + *listenersPtr
-
-	// Gather the command transcripts and create a map of vendor/platform/command
-	transcriptMapRaw, err := os.ReadFile(*transcriptMapPtr)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	// fmt.Printf("Raw Transcript Map from file:\n\n%s\n", transcriptMapRaw)
-
-	myTranscriptMap := TranscriptMap{}
-	err = yaml.UnmarshalStrict([]byte(transcriptMapRaw), &myTranscriptMap)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	// fmt.Printf("YAML Parsed Transcript Map:\n\n%+v\n", myTranscriptMap)
-
-	return numListeners, startingPortPtr, myTranscriptMap
+	return numListeners, startingPortPtr, myTranscriptMap, nil
 }

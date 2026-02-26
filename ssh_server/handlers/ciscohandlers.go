@@ -45,7 +45,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 				userInput, myFakeDevice.ContextSearch,
 			)
 			if err != nil {
-				log.Println(err)
+				log.Println(err) // coverage-ignore // CmdMatch never returns errors
 				break
 			}
 
@@ -93,7 +93,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 			// Run userInput through the command matcher to look at supportedCommands
 			match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, myFakeDevice.SupportedCommands)
 			if err != nil {
-				log.Println(err)
+				log.Println(err) // coverage-ignore // CmdMatch never returns errors
 				break
 			}
 
@@ -104,7 +104,8 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 					myFakeDevice,
 				)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
+					break
 				}
 
 				// Write the output of our matched command

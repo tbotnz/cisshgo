@@ -218,6 +218,102 @@ func TestHandler_ResetState(t *testing.T) {
 	}
 }
 
+func TestExec_ShowVersion(t *testing.T) {
+	fd := newTestDevice()
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	config := &gossh.ClientConfig{
+		User:            "admin",
+		Auth:            []gossh.AuthMethod{gossh.Password("admin")},
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
+		Timeout:         2 * time.Second,
+	}
+	client, err := gossh.Dial("tcp", addr, config)
+	if err != nil {
+		t.Fatalf("ssh dial: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	out, err := session.Output("show version")
+	if err != nil {
+		t.Fatalf("exec: %v", err)
+	}
+	if !strings.Contains(string(out), "FakeOS version 1.0") {
+		t.Errorf("expected 'FakeOS version 1.0' in exec output, got:\n%s", out)
+	}
+}
+
+func TestExec_AbbreviatedCommand(t *testing.T) {
+	fd := newTestDevice()
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	config := &gossh.ClientConfig{
+		User:            "admin",
+		Auth:            []gossh.AuthMethod{gossh.Password("admin")},
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
+		Timeout:         2 * time.Second,
+	}
+	client, err := gossh.Dial("tcp", addr, config)
+	if err != nil {
+		t.Fatalf("ssh dial: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	out, err := session.Output("sho ver")
+	if err != nil {
+		t.Fatalf("exec: %v", err)
+	}
+	if !strings.Contains(string(out), "FakeOS version 1.0") {
+		t.Errorf("expected abbreviated match in exec output, got:\n%s", out)
+	}
+}
+
+func TestExec_UnknownCommand(t *testing.T) {
+	fd := newTestDevice()
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	config := &gossh.ClientConfig{
+		User:            "admin",
+		Auth:            []gossh.AuthMethod{gossh.Password("admin")},
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
+		Timeout:         2 * time.Second,
+	}
+	client, err := gossh.Dial("tcp", addr, config)
+	if err != nil {
+		t.Fatalf("ssh dial: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	out, err := session.Output("bogus command")
+	if err != nil {
+		t.Fatalf("exec: %v", err)
+	}
+	if len(out) != 0 {
+		t.Errorf("expected empty output for unknown command, got:\n%s", out)
+	}
+}
+
 func TestHandler_EmptyInput(t *testing.T) {
 	fd := newTestDevice()
 	addr, cleanup := startTestServer(t, fd)

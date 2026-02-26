@@ -3,6 +3,7 @@
 package handlers
 
 import (
+	"io"
 	"log"
 	"strings"
 
@@ -19,7 +20,23 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) {
 	// Prepare the "ssh.DefaultHandler", this houses our device specific functionality
 	ssh.Handle(func(s ssh.Session) {
 
-		// Setup our initial "context" or prompt
+		// Exec mode: client sent a command directly (e.g., ssh host "show version")
+		if cmd := s.RawCommand(); cmd != "" {
+			log.Printf("exec: %s", cmd)
+			match, matchedCommand, multipleMatches, _ := utils.CmdMatch(cmd, myFakeDevice.SupportedCommands)
+			if match && !multipleMatches {
+				output, err := fakedevices.TranscriptReader(
+					myFakeDevice.SupportedCommands[matchedCommand], myFakeDevice,
+				)
+				if err == nil {
+					io.WriteString(s, output)
+				}
+			}
+			s.Exit(0)
+			return
+		}
+
+		// Interactive shell mode
 		ContextState := myFakeDevice.ContextSearch["base"]
 
 		// Setup a terminal with the hostname + initial context state as a prompt

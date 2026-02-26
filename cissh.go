@@ -26,7 +26,7 @@ func run() error {
 	done := make(chan bool, 1)
 
 	// Iterate through the server ports and spawn a Goroutine for each
-	for portNumber := *startingPortPtr; portNumber < numListeners; portNumber++ {
+	for portNumber := *startingPortPtr; portNumber < numListeners; portNumber++ { // coverage-ignore // blocks on <-done
 		go sshlistners.GenericListener(myFakeDevice, portNumber, handlers.GenericCiscoHandler, done)
 	}
 
@@ -35,7 +35,7 @@ func run() error {
 	return nil
 }
 
-func main() {
+func main() { // coverage-ignore
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}

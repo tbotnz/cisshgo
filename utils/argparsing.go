@@ -5,6 +5,9 @@ package utils
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -70,4 +73,27 @@ func LoadTranscriptMap(path string) (TranscriptMap, error) {
 	}
 
 	return myTranscriptMap, nil
+}
+
+// ValidateTranscriptMap checks that all transcript file paths in the map exist on disk.
+// baseDir is prepended to relative paths (typically filepath.Dir of the transcript map file).
+// Returns an error listing all missing files, not just the first.
+func ValidateTranscriptMap(tm TranscriptMap, baseDir string) error {
+	var missing []string
+	for platform, p := range tm.Platforms {
+		for cmd, path := range p.CommandTranscripts {
+			resolved := path
+			if !filepath.IsAbs(path) {
+				resolved = filepath.Join(baseDir, path)
+			}
+			if _, err := os.Stat(resolved); err != nil {
+				missing = append(missing, fmt.Sprintf("  platform %q command %q: %s", platform, cmd, resolved))
+			}
+		}
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return fmt.Errorf("transcript map validation failed:\n%s", strings.Join(missing, "\n"))
+	}
+	return nil
 }

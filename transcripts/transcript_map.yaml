@@ -19,3 +19,16 @@ platforms:
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
+  iosxr:
+    vendor: "cisco"
+    hostname: "cisshgo-xr"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/cisco/iosxr/show_version.txt"
+      "terminal length 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "#": "exit"
+      "(config)#": "#"
+    context_search:
+      "configure terminal": "(config)#"
+      "base": "#"

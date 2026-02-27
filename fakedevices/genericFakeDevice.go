@@ -50,13 +50,11 @@ func readFile(filename string) (string, error) {
 }
 
 // InitGeneric builds a FakeDevice struct for use with cisshgo
-func InitGeneric(
-	vendor string,
-	platform string,
-	myTranscriptMap utils.TranscriptMap,
-) (*FakeDevice, error) {
-
-	p := myTranscriptMap.Platforms[platform]
+func InitGeneric(platform string, myTranscriptMap utils.TranscriptMap) (*FakeDevice, error) {
+	p, ok := myTranscriptMap.Platforms[platform]
+	if !ok {
+		return nil, fmt.Errorf("platform %q not found in transcript map", platform)
+	}
 
 	supportedCommands := make(SupportedCommands, len(p.CommandTranscripts))
 	for k, v := range p.CommandTranscripts {
@@ -67,9 +65,8 @@ func InitGeneric(
 		supportedCommands[k] = content
 	}
 
-	// Create our fake device and return it
-	myFakeDevice := FakeDevice{
-		Vendor:            vendor,
+	return &FakeDevice{
+		Vendor:            p.Vendor,
 		Platform:          platform,
 		Hostname:          p.Hostname,
 		DefaultHostname:   p.Hostname,
@@ -77,7 +74,5 @@ func InitGeneric(
 		SupportedCommands: supportedCommands,
 		ContextSearch:     p.ContextSearch,
 		ContextHierarchy:  p.ContextHierarchy,
-	}
-
-	return &myFakeDevice, nil
+	}, nil
 }

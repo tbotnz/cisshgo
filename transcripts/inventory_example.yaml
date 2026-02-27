@@ -1,0 +1,6 @@
+---
+devices:
+  - platform: csr1000v
+    count: 10
+  - platform: iosxr
+    count: 5

@@ -1,0 +1,25 @@
+Cisco IOS XR Software, Version 7.9.1
+Copyright (c) 2013-2023 by Cisco Systems, Inc.
+
+Build Information:
+ Built By     : aewinter
+ Built On     : Mon Oct  2 18:14:21 UTC 2023
+ Build Host   : iox-ucs-029
+ Workspace    : /auto/srcarchive17/prod/7.9.1/xr-dev/ws
+ Version      : 7.9.1
+ Location     : /opt/cisco/XR/packages/
+ Label        : 7.9.1
+
+cisco ASR9K Series (Intel 686 F6M14S4) processor with 12582912K bytes of memory.
+Intel 686 F6M14S4 processor at 2125MHz, Revision 2.174
+ASR-9001 Chassis
+
+2 Management Ethernet
+8 GigabitEthernet
+503k bytes of non-volatile configuration memory.
+3271M bytes of hard disk.
+11264M bytes of Flash system memory.
+
+Configuration register on node 0/RSP0/CPU0 is 0x102
+Boot device on node 0/RSP0/CPU0 is disk0:
+Package active on node 0/RSP0/CPU0:

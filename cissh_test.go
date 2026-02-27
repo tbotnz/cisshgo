@@ -66,6 +66,22 @@ platforms:
 	}
 }
 
+func TestRun_InventoryZeroCounts(t *testing.T) {
+	inv := `---
+devices:
+  - platform: csr1000v
+    count: 0
+`
+	invFile := filepath.Join(t.TempDir(), "inventory.yaml")
+	if err := os.WriteFile(invFile, []byte(inv), 0644); err != nil {
+		t.Fatal(err)
+	}
+	cli := utils.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: invFile}
+	if err := run(context.Background(), cli); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
 func TestRun_BadInventory(t *testing.T) {
 	cli := utils.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: "/nonexistent/inventory.yaml"}
 	if err := run(context.Background(), cli); err == nil {

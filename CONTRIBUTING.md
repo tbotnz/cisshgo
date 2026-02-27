@@ -83,6 +83,8 @@ fix: handle empty input in exec mode
 chore: update dependencies
 ```
 
+Conventional commits are required — they feed directly into the automated `CHANGELOG.md` generation via [git-cliff](https://git-cliff.org/) on each release. Non-conventional commits will be silently excluded from the changelog.
+
 ## Reporting Issues
 
 Open a GitHub issue. For bugs, include:

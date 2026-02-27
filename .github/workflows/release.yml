@@ -39,6 +39,18 @@ jobs:
       - name: Install Syft (for SBOM generation)
         uses: anchore/sbom-action/download-syft@v0.23.0
 
+      - name: Install git-cliff (for changelog generation)
+        uses: kenji-miyake/setup-git-cliff@v2
+
+      - name: Update CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git-cliff --tag ${{ github.ref_name }} --output CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog for ${{ github.ref_name }}" || echo "No changelog changes"
+          git push origin HEAD:${{ github.event.repository.default_branch }} || echo "Push skipped"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

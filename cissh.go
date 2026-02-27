@@ -10,6 +10,7 @@ import (
 	"context"
 	"log"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 
@@ -34,6 +35,8 @@ func run(ctx context.Context, cli utils.CLI) error {
 
 	var specs []listenerSpec
 
+	baseDir := filepath.Dir(cli.TranscriptMap)
+
 	if cli.Inventory != "" {
 		inv, err := utils.LoadInventory(cli.Inventory)
 		if err != nil {
@@ -41,7 +44,7 @@ func run(ctx context.Context, cli utils.CLI) error {
 		}
 		port := cli.StartingPort
 		for _, entry := range inv.Devices {
-			fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap)
+			fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap, baseDir)
 			if err != nil {
 				return err
 			}
@@ -51,7 +54,7 @@ func run(ctx context.Context, cli utils.CLI) error {
 			}
 		}
 	} else {
-		fd, err := fakedevices.InitGeneric(cli.Platform, myTranscriptMap)
+		fd, err := fakedevices.InitGeneric(cli.Platform, myTranscriptMap, baseDir)
 		if err != nil {
 			return err
 		}

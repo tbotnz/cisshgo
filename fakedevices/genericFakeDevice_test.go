@@ -38,7 +38,7 @@ func TestInitGeneric(t *testing.T) {
 	}
 	t.Cleanup(func() { os.Chdir("fakedevices") })
 
-	fd, err := InitGeneric("csr1000v", testTranscriptMap())
+	fd, err := InitGeneric("csr1000v", testTranscriptMap(), ".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestInitGeneric_UnknownPlatform(t *testing.T) {
 			"other": {Hostname: "other"},
 		},
 	}
-	_, err := InitGeneric("csr1000v", tm)
+	_, err := InitGeneric("csr1000v", tm, ".")
 	if err == nil {
 		t.Error("expected error for unknown platform")
 	}
@@ -128,7 +128,7 @@ func TestInitGeneric_BadTranscriptFile(t *testing.T) {
 			},
 		},
 	}
-	_, err := InitGeneric("csr1000v", tm)
+	_, err := InitGeneric("csr1000v", tm, ".")
 	if err == nil {
 		t.Error("expected error for missing transcript file")
 	}

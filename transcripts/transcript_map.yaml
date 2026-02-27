@@ -112,3 +112,18 @@ platforms:
     context_search:
       "configure": "#"
       "base": ">"
+
+scenarios:
+  csr1000v-add-interface:
+    platform: csr1000v
+    sequence:
+      - command: "show running-config"
+        transcript: "transcripts/scenarios/csr1000v-add-interface/running_config_before.txt"
+      - command: "interface GigabitEthernet0/0/2"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "ip address 172.16.0.1 255.255.255.0"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "end"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "show running-config"
+        transcript: "transcripts/scenarios/csr1000v-add-interface/running_config_after.txt"

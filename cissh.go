@@ -23,8 +23,9 @@ import (
 )
 
 type listenerSpec struct {
-	fd   *fakedevices.FakeDevice
-	port int
+	fd       *fakedevices.FakeDevice
+	port     int
+	sequence []utils.SequenceStep // nil for platform-only listeners
 }
 
 func run(ctx context.Context, cli utils.CLI) error {
@@ -47,13 +48,24 @@ func run(ctx context.Context, cli utils.CLI) error {
 		}
 		port := cli.StartingPort
 		for _, entry := range inv.Devices {
-			fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap, baseDir)
-			if err != nil {
-				return err
-			}
-			for i := 0; i < entry.Count; i++ {
-				specs = append(specs, listenerSpec{fd, port})
-				port++
+			if entry.Scenario != "" {
+				fd, seq, err := fakedevices.InitScenario(entry.Scenario, myTranscriptMap, baseDir)
+				if err != nil {
+					return err
+				}
+				for i := 0; i < entry.Count; i++ {
+					specs = append(specs, listenerSpec{fd, port, seq})
+					port++
+				}
+			} else {
+				fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap, baseDir)
+				if err != nil {
+					return err
+				}
+				for i := 0; i < entry.Count; i++ {
+					specs = append(specs, listenerSpec{fd, port, nil})
+					port++
+				}
 			}
 		}
 	} else {
@@ -62,19 +74,25 @@ func run(ctx context.Context, cli utils.CLI) error {
 			return err
 		}
 		for port := cli.StartingPort; port < cli.StartingPort+cli.Listeners; port++ {
-			specs = append(specs, listenerSpec{fd, port})
+			specs = append(specs, listenerSpec{fd, port, nil})
 		}
 	}
 
 	var wg sync.WaitGroup
 	for _, spec := range specs { // coverage-ignore
-		wg.Add(1)                                       // coverage-ignore
-		go func(fd *fakedevices.FakeDevice, port int) { // coverage-ignore
-			defer wg.Done()                                                                                   // coverage-ignore
-			if err := sshlisteners.GenericListener(ctx, fd, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
-				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
+		wg.Add(1)                 // coverage-ignore
+		go func(s listenerSpec) { // coverage-ignore
+			defer wg.Done()        // coverage-ignore
+			var err error          // coverage-ignore
+			if s.sequence != nil { // coverage-ignore
+				err = sshlisteners.ScenarioListener(ctx, s.fd, s.sequence, s.port) // coverage-ignore
+			} else { // coverage-ignore
+				err = sshlisteners.GenericListener(ctx, s.fd, s.port, handlers.GenericCiscoHandler) // coverage-ignore
 			} // coverage-ignore
-		}(spec.fd, spec.port) // coverage-ignore
+			if err != nil { // coverage-ignore
+				log.Printf("listener on port %d: %v", s.port, err) // coverage-ignore
+			} // coverage-ignore
+		}(spec) // coverage-ignore
 	} // coverage-ignore
 
 	wg.Wait()  // coverage-ignore

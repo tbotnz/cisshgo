@@ -16,6 +16,15 @@ import (
 
 // GenericCiscoHandler function handles generic Cisco style sessions
 func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
+	return genericCiscoSession(myFakeDevice, nil)
+}
+
+// GenericCiscoScenarioHandler returns an ssh.Handler that plays back a scenario sequence.
+func GenericCiscoScenarioHandler(myFakeDevice *fakedevices.FakeDevice, sequence []utils.SequenceStep) ssh.Handler {
+	return genericCiscoSession(myFakeDevice, sequence)
+}
+
+func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.SequenceStep) ssh.Handler {
 	return func(s ssh.Session) {
 
 		// Exec mode: client sent a command directly (e.g., ssh host "show version")
@@ -34,7 +43,8 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
 			return
 		}
 
-		// Interactive shell mode
+		// Interactive shell mode — sequence pointer resets per session
+		seqPointer := 0
 		contextState := myFakeDevice.ContextSearch["base"]
 		t := term.NewTerminal(s, myFakeDevice.Hostname+contextState)
 
@@ -45,7 +55,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
 			}
 			log.Println(userInput)
 
-			done := handleShellInput(t, userInput, myFakeDevice, &contextState)
+			done := handleShellInput(t, userInput, myFakeDevice, &contextState, sequence, &seqPointer)
 			if done {
 				break
 			}
@@ -56,7 +66,7 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
 
 // handleShellInput processes a single line of user input in interactive shell mode.
 // Returns true if the session should be terminated.
-func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string) bool {
+func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string, sequence []utils.SequenceStep, seqPointer *int) bool {
 	if userInput == "" {
 		t.Write([]byte(""))
 		return false
@@ -102,12 +112,28 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	}
 
 	// Match against supported commands
-	return dispatchCommand(t, userInput, fd)
+	return dispatchCommand(t, userInput, fd, sequence, seqPointer)
 }
 
-// dispatchCommand matches userInput against supported commands and writes the response.
+// dispatchCommand matches userInput against the active sequence step first, then supported commands.
 // Returns true if the session should be terminated.
-func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice) bool {
+func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []utils.SequenceStep, seqPointer *int) bool {
+	// Check if the next sequence step matches
+	if seqPointer != nil && *seqPointer < len(sequence) {
+		step := sequence[*seqPointer]
+		match, _, multipleMatches, _ := utils.CmdMatch(userInput, map[string]string{step.Command: ""})
+		if match && !multipleMatches {
+			output, err := fakedevices.TranscriptReader(step.Transcript, fd)
+			if err != nil {
+				log.Println(err)
+				return true
+			}
+			t.Write(append([]byte(output), '\n'))
+			*seqPointer++
+			return false
+		}
+	}
+
 	match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, fd.SupportedCommands)
 	if err != nil {
 		log.Println(err) // coverage-ignore // CmdMatch never returns errors

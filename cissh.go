@@ -3,7 +3,7 @@
 //
 // Usage:
 //
-//	cisshgo [-listeners N] [-startingPort N] [-transcriptMap path]
+//	cisshgo [--inventory path] [--platform name] [--listeners N] [--starting-port N] [--transcript-map path]
 package main
 
 import (
@@ -21,27 +21,54 @@ import (
 	"github.com/tbotnz/cisshgo/utils"
 )
 
+type listenerSpec struct {
+	fd   *fakedevices.FakeDevice
+	port int
+}
+
 func run(ctx context.Context, cli utils.CLI) error {
 	myTranscriptMap, err := utils.LoadTranscriptMap(cli.TranscriptMap)
 	if err != nil {
 		return err
 	}
 
-	myFakeDevice, err := fakedevices.InitGeneric("cisco", "csr1000v", myTranscriptMap)
-	if err != nil {
-		return err
+	var specs []listenerSpec
+
+	if cli.Inventory != "" {
+		inv, err := utils.LoadInventory(cli.Inventory)
+		if err != nil {
+			return err
+		}
+		port := cli.StartingPort
+		for _, entry := range inv.Devices {
+			fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap)
+			if err != nil {
+				return err
+			}
+			for i := 0; i < entry.Count; i++ {
+				specs = append(specs, listenerSpec{fd, port})
+				port++
+			}
+		}
+	} else {
+		fd, err := fakedevices.InitGeneric(cli.Platform, myTranscriptMap)
+		if err != nil {
+			return err
+		}
+		for port := cli.StartingPort; port < cli.StartingPort+cli.Listeners; port++ {
+			specs = append(specs, listenerSpec{fd, port})
+		}
 	}
 
 	var wg sync.WaitGroup
-	numListeners := cli.StartingPort + cli.Listeners
-	for portNumber := cli.StartingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
-		wg.Add(1)           // coverage-ignore
-		go func(port int) { // coverage-ignore
-			defer wg.Done()                                                                                             // coverage-ignore
-			if err := sshlisteners.GenericListener(ctx, myFakeDevice, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
+	for _, spec := range specs { // coverage-ignore
+		wg.Add(1)                                       // coverage-ignore
+		go func(fd *fakedevices.FakeDevice, port int) { // coverage-ignore
+			defer wg.Done()                                                                                   // coverage-ignore
+			if err := sshlisteners.GenericListener(ctx, fd, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
 				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
 			} // coverage-ignore
-		}(portNumber) // coverage-ignore
+		}(spec.fd, spec.port) // coverage-ignore
 	} // coverage-ignore
 
 	wg.Wait()  // coverage-ignore

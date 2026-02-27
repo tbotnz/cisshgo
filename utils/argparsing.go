@@ -14,6 +14,32 @@ type CLI struct {
 	Listeners     int    `help:"How many listeners to spawn." default:"50" short:"l"`
 	StartingPort  int    `help:"Starting port." default:"10000" short:"p"`
 	TranscriptMap string `help:"Path to transcript map YAML file." default:"transcripts/transcript_map.yaml" short:"t" type:"path"`
+	Platform      string `help:"Platform to use when no inventory is provided." default:"csr1000v" short:"P"`
+	Inventory     string `help:"Path to inventory YAML file." optional:"" short:"i" type:"path"`
+}
+
+// InventoryEntry defines a single platform and how many listeners to spawn for it.
+type InventoryEntry struct {
+	Platform string `yaml:"platform"`
+	Count    int    `yaml:"count"`
+}
+
+// Inventory defines a set of devices to spawn.
+type Inventory struct {
+	Devices []InventoryEntry `yaml:"devices"`
+}
+
+// LoadInventory reads and parses an inventory YAML file.
+func LoadInventory(path string) (Inventory, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return Inventory{}, fmt.Errorf("reading inventory: %w", err)
+	}
+	var inv Inventory
+	if err = yaml.UnmarshalStrict(raw, &inv); err != nil {
+		return Inventory{}, fmt.Errorf("parsing inventory: %w", err)
+	}
+	return inv, nil
 }
 
 // TranscriptMapPlatform struct for use inside of a TranscriptMap struct

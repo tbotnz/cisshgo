@@ -9,16 +9,20 @@ body = """
 {% set breaking_commits = commits | filter(attribute="breaking", value=true) %}\
 {% if breaking_commits %}\
 
-### Breaking Changes
+### ⚠️ Breaking Changes
 {% for commit in breaking_commits %}
 - {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tbotnz/cisshgo/commit/{{ commit.id }}))\
 {% endfor %}
 {% endif %}\
-{% for group, commits in commits | group_by(attribute="group") %}
+{% for group, commits in commits | group_by(attribute="group") %}\
+{% set non_breaking = commits | filter(attribute="breaking", value=false) %}\
+{% if non_breaking %}\
+
 ### {{ group | upper_first }}
-{% for commit in commits %}
+{% for commit in non_breaking %}
 - {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tbotnz/cisshgo/commit/{{ commit.id }}))\
 {% endfor %}
+{% endif %}\
 {% endfor %}\n
 """
 trim = true
@@ -29,15 +33,15 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-  { message = "^feat", group = "Features" },
-  { message = "^fix", group = "Bug Fixes" },
-  { message = "^refactor", group = "Refactoring" },
-  { message = "^perf", group = "Performance" },
-  { message = "^docs", group = "Documentation" },
-  { message = "^ci", group = "CI/CD" },
-  { message = "^chore", group = "Chores" },
-  { message = "^test", group = "Testing" },
-  { message = "^style", group = "Style" },
+  { message = "^feat", group = "🚀 Features" },
+  { message = "^fix", group = "🐛 Bug Fixes" },
+  { message = "^refactor", group = "🔧 Refactoring" },
+  { message = "^perf", group = "⚡ Performance" },
+  { message = "^docs", group = "📚 Documentation" },
+  { message = "^ci", group = "👷 CI/CD" },
+  { message = "^chore", group = "🧹 Chores" },
+  { message = "^test", group = "🧪 Testing" },
+  { message = "^style", group = "🎨 Style" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"

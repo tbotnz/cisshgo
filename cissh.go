@@ -33,9 +33,12 @@ func run(ctx context.Context, cli utils.CLI) error {
 		return err
 	}
 
-	var specs []listenerSpec
-
 	baseDir := filepath.Dir(cli.TranscriptMap)
+	if err := utils.ValidateTranscriptMap(myTranscriptMap, baseDir); err != nil {
+		return err
+	}
+
+	var specs []listenerSpec
 
 	if cli.Inventory != "" {
 		inv, err := utils.LoadInventory(cli.Inventory)

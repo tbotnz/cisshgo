@@ -162,3 +162,38 @@ func TestLoadInventory_InvalidYAML(t *testing.T) {
 		t.Error("expected error for invalid YAML")
 	}
 }
+
+func TestValidateTranscriptMap(t *testing.T) {
+	dir := t.TempDir()
+	// Create a real file
+	f := filepath.Join(dir, "show_version.txt")
+	if err := os.WriteFile(f, []byte("output"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	tm := TranscriptMap{
+		Platforms: map[string]TranscriptMapPlatform{
+			"csr1000v": {CommandTranscripts: map[string]string{
+				"show version": "show_version.txt",
+			}},
+		},
+	}
+
+	if err := ValidateTranscriptMap(tm, dir); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateTranscriptMap_MissingFile(t *testing.T) {
+	tm := TranscriptMap{
+		Platforms: map[string]TranscriptMapPlatform{
+			"csr1000v": {CommandTranscripts: map[string]string{
+				"show version": "nonexistent.txt",
+			}},
+		},
+	}
+
+	if err := ValidateTranscriptMap(tm, t.TempDir()); err == nil {
+		t.Error("expected error for missing transcript file")
+	}
+}

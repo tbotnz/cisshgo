@@ -1,6 +1,7 @@
 package sshlisteners
 
 import (
+	"context"
 	"net"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ func TestGenericListener(t *testing.T) {
 		ContextHierarchy: map[string]string{">": "exit"},
 	}
 
-	// Find a free port
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -34,10 +34,11 @@ func TestGenericListener(t *testing.T) {
 	addr := ln.Addr().String()
 	ln.Close()
 
-	done := make(chan bool, 1)
-	errCh := make(chan error, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
-		errCh <- GenericListener(fd, port, handlers.GenericCiscoHandler, done)
+		GenericListener(ctx, fd, port, handlers.GenericCiscoHandler)
 	}()
 
 	// Wait for server to be ready
@@ -50,7 +51,6 @@ func TestGenericListener(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 	}
 
-	// Connect via SSH and verify auth works
 	config := &gossh.ClientConfig{
 		User:            "admin",
 		Auth:            []gossh.AuthMethod{gossh.Password("admin")},
@@ -74,6 +74,14 @@ func TestGenericListener(t *testing.T) {
 	if err == nil {
 		t.Error("expected auth failure with wrong password")
 	}
+
+	// Verify graceful shutdown via context cancellation
+	cancel()
+	time.Sleep(100 * time.Millisecond)
+	_, err = gossh.Dial("tcp", addr, config)
+	if err == nil {
+		t.Error("expected server to be shut down after context cancel")
+	}
 }
 
 func TestGenericListener_PortInUse(t *testing.T) {
@@ -84,7 +92,6 @@ func TestGenericListener_PortInUse(t *testing.T) {
 		ContextHierarchy:  map[string]string{">": "exit"},
 	}
 
-	// Occupy a port
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -92,9 +99,7 @@ func TestGenericListener_PortInUse(t *testing.T) {
 	defer ln.Close()
 	port := ln.Addr().(*net.TCPAddr).Port
 
-	done := make(chan bool, 1)
-	// GenericListener should return an error since the port is in use
-	err = GenericListener(fd, port, handlers.GenericCiscoHandler, done)
+	err = GenericListener(context.Background(), fd, port, handlers.GenericCiscoHandler)
 	if err == nil {
 		t.Error("expected error when port is already in use")
 	}

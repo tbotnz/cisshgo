@@ -3,6 +3,7 @@
 package sshlisteners
 
 import (
+	"context"
 	"log"
 	"strconv"
 
@@ -12,26 +13,32 @@ import (
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 )
 
-// GenericListener function that creates a fake device and terminal session
+// GenericListener starts an SSH server on the given port and blocks until ctx is cancelled.
 func GenericListener(
+	ctx context.Context,
 	myFakeDevice *fakedevices.FakeDevice,
 	portNumber int,
 	myHandler handlers.PlatformHandler,
-	done chan bool,
 ) error {
 	portString := ":" + strconv.Itoa(portNumber)
 	log.Printf("Starting cissh.go ssh server on port %s\n", portString)
 
-	err := ssh.ListenAndServe(
-		portString,
-		myHandler(myFakeDevice.Copy()),
-		ssh.PasswordAuth(
-			func(ctx ssh.Context, pass string) bool {
-				return pass == myFakeDevice.Password
-			},
-		),
-	)
+	srv := &ssh.Server{
+		Addr:    portString,
+		Handler: myHandler(myFakeDevice.Copy()),
+		PasswordHandler: func(sshCtx ssh.Context, pass string) bool {
+			return pass == myFakeDevice.Password
+		},
+	}
 
-	done <- true
+	go func() {
+		<-ctx.Done()
+		srv.Shutdown(context.Background())
+	}()
+
+	err := srv.ListenAndServe()
+	if err == ssh.ErrServerClosed {
+		return nil
+	}
 	return err
 }

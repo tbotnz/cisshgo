@@ -5,6 +5,7 @@ package fakedevices
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/tbotnz/cisshgo/utils"
 )
@@ -49,8 +50,10 @@ func readFile(filename string) (string, error) {
 	return string(content), nil
 }
 
-// InitGeneric builds a FakeDevice struct for use with cisshgo
-func InitGeneric(platform string, myTranscriptMap utils.TranscriptMap) (*FakeDevice, error) {
+// InitGeneric builds a FakeDevice struct for use with cisshgo.
+// baseDir is the directory from which transcript paths are resolved (typically
+// the directory containing the transcript map file).
+func InitGeneric(platform string, myTranscriptMap utils.TranscriptMap, baseDir string) (*FakeDevice, error) {
 	p, ok := myTranscriptMap.Platforms[platform]
 	if !ok {
 		return nil, fmt.Errorf("platform %q not found in transcript map", platform)
@@ -58,6 +61,9 @@ func InitGeneric(platform string, myTranscriptMap utils.TranscriptMap) (*FakeDev
 
 	supportedCommands := make(SupportedCommands, len(p.CommandTranscripts))
 	for k, v := range p.CommandTranscripts {
+		if !filepath.IsAbs(v) {
+			v = filepath.Join(baseDir, v)
+		}
 		content, err := readFile(v)
 		if err != nil {
 			return nil, err

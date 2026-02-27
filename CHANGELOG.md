@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 ## [Unreleased]
+### ⚠️ Breaking Changes
+
+- Document breaking CLI flag renames from Kong migration ([4d7da81](https://github.com/tbotnz/cisshgo/commit/4d7da81880a6ca65f30f96e8c4c9b5fb0061e438))
 ### 🐛 Bug Fixes
 
 - Change ParseArgs to return int instead of *int for startingPort ([31205b8](https://github.com/tbotnz/cisshgo/commit/31205b818f5d675d0c5e9c52e8c95dee1fec354a))
@@ -16,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Add package-level doc comments for pkg.go.dev ([a8313e5](https://github.com/tbotnz/cisshgo/commit/a8313e5613c07e3ac8b0ff24d4c9f9d8523c13a3))
 - Add git-cliff for automated changelog generation (#66) ([f2386e1](https://github.com/tbotnz/cisshgo/commit/f2386e1d01c5a914833114a8b3c958c6dd0c41e8))
 - Promote breaking changes to top section in changelog ([45f40ba](https://github.com/tbotnz/cisshgo/commit/45f40bab62fea63f0eae66109d16ba08fc604485))
+- Add emoji section headers and fix breaking change deduplication in changelog ([6e0a8f1](https://github.com/tbotnz/cisshgo/commit/6e0a8f1c7ae203221b933e3aae2af34f305669c8))
 ### 🔧 Refactoring
 
 - Change TranscriptMap.Platforms from list-of-maps to map (#62) ([8814135](https://github.com/tbotnz/cisshgo/commit/881413506fcd3ea4c635eec802df19162af8a92f))

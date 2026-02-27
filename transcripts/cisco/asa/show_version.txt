@@ -1,0 +1,25 @@
+Cisco Adaptive Security Appliance Software Version 9.12(4)
+Device Manager Version 7.12(2)
+
+Compiled on Mon 15-Jun-20 12:00 PST by builders
+System image file is "disk0:/asa9124-smp-k8.bin"
+Config file at boot was "startup-config"
+
+{{.Hostname}} up 14 days 6 hours
+
+Hardware:   ASAv, 2048 MB RAM, CPU Pentium II 2000 MHz,
+Model Id:   ASAv10
+Internal ATA Compact Flash, 8192MB
+BIOS Flash Firmware Hub @ 0x0, 0KB
+
+ 0: Ext: Management0/0       : address is 5000.000b.0000, irq 11
+ 1: Ext: GigabitEthernet0/0  : address is 5000.000b.0001, irq 11
+ 2: Ext: GigabitEthernet0/1  : address is 5000.000b.0002, irq 10
+ 3: Ext: GigabitEthernet0/2  : address is 5000.000b.0003, irq 10
+
+License mode: Smart Licensing
+ASAv Platform License State: Licensed
+
+Serial Number: 9BU2M1EX1EG
+
+Configuration last modified by enable_15 at 09:12:33.410 UTC Mon Jan 10 2022

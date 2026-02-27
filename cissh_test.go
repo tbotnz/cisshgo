@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"flag"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 func validTranscriptMap(t *testing.T) string {
@@ -29,29 +30,16 @@ platforms:
 	return tmpFile
 }
 
-func resetFlags(t *testing.T) {
-	t.Helper()
-	oldArgs := os.Args
-	oldFlags := flag.CommandLine
-	t.Cleanup(func() {
-		os.Args = oldArgs
-		flag.CommandLine = oldFlags
-	})
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-}
-
 func TestRun_ZeroListeners(t *testing.T) {
-	resetFlags(t)
-	os.Args = []string{"cisshgo", "-listeners", "0", "-transcriptMap", validTranscriptMap(t)}
-	if err := run(context.Background()); err != nil {
+	cli := utils.CLI{Listeners: 0, StartingPort: 10000, TranscriptMap: validTranscriptMap(t)}
+	if err := run(context.Background(), cli); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestRun_BadTranscriptMap(t *testing.T) {
-	resetFlags(t)
-	os.Args = []string{"cisshgo", "-transcriptMap", "/nonexistent/file.yaml"}
-	if err := run(context.Background()); err == nil {
+	cli := utils.CLI{Listeners: 0, StartingPort: 10000, TranscriptMap: "/nonexistent/file.yaml"}
+	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for missing transcript map")
 	}
 }
@@ -73,9 +61,8 @@ platforms:
 		t.Fatal(err)
 	}
 
-	resetFlags(t)
-	os.Args = []string{"cisshgo", "-transcriptMap", tmpFile}
-	if err := run(context.Background()); err == nil {
+	cli := utils.CLI{Listeners: 0, StartingPort: 10000, TranscriptMap: tmpFile}
+	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for bad transcript file reference")
 	}
 }

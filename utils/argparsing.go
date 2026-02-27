@@ -3,12 +3,18 @@
 package utils
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
+
+// CLI defines the command-line interface for cisshgo.
+type CLI struct {
+	Listeners     int    `help:"How many listeners to spawn." default:"50" short:"l"`
+	StartingPort  int    `help:"Starting port." default:"10000" short:"p"`
+	TranscriptMap string `help:"Path to transcript map YAML file." default:"transcripts/transcript_map.yaml" short:"t" type:"path"`
+}
 
 // TranscriptMapPlatform struct for use inside of a TranscriptMap struct
 type TranscriptMapPlatform struct {
@@ -38,23 +44,4 @@ func LoadTranscriptMap(path string) (TranscriptMap, error) {
 	}
 
 	return myTranscriptMap, nil
-}
-
-// ParseArgs parses command line arguments for cisshgo and returns the configuration.
-func ParseArgs() (int, int, TranscriptMap, error) {
-	listenersPtr := flag.Int("listeners", 50, "How many listeners do you wish to spawn?")
-	startingPortPtr := flag.Int("startingPort", 10000, "What port do you want to start at?")
-	transcriptMapPtr := flag.String(
-		"transcriptMap",
-		"transcripts/transcript_map.yaml",
-		"What file contains the map of commands to transcribed output?",
-	)
-	flag.Parse()
-
-	myTranscriptMap, err := LoadTranscriptMap(*transcriptMapPtr)
-	if err != nil {
-		return 0, 0, TranscriptMap{}, err
-	}
-
-	return *startingPortPtr + *listenersPtr, *startingPortPtr, myTranscriptMap, nil
 }

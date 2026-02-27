@@ -11,7 +11,7 @@ import (
 
 	"github.com/gliderlabs/ssh"
 	"github.com/tbotnz/cisshgo/fakedevices"
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
 // newTestDevice creates a FakeDevice for testing without reading files from disk.
@@ -366,7 +366,7 @@ func TestHandler_TranscriptReaderError(t *testing.T) {
 
 func TestHandler_ScenarioSequence(t *testing.T) {
 	fd := newTestDevice()
-	sequence := []utils.SequenceStep{
+	sequence := []transcript.SequenceStep{
 		{Command: "show running-config", Transcript: "config before\n"},
 		{Command: "interface GigabitEthernet0/0/2", Transcript: ""},
 		{Command: "show running-config", Transcript: "config after\n"},

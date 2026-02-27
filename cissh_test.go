@@ -11,7 +11,7 @@ import (
 
 	gossh "golang.org/x/crypto/ssh"
 
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/config"
 )
 
 func validTranscriptMap(t *testing.T) string {
@@ -81,7 +81,7 @@ func TestRun_PlatformListener(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cli := utils.CLI{Listeners: 1, StartingPort: port, Platform: "csr1000v", TranscriptMap: validTranscriptMap(t)}
+	cli := config.CLI{Listeners: 1, StartingPort: port, Platform: "csr1000v", TranscriptMap: validTranscriptMap(t)}
 	done := make(chan error, 1)
 	go func() { done <- run(ctx, cli) }()
 
@@ -139,7 +139,7 @@ devices:
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cli := utils.CLI{StartingPort: port, Platform: "csr1000v", TranscriptMap: tmFile, Inventory: invFile}
+	cli := config.CLI{StartingPort: port, Platform: "csr1000v", TranscriptMap: tmFile, Inventory: invFile}
 	done := make(chan error, 1)
 	go func() { done <- run(ctx, cli) }()
 
@@ -153,14 +153,14 @@ devices:
 }
 
 func TestRun_ZeroListeners(t *testing.T) {
-	cli := utils.CLI{Listeners: 0, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: validTranscriptMap(t)}
+	cli := config.CLI{Listeners: 0, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: validTranscriptMap(t)}
 	if err := run(context.Background(), cli); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestRun_BadTranscriptMap(t *testing.T) {
-	cli := utils.CLI{Listeners: 0, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: "/nonexistent/file.yaml"}
+	cli := config.CLI{Listeners: 0, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: "/nonexistent/file.yaml"}
 	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for missing transcript map")
 	}
@@ -182,7 +182,7 @@ platforms:
 	if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
 		t.Fatal(err)
 	}
-	cli := utils.CLI{Listeners: 1, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: tmpFile}
+	cli := config.CLI{Listeners: 1, StartingPort: 10000, Platform: "csr1000v", TranscriptMap: tmpFile}
 	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for bad transcript file reference")
 	}
@@ -198,14 +198,14 @@ devices:
 	if err := os.WriteFile(invFile, []byte(inv), 0644); err != nil {
 		t.Fatal(err)
 	}
-	cli := utils.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: invFile}
+	cli := config.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: invFile}
 	if err := run(context.Background(), cli); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestRun_BadInventory(t *testing.T) {
-	cli := utils.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: "/nonexistent/inventory.yaml"}
+	cli := config.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: "/nonexistent/inventory.yaml"}
 	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for missing inventory file")
 	}
@@ -221,7 +221,7 @@ devices:
 	if err := os.WriteFile(invFile, []byte(inv), 0644); err != nil {
 		t.Fatal(err)
 	}
-	cli := utils.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: invFile}
+	cli := config.CLI{Platform: "csr1000v", TranscriptMap: validTranscriptMap(t), Inventory: invFile}
 	if err := run(context.Background(), cli); err == nil {
 		t.Error("expected error for nonexistent platform in inventory")
 	}

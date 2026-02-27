@@ -10,8 +10,9 @@ import (
 	"github.com/gliderlabs/ssh"
 	"golang.org/x/term"
 
+	"github.com/tbotnz/cisshgo/cmdmatch"
 	"github.com/tbotnz/cisshgo/fakedevices"
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
 // GenericCiscoHandler function handles generic Cisco style sessions
@@ -20,17 +21,17 @@ func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
 }
 
 // GenericCiscoScenarioHandler returns an ssh.Handler that plays back a scenario sequence.
-func GenericCiscoScenarioHandler(myFakeDevice *fakedevices.FakeDevice, sequence []utils.SequenceStep) ssh.Handler {
+func GenericCiscoScenarioHandler(myFakeDevice *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
 	return genericCiscoSession(myFakeDevice, sequence)
 }
 
-func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.SequenceStep) ssh.Handler {
+func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
 	return func(s ssh.Session) {
 
 		// Exec mode: client sent a command directly (e.g., ssh host "show version")
 		if cmd := s.RawCommand(); cmd != "" {
 			log.Printf("exec: %s", cmd)
-			match, matchedCommand, multipleMatches, _ := utils.CmdMatch(cmd, myFakeDevice.SupportedCommands)
+			match, matchedCommand, multipleMatches, _ := cmdmatch.Match(cmd, myFakeDevice.SupportedCommands)
 			if match && !multipleMatches {
 				output, err := fakedevices.TranscriptReader(
 					myFakeDevice.SupportedCommands[matchedCommand], myFakeDevice,
@@ -66,14 +67,14 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.
 
 // handleShellInput processes a single line of user input in interactive shell mode.
 // Returns true if the session should be terminated.
-func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string, sequence []utils.SequenceStep, seqIdx *int) bool {
+func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string, sequence []transcript.SequenceStep, seqIdx *int) bool {
 	if userInput == "" {
 		t.Write([]byte(""))
 		return false
 	}
 
 	// Check for context switching commands
-	matchPrompt, matchedPrompt, multiplePromptMatches, err := utils.CmdMatch(userInput, fd.ContextSearch)
+	matchPrompt, matchedPrompt, multiplePromptMatches, err := cmdmatch.Match(userInput, fd.ContextSearch)
 	if err != nil {
 		log.Println(err) // coverage-ignore // CmdMatch never returns errors
 		return true
@@ -117,11 +118,11 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 
 // dispatchCommand matches userInput against the active sequence step first, then supported commands.
 // Returns true if the session should be terminated.
-func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []utils.SequenceStep, seqIdx *int) bool {
+func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []transcript.SequenceStep, seqIdx *int) bool {
 	// Check if the next sequence step matches
 	if seqIdx != nil && *seqIdx < len(sequence) {
 		step := sequence[*seqIdx]
-		match, _, multipleMatches, _ := utils.CmdMatch(userInput, map[string]string{step.Command: ""})
+		match, _, multipleMatches, _ := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
 		if match && !multipleMatches {
 			output, err := fakedevices.TranscriptReader(step.Transcript, fd)
 			if err != nil {
@@ -134,7 +135,7 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 		}
 	}
 
-	match, matchedCommand, multipleMatches, err := utils.CmdMatch(userInput, fd.SupportedCommands)
+	match, matchedCommand, multipleMatches, err := cmdmatch.Match(userInput, fd.SupportedCommands)
 	if err != nil {
 		log.Println(err) // coverage-ignore // CmdMatch never returns errors
 		return true

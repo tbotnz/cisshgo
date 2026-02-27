@@ -16,19 +16,20 @@ import (
 
 	"github.com/alecthomas/kong"
 
+	"github.com/tbotnz/cisshgo/config"
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 	"github.com/tbotnz/cisshgo/ssh_server/sshlisteners"
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
 type listenerConfig struct {
 	fd       *fakedevices.FakeDevice
 	port     int
-	sequence []utils.SequenceStep // nil for platform-only listeners
+	sequence []transcript.SequenceStep // nil for platform-only listeners
 }
 
-func resolveListeners(cli utils.CLI, tm utils.TranscriptMap, baseDir string) ([]listenerConfig, error) {
+func resolveListeners(cli config.CLI, tm transcript.Map, baseDir string) ([]listenerConfig, error) {
 	if cli.Inventory == "" {
 		fd, err := fakedevices.InitGeneric(cli.Platform, tm, baseDir)
 		if err != nil {
@@ -41,7 +42,7 @@ func resolveListeners(cli utils.CLI, tm utils.TranscriptMap, baseDir string) ([]
 		return configs, nil
 	}
 
-	inv, err := utils.LoadInventory(cli.Inventory)
+	inv, err := config.LoadInventory(cli.Inventory)
 	if err != nil {
 		return nil, err
 	}
@@ -72,18 +73,18 @@ func resolveListeners(cli utils.CLI, tm utils.TranscriptMap, baseDir string) ([]
 	return configs, nil
 }
 
-func run(ctx context.Context, cli utils.CLI) error {
-	myTranscriptMap, err := utils.LoadTranscriptMap(cli.TranscriptMap)
+func run(ctx context.Context, cli config.CLI) error {
+	tm, err := transcript.Load(cli.TranscriptMap)
 	if err != nil {
 		return err
 	}
 
 	baseDir := filepath.Dir(cli.TranscriptMap)
-	if err := utils.ValidateTranscriptMap(myTranscriptMap, baseDir); err != nil {
+	if err := transcript.Validate(tm, baseDir); err != nil {
 		return err
 	}
 
-	configs, err := resolveListeners(cli, myTranscriptMap, baseDir)
+	configs, err := resolveListeners(cli, tm, baseDir)
 	if err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func run(ctx context.Context, cli utils.CLI) error {
 }
 
 func main() { // coverage-ignore
-	var cli utils.CLI
+	var cli config.CLI
 	kong.Parse(&cli,
 		kong.Name("cisshgo"),
 		kong.Description("Lightweight SSH server that emulates network equipment for testing."),

@@ -35,9 +35,9 @@ func run(ctx context.Context, cli utils.CLI) error {
 	var wg sync.WaitGroup
 	numListeners := cli.StartingPort + cli.Listeners
 	for portNumber := cli.StartingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
-		wg.Add(1)                                                                  // coverage-ignore
-		go func(port int) {                                                        // coverage-ignore
-			defer wg.Done()                                                        // coverage-ignore
+		wg.Add(1)           // coverage-ignore
+		go func(port int) { // coverage-ignore
+			defer wg.Done()                                                                                             // coverage-ignore
 			if err := sshlisteners.GenericListener(ctx, myFakeDevice, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
 				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
 			} // coverage-ignore

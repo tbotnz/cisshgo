@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 - Add CONTRIBUTING.md with GitHub Flow workflow and transcript guide ([5434278](https://github.com/tbotnz/cisshgo/commit/54342788114d86b5b68e05a17a0448797fb251cb))
 - Add package-level doc comments for pkg.go.dev ([a8313e5](https://github.com/tbotnz/cisshgo/commit/a8313e5613c07e3ac8b0ff24d4c9f9d8523c13a3))
+- Add git-cliff for automated changelog generation (#66) ([f2386e1](https://github.com/tbotnz/cisshgo/commit/f2386e1d01c5a914833114a8b3c958c6dd0c41e8))
 
 ### Features
 
@@ -30,8 +31,12 @@ All notable changes to this project will be documented in this file.
 ### Refactoring
 
 - Change TranscriptMap.Platforms from list-of-maps to map (#62) ([8814135](https://github.com/tbotnz/cisshgo/commit/881413506fcd3ea4c635eec802df19162af8a92f))
+- Replace flag package with Kong for CLI argument parsing (#64) ([0391eba](https://github.com/tbotnz/cisshgo/commit/0391ebab3aef81a13d2349fb2f2686ab59009f72))
 
 ## [0.2.0] - 2026-02-26
+### Breaking Changes
+
+- Replace log.Fatal with error returns, achieve 93% coverage (#39) ([585a431](https://github.com/tbotnz/cisshgo/commit/585a431d6f0060b31ce984e1c87c03bbac9a6e53))
 
 ### CI/CD
 
@@ -53,7 +58,7 @@ All notable changes to this project will be documented in this file.
 
 ### Refactoring
 
-- **BREAKING** Replace log.Fatal with error returns, achieve 93% coverage (#39) ([585a431](https://github.com/tbotnz/cisshgo/commit/585a431d6f0060b31ce984e1c87c03bbac9a6e53))
+- Replace log.Fatal with error returns, achieve 93% coverage (#39) ([585a431](https://github.com/tbotnz/cisshgo/commit/585a431d6f0060b31ce984e1c87c03bbac9a6e53))
 
 ### Testing
 

@@ -6,10 +6,18 @@ body = """
 {% else %}\
 ## [Unreleased]
 {% endif %}\
+{% set breaking_commits = commits | filter(attribute="breaking", value=true) %}\
+{% if breaking_commits %}\
+
+### Breaking Changes
+{% for commit in breaking_commits %}
+- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tbotnz/cisshgo/commit/{{ commit.id }}))\
+{% endfor %}
+{% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}
-- {% if commit.breaking %}**BREAKING** {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tbotnz/cisshgo/commit/{{ commit.id }}))\
+- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tbotnz/cisshgo/commit/{{ commit.id }}))\
 {% endfor %}
 {% endfor %}\n
 """

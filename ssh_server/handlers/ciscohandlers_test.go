@@ -321,6 +321,24 @@ func TestHandler_EmptyInput(t *testing.T) {
 	}
 }
 
+func TestHandler_AmbiguousContextCommand(t *testing.T) {
+	fd := newTestDevice()
+	// Add two multi-word context keys sharing a prefix to trigger multiplePromptMatches.
+	// "sh v" matches both "show version" and "show vlan" via field-by-field matching.
+	fd.ContextSearch["show version"] = "(show-version)#"
+	fd.ContextSearch["show vlan"] = "(show-vlan)#"
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	// multiplePromptMatches=true falls through to dispatchCommand.
+	// "sh v" also matches "show version" in SupportedCommands, so we get output.
+	out := interact(t, addr, []string{"sh v"})
+	// Verify we got command output (not a context switch) — confirms the fallthrough path executed
+	if !strings.Contains(out, "FakeOS") {
+		t.Errorf("expected command output after ambiguous context fallthrough, got:\n%s", out)
+	}
+}
+
 func TestHandler_AmbiguousCommand(t *testing.T) {
 	fd := newTestDevice()
 	// Add commands that will be ambiguous with "s v"

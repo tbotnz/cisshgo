@@ -1,3 +1,5 @@
 .vscode
 *.exe
 dist/
+
+coverage.out

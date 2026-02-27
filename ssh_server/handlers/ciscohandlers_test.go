@@ -400,9 +400,9 @@ func TestHandler_ScenarioSequence(t *testing.T) {
 
 	// All three steps in a single session — pointer advances across commands
 	out := interact(t, addr, []string{
-		"show running-config",          // step 0 → "config before"
+		"show running-config",            // step 0 → "config before"
 		"interface GigabitEthernet0/0/2", // step 1 → ""
-		"show running-config",          // step 2 → "config after"
+		"show running-config",            // step 2 → "config after"
 	})
 	if !strings.Contains(out, "config before") {
 		t.Errorf("expected 'config before' in output, got:\n%s", out)

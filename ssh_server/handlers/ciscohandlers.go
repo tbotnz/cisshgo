@@ -44,7 +44,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.
 		}
 
 		// Interactive shell mode — sequence pointer resets per session
-		seqPointer := 0
+		seqIdx := 0
 		contextState := myFakeDevice.ContextSearch["base"]
 		t := term.NewTerminal(s, myFakeDevice.Hostname+contextState)
 
@@ -55,7 +55,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.
 			}
 			log.Println(userInput)
 
-			done := handleShellInput(t, userInput, myFakeDevice, &contextState, sequence, &seqPointer)
+			done := handleShellInput(t, userInput, myFakeDevice, &contextState, sequence, &seqIdx)
 			if done {
 				break
 			}
@@ -66,7 +66,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []utils.
 
 // handleShellInput processes a single line of user input in interactive shell mode.
 // Returns true if the session should be terminated.
-func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string, sequence []utils.SequenceStep, seqPointer *int) bool {
+func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string, sequence []utils.SequenceStep, seqIdx *int) bool {
 	if userInput == "" {
 		t.Write([]byte(""))
 		return false
@@ -112,15 +112,15 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	}
 
 	// Match against supported commands
-	return dispatchCommand(t, userInput, fd, sequence, seqPointer)
+	return dispatchCommand(t, userInput, fd, sequence, seqIdx)
 }
 
 // dispatchCommand matches userInput against the active sequence step first, then supported commands.
 // Returns true if the session should be terminated.
-func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []utils.SequenceStep, seqPointer *int) bool {
+func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []utils.SequenceStep, seqIdx *int) bool {
 	// Check if the next sequence step matches
-	if seqPointer != nil && *seqPointer < len(sequence) {
-		step := sequence[*seqPointer]
+	if seqIdx != nil && *seqIdx < len(sequence) {
+		step := sequence[*seqIdx]
 		match, _, multipleMatches, _ := utils.CmdMatch(userInput, map[string]string{step.Command: ""})
 		if match && !multipleMatches {
 			output, err := fakedevices.TranscriptReader(step.Transcript, fd)
@@ -129,7 +129,7 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 				return true
 			}
 			t.Write(append([]byte(output), '\n'))
-			*seqPointer++
+			*seqIdx++
 			return false
 		}
 	}

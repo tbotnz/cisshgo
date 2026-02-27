@@ -89,7 +89,7 @@ func run(ctx context.Context, cli utils.CLI) error {
 	}
 
 	var wg sync.WaitGroup
-	for _, config := range configs { // coverage-ignore
+	for _, config := range configs {
 		wg.Add(1)
 		go func(cfg listenerConfig) {
 			defer wg.Done()

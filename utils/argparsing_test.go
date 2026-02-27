@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"flag"
 	"os"
 	"path/filepath"
 	"testing"
@@ -121,50 +120,5 @@ func TestLoadTranscriptMap_InvalidYAML(t *testing.T) {
 	_, err := LoadTranscriptMap(tmpFile)
 	if err == nil {
 		t.Error("expected error for invalid YAML")
-	}
-}
-
-func TestParseArgs(t *testing.T) {
-	tmpFile := writeTestTranscriptMap(t)
-
-	oldArgs := os.Args
-	oldFlags := flag.CommandLine
-	t.Cleanup(func() {
-		os.Args = oldArgs
-		flag.CommandLine = oldFlags
-	})
-
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	os.Args = []string{"cisshgo", "-listeners", "2", "-startingPort", "20000", "-transcriptMap", tmpFile}
-
-	numListeners, startingPort, tm, err := ParseArgs()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if numListeners != 20002 {
-		t.Errorf("numListeners = %d, want 20002", numListeners)
-	}
-	if startingPort != 20000 {
-		t.Errorf("startingPort = %d, want 20000", startingPort)
-	}
-	if len(tm.Platforms) != 1 {
-		t.Errorf("Platforms len = %d, want 1", len(tm.Platforms))
-	}
-}
-
-func TestParseArgs_BadFile(t *testing.T) {
-	oldArgs := os.Args
-	oldFlags := flag.CommandLine
-	t.Cleanup(func() {
-		os.Args = oldArgs
-		flag.CommandLine = oldFlags
-	})
-
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	os.Args = []string{"cisshgo", "-transcriptMap", "/nonexistent/file.yaml"}
-
-	_, _, _, err := ParseArgs()
-	if err == nil {
-		t.Error("expected error for missing transcript map")
 	}
 }

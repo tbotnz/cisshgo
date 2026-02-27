@@ -13,14 +13,16 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/alecthomas/kong"
+
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 	"github.com/tbotnz/cisshgo/ssh_server/sshlisteners"
 	"github.com/tbotnz/cisshgo/utils"
 )
 
-func run(ctx context.Context) error {
-	numListeners, startingPort, myTranscriptMap, err := utils.ParseArgs()
+func run(ctx context.Context, cli utils.CLI) error {
+	myTranscriptMap, err := utils.LoadTranscriptMap(cli.TranscriptMap)
 	if err != nil {
 		return err
 	}
@@ -31,10 +33,11 @@ func run(ctx context.Context) error {
 	}
 
 	var wg sync.WaitGroup
-	for portNumber := startingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
-		wg.Add(1)           // coverage-ignore
-		go func(port int) { // coverage-ignore
-			defer wg.Done()                                                                                             // coverage-ignore
+	numListeners := cli.StartingPort + cli.Listeners
+	for portNumber := cli.StartingPort; portNumber < numListeners; portNumber++ { // coverage-ignore
+		wg.Add(1)                                                                  // coverage-ignore
+		go func(port int) {                                                        // coverage-ignore
+			defer wg.Done()                                                        // coverage-ignore
 			if err := sshlisteners.GenericListener(ctx, myFakeDevice, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
 				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
 			} // coverage-ignore
@@ -46,10 +49,16 @@ func run(ctx context.Context) error {
 }
 
 func main() { // coverage-ignore
+	var cli utils.CLI
+	kong.Parse(&cli,
+		kong.Name("cisshgo"),
+		kong.Description("Lightweight SSH server that emulates network equipment for testing."),
+	)
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := run(ctx); err != nil {
+	if err := run(ctx, cli); err != nil {
 		log.Fatal(err)
 	}
 }

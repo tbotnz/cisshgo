@@ -11,11 +11,11 @@ import (
 
 // CLI defines the command-line interface for cisshgo.
 type CLI struct {
-	Listeners     int    `help:"How many listeners to spawn." default:"50" short:"l"`
-	StartingPort  int    `help:"Starting port." default:"10000" short:"p"`
-	TranscriptMap string `help:"Path to transcript map YAML file." default:"transcripts/transcript_map.yaml" short:"t" type:"path"`
-	Platform      string `help:"Platform to use when no inventory is provided." default:"csr1000v" short:"P"`
-	Inventory     string `help:"Path to inventory YAML file." optional:"" short:"i" type:"path"`
+	Listeners     int    `help:"How many listeners to spawn." default:"50" short:"l" env:"CISSHGO_LISTENERS"`
+	StartingPort  int    `help:"Starting port." default:"10000" short:"p" env:"CISSHGO_STARTING_PORT"`
+	TranscriptMap string `help:"Path to transcript map YAML file." default:"transcripts/transcript_map.yaml" short:"t" type:"path" env:"CISSHGO_TRANSCRIPT_MAP"`
+	Platform      string `help:"Platform to use when no inventory is provided." default:"csr1000v" short:"P" env:"CISSHGO_PLATFORM"`
+	Inventory     string `help:"Path to inventory YAML file." optional:"" short:"i" type:"path" env:"CISSHGO_INVENTORY"`
 }
 
 // InventoryEntry defines a single platform and how many listeners to spawn for it.

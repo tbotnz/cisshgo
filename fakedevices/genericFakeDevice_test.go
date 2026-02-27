@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
-func testTranscriptMap() utils.TranscriptMap {
-	return utils.TranscriptMap{
-		Platforms: map[string]utils.TranscriptMapPlatform{
+func testTranscriptMap() transcript.Map {
+	return transcript.Map{
+		Platforms: map[string]transcript.Platform{
 			"csr1000v": {
 				Vendor:   "cisco",
 				Hostname: "testhost",
@@ -71,8 +71,8 @@ func TestInitGeneric(t *testing.T) {
 }
 
 func TestInitGeneric_UnknownPlatform(t *testing.T) {
-	tm := utils.TranscriptMap{
-		Platforms: map[string]utils.TranscriptMapPlatform{
+	tm := transcript.Map{
+		Platforms: map[string]transcript.Platform{
 			"other": {Hostname: "other"},
 		},
 	}
@@ -121,8 +121,8 @@ func TestFakeDevice_Copy(t *testing.T) {
 }
 
 func TestInitGeneric_BadTranscriptFile(t *testing.T) {
-	tm := utils.TranscriptMap{
-		Platforms: map[string]utils.TranscriptMapPlatform{
+	tm := transcript.Map{
+		Platforms: map[string]transcript.Platform{
 			"csr1000v": {
 				CommandTranscripts: map[string]string{
 					"show version": "/nonexistent/file.txt",
@@ -142,7 +142,7 @@ func TestTranscriptMapIntegrity(t *testing.T) {
 	}
 	t.Cleanup(func() { os.Chdir("fakedevices") })
 
-	tm, err := utils.LoadTranscriptMap("transcripts/transcript_map.yaml")
+	tm, err := transcript.Load("transcripts/transcript_map.yaml")
 	if err != nil {
 		t.Fatalf("loading transcript map: %v", err)
 	}
@@ -192,7 +192,7 @@ func TestInitScenario(t *testing.T) {
 	}
 	t.Cleanup(func() { os.Chdir("fakedevices") })
 
-	tm, err := utils.LoadTranscriptMap("transcripts/transcript_map.yaml")
+	tm, err := transcript.Load("transcripts/transcript_map.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func TestInitScenario(t *testing.T) {
 }
 
 func TestInitScenario_UnknownScenario(t *testing.T) {
-	tm := utils.TranscriptMap{Platforms: map[string]utils.TranscriptMapPlatform{}}
+	tm := transcript.Map{Platforms: map[string]transcript.Platform{}}
 	_, _, err := InitScenario("nonexistent", tm, ".")
 	if err == nil {
 		t.Error("expected error for unknown scenario")

@@ -1,4 +1,4 @@
-package utils
+package cmdmatch
 
 import "testing"
 
@@ -8,7 +8,7 @@ type inputMatch struct {
 	multipleMatches bool   // Were multiple commands matched?
 }
 
-func TestCmdMatch(t *testing.T) {
+func TestMatch(t *testing.T) {
 
 	// Create a fake SupportedCommands map
 	mySupportedCommands := map[string]string{
@@ -30,7 +30,7 @@ func TestCmdMatch(t *testing.T) {
 	inputs["show vlan!"] = inputMatch{false, "", false}                   // Should return no match
 
 	for input, expected := range inputs {
-		match, matchedCommand, multipleMatches, err := CmdMatch(input, mySupportedCommands)
+		match, matchedCommand, multipleMatches, err := Match(input, mySupportedCommands)
 		if err != nil {
 			t.Errorf("Unknown Error: %s", err)
 		}
@@ -38,7 +38,7 @@ func TestCmdMatch(t *testing.T) {
 			matchedCommand != expected.matchedCommand ||
 			multipleMatches != expected.multipleMatches {
 			t.Errorf(
-				"CmdMatch('%s', %v) = (%t, '%s', %t); want (%t, '%s', %t)",
+				"Match('%s', %v) = (%t, '%s', %t); want (%t, '%s', %t)",
 				input,
 				mySupportedCommands,
 				match,

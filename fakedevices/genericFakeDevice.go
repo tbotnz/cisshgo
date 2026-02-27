@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tbotnz/cisshgo/utils"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
 // SupportedCommands is a map of the commands a FakeDevice supports and it's corresponding output
@@ -52,7 +52,7 @@ func readFile(filename string) (string, error) {
 
 // InitScenario builds a FakeDevice for a named scenario, loading the base platform
 // and returning the pre-loaded sequence steps alongside the device.
-func InitScenario(scenarioName string, tm utils.TranscriptMap, baseDir string) (*FakeDevice, []utils.SequenceStep, error) {
+func InitScenario(scenarioName string, tm transcript.Map, baseDir string) (*FakeDevice, []transcript.SequenceStep, error) {
 	s, ok := tm.Scenarios[scenarioName]
 	if !ok {
 		return nil, nil, fmt.Errorf("scenario %q not found in transcript map", scenarioName)
@@ -61,7 +61,7 @@ func InitScenario(scenarioName string, tm utils.TranscriptMap, baseDir string) (
 	if err != nil {
 		return nil, nil, err
 	}
-	steps := make([]utils.SequenceStep, len(s.Sequence))
+	steps := make([]transcript.SequenceStep, len(s.Sequence))
 	for i, step := range s.Sequence {
 		path := step.Transcript
 		if !filepath.IsAbs(path) {
@@ -71,7 +71,7 @@ func InitScenario(scenarioName string, tm utils.TranscriptMap, baseDir string) (
 		if err != nil {
 			return nil, nil, err
 		}
-		steps[i] = utils.SequenceStep{Command: step.Command, Transcript: content}
+		steps[i] = transcript.SequenceStep{Command: step.Command, Transcript: content}
 	}
 	return fd, steps, nil
 }
@@ -79,7 +79,7 @@ func InitScenario(scenarioName string, tm utils.TranscriptMap, baseDir string) (
 // InitGeneric builds a FakeDevice struct for use with cisshgo.
 // baseDir is the directory from which transcript paths are resolved (typically
 // the directory containing the transcript map file).
-func InitGeneric(platform string, myTranscriptMap utils.TranscriptMap, baseDir string) (*FakeDevice, error) {
+func InitGeneric(platform string, myTranscriptMap transcript.Map, baseDir string) (*FakeDevice, error) {
 	p, ok := myTranscriptMap.Platforms[platform]
 	if !ok {
 		return nil, fmt.Errorf("platform %q not found in transcript map", platform)

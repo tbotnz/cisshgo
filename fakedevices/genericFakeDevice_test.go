@@ -9,25 +9,23 @@ import (
 
 func testTranscriptMap() utils.TranscriptMap {
 	return utils.TranscriptMap{
-		Platforms: []map[string]utils.TranscriptMapPlatform{
-			{
-				"csr1000v": utils.TranscriptMapPlatform{
-					Vendor:   "cisco",
-					Hostname: "testhost",
-					Password: "secret",
-					CommandTranscripts: map[string]string{
-						"show version": "transcripts/cisco/csr1000v/show_version.txt",
-					},
-					ContextSearch: map[string]string{
-						"base":               ">",
-						"enable":             "#",
-						"configure terminal": "(config)#",
-					},
-					ContextHierarchy: map[string]string{
-						">":         "exit",
-						"#":         ">",
-						"(config)#": "#",
-					},
+		Platforms: map[string]utils.TranscriptMapPlatform{
+			"csr1000v": {
+				Vendor:   "cisco",
+				Hostname: "testhost",
+				Password: "secret",
+				CommandTranscripts: map[string]string{
+					"show version": "transcripts/cisco/csr1000v/show_version.txt",
+				},
+				ContextSearch: map[string]string{
+					"base":               ">",
+					"enable":             "#",
+					"configure terminal": "(config)#",
+				},
+				ContextHierarchy: map[string]string{
+					">":         "exit",
+					"#":         ">",
+					"(config)#": "#",
 				},
 			},
 		},
@@ -72,8 +70,8 @@ func TestInitGeneric(t *testing.T) {
 
 func TestInitGeneric_UnknownPlatform(t *testing.T) {
 	tm := utils.TranscriptMap{
-		Platforms: []map[string]utils.TranscriptMapPlatform{
-			{"other": utils.TranscriptMapPlatform{Hostname: "other"}},
+		Platforms: map[string]utils.TranscriptMapPlatform{
+			"other": {Hostname: "other"},
 		},
 	}
 	fd, err := InitGeneric("cisco", "csr1000v", tm)
@@ -128,12 +126,10 @@ func TestFakeDevice_Copy(t *testing.T) {
 
 func TestInitGeneric_BadTranscriptFile(t *testing.T) {
 	tm := utils.TranscriptMap{
-		Platforms: []map[string]utils.TranscriptMapPlatform{
-			{
-				"csr1000v": utils.TranscriptMapPlatform{
-					CommandTranscripts: map[string]string{
-						"show version": "/nonexistent/file.txt",
-					},
+		Platforms: map[string]utils.TranscriptMapPlatform{
+			"csr1000v": {
+				CommandTranscripts: map[string]string{
+					"show version": "/nonexistent/file.txt",
 				},
 			},
 		},

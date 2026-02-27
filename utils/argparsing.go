@@ -22,7 +22,7 @@ type TranscriptMapPlatform struct {
 
 // TranscriptMap Struct for modeling the TranscriptMap YAML
 type TranscriptMap struct {
-	Platforms []map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
+	Platforms map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
 }
 
 // LoadTranscriptMap reads and parses a transcript map YAML file.

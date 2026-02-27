@@ -12,15 +12,15 @@ func validTranscriptMap(t *testing.T) string {
 	t.Helper()
 	content := `---
 platforms:
-  - csr1000v:
-      vendor: "cisco"
-      hostname: "testhost"
-      password: "admin"
-      command_transcripts: {}
-      context_search:
-        base: ">"
-      context_hierarchy:
-        ">": "exit"
+  csr1000v:
+    vendor: "cisco"
+    hostname: "testhost"
+    password: "admin"
+    command_transcripts: {}
+    context_search:
+      base: ">"
+    context_hierarchy:
+      ">": "exit"
 `
 	tmpFile := filepath.Join(t.TempDir(), "transcript_map.yaml")
 	if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
@@ -59,14 +59,14 @@ func TestRun_BadTranscriptMap(t *testing.T) {
 func TestRun_BadTranscriptContent(t *testing.T) {
 	content := `---
 platforms:
-  - csr1000v:
-      vendor: "cisco"
-      hostname: "testhost"
-      password: "admin"
-      command_transcripts:
-        "show version": "/nonexistent/transcript.txt"
-      context_search: {}
-      context_hierarchy: {}
+  csr1000v:
+    vendor: "cisco"
+    hostname: "testhost"
+    password: "admin"
+    command_transcripts:
+      "show version": "/nonexistent/transcript.txt"
+    context_search: {}
+    context_hierarchy: {}
 `
 	tmpFile := filepath.Join(t.TempDir(), "transcript_map.yaml")
 	if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {

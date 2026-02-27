@@ -1,7 +1,9 @@
 package fakedevices
 
 import (
+	"io/fs"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/tbotnz/cisshgo/utils"
@@ -131,5 +133,47 @@ func TestInitGeneric_BadTranscriptFile(t *testing.T) {
 	_, err := InitGeneric("csr1000v", tm)
 	if err == nil {
 		t.Error("expected error for missing transcript file")
+	}
+}
+
+func TestTranscriptMapIntegrity(t *testing.T) {
+	if err := os.Chdir(".."); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.Chdir("fakedevices") })
+
+	tm, err := utils.LoadTranscriptMap("transcripts/transcript_map.yaml")
+	if err != nil {
+		t.Fatalf("loading transcript map: %v", err)
+	}
+
+	// Track all referenced paths for orphan detection
+	referenced := map[string]bool{}
+
+	for platform, p := range tm.Platforms {
+		for cmd, path := range p.CommandTranscripts {
+			referenced[path] = true
+			if _, err := os.Stat(path); err != nil {
+				t.Errorf("platform %q command %q: file not found: %s", platform, cmd, path)
+			}
+		}
+	}
+
+	// Walk transcripts/ and flag unreferenced .txt files
+	err = filepath.WalkDir("transcripts", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || filepath.Ext(path) != ".txt" {
+			return err
+		}
+		// generic_empty_return.txt is intentionally shared — skip
+		if filepath.Base(path) == "generic_empty_return.txt" {
+			return nil
+		}
+		if !referenced[path] {
+			t.Errorf("orphan transcript not referenced in transcript_map.yaml: %s", path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walking transcripts dir: %v", err)
 	}
 }

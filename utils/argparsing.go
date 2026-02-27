@@ -21,9 +21,11 @@ type CLI struct {
 	Inventory     string `help:"Path to inventory YAML file." optional:"" short:"i" type:"path" env:"CISSHGO_INVENTORY"`
 }
 
-// InventoryEntry defines a single platform and how many listeners to spawn for it.
+// InventoryEntry defines a single platform or scenario and how many listeners to spawn for it.
+// Exactly one of Platform or Scenario must be set.
 type InventoryEntry struct {
 	Platform string `yaml:"platform"`
+	Scenario string `yaml:"scenario"`
 	Count    int    `yaml:"count"`
 }
 
@@ -42,7 +44,27 @@ func LoadInventory(path string) (Inventory, error) {
 	if err = yaml.UnmarshalStrict(raw, &inv); err != nil {
 		return Inventory{}, fmt.Errorf("parsing inventory: %w", err)
 	}
+	for i, entry := range inv.Devices {
+		if entry.Platform == "" && entry.Scenario == "" {
+			return Inventory{}, fmt.Errorf("inventory entry %d: must set either platform or scenario", i)
+		}
+		if entry.Platform != "" && entry.Scenario != "" {
+			return Inventory{}, fmt.Errorf("inventory entry %d: platform and scenario are mutually exclusive", i)
+		}
+	}
 	return inv, nil
+}
+
+// SequenceStep defines a single expected command and its response transcript path.
+type SequenceStep struct {
+	Command    string `yaml:"command"`
+	Transcript string `yaml:"transcript"`
+}
+
+// Scenario defines an ordered sequence of command/response pairs layered on top of a platform.
+type Scenario struct {
+	Platform string         `yaml:"platform"`
+	Sequence []SequenceStep `yaml:"sequence"`
 }
 
 // TranscriptMapPlatform struct for use inside of a TranscriptMap struct
@@ -58,6 +80,7 @@ type TranscriptMapPlatform struct {
 // TranscriptMap Struct for modeling the TranscriptMap YAML
 type TranscriptMap struct {
 	Platforms map[string]TranscriptMapPlatform `yaml:"platforms" json:"platforms"`
+	Scenarios map[string]Scenario              `yaml:"scenarios" json:"scenarios"`
 }
 
 // LoadTranscriptMap reads and parses a transcript map YAML file.
@@ -77,23 +100,39 @@ func LoadTranscriptMap(path string) (TranscriptMap, error) {
 
 // ValidateTranscriptMap checks that all transcript file paths in the map exist on disk.
 // baseDir is prepended to relative paths (typically filepath.Dir of the transcript map file).
-// Returns an error listing all missing files, not just the first.
+// Returns an error listing all missing files and invalid references, not just the first.
 func ValidateTranscriptMap(tm TranscriptMap, baseDir string) error {
-	var missing []string
-	for platform, p := range tm.Platforms {
-		for cmd, path := range p.CommandTranscripts {
-			resolved := path
-			if !filepath.IsAbs(path) {
-				resolved = filepath.Join(baseDir, path)
-			}
-			if _, err := os.Stat(resolved); err != nil {
-				missing = append(missing, fmt.Sprintf("  platform %q command %q: %s", platform, cmd, resolved))
-			}
+	var errs []string
+
+	checkPath := func(label, path string) {
+		resolved := path
+		if !filepath.IsAbs(path) {
+			resolved = filepath.Join(baseDir, path)
+		}
+		if _, err := os.Stat(resolved); err != nil {
+			errs = append(errs, fmt.Sprintf("  %s: %s", label, resolved))
 		}
 	}
-	if len(missing) > 0 {
-		sort.Strings(missing)
-		return fmt.Errorf("transcript map validation failed:\n%s", strings.Join(missing, "\n"))
+
+	for platform, p := range tm.Platforms {
+		for cmd, path := range p.CommandTranscripts {
+			checkPath(fmt.Sprintf("platform %q command %q", platform, cmd), path)
+		}
+	}
+
+	for name, s := range tm.Scenarios {
+		if _, ok := tm.Platforms[s.Platform]; !ok {
+			errs = append(errs, fmt.Sprintf("  scenario %q: unknown platform %q", name, s.Platform))
+			continue
+		}
+		for i, step := range s.Sequence {
+			checkPath(fmt.Sprintf("scenario %q step %d (%q)", name, i, step.Command), step.Transcript)
+		}
+	}
+
+	if len(errs) > 0 {
+		sort.Strings(errs)
+		return fmt.Errorf("transcript map validation failed:\n%s", strings.Join(errs, "\n"))
 	}
 	return nil
 }

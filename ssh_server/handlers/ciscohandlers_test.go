@@ -11,6 +11,7 @@ import (
 
 	"github.com/gliderlabs/ssh"
 	"github.com/tbotnz/cisshgo/fakedevices"
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 // newTestDevice creates a FakeDevice for testing without reading files from disk.
@@ -361,4 +362,52 @@ func TestHandler_TranscriptReaderError(t *testing.T) {
 
 	// Should not crash, just close the session
 	_ = interact(t, addr, []string{"show bad"})
+}
+
+func TestHandler_ScenarioSequence(t *testing.T) {
+	fd := newTestDevice()
+	sequence := []utils.SequenceStep{
+		{Command: "show running-config", Transcript: "config before\n"},
+		{Command: "interface GigabitEthernet0/0/2", Transcript: ""},
+		{Command: "show running-config", Transcript: "config after\n"},
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := ln.Addr().String()
+	ln.Close()
+
+	srv := &ssh.Server{
+		Addr:    addr,
+		Handler: GenericCiscoScenarioHandler(fd, sequence),
+		PasswordHandler: func(ctx ssh.Context, pass string) bool {
+			return pass == fd.Password
+		},
+	}
+	go func() { _ = srv.ListenAndServe() }()
+
+	for i := 0; i < 20; i++ {
+		conn, dialErr := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if dialErr == nil {
+			conn.Close()
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	defer srv.Close()
+
+	// All three steps in a single session — pointer advances across commands
+	out := interact(t, addr, []string{
+		"show running-config",            // step 0 → "config before"
+		"interface GigabitEthernet0/0/2", // step 1 → ""
+		"show running-config",            // step 2 → "config after"
+	})
+	if !strings.Contains(out, "config before") {
+		t.Errorf("expected 'config before' in output, got:\n%s", out)
+	}
+	if !strings.Contains(out, "config after") {
+		t.Errorf("expected 'config after' in output, got:\n%s", out)
+	}
 }

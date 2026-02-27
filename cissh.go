@@ -22,9 +22,54 @@ import (
 	"github.com/tbotnz/cisshgo/utils"
 )
 
-type listenerSpec struct {
-	fd   *fakedevices.FakeDevice
-	port int
+type listenerConfig struct {
+	fd       *fakedevices.FakeDevice
+	port     int
+	sequence []utils.SequenceStep // nil for platform-only listeners
+}
+
+func resolveListeners(cli utils.CLI, tm utils.TranscriptMap, baseDir string) ([]listenerConfig, error) {
+	if cli.Inventory == "" {
+		fd, err := fakedevices.InitGeneric(cli.Platform, tm, baseDir)
+		if err != nil {
+			return nil, err
+		}
+		var configs []listenerConfig
+		for port := cli.StartingPort; port < cli.StartingPort+cli.Listeners; port++ {
+			configs = append(configs, listenerConfig{fd, port, nil})
+		}
+		return configs, nil
+	}
+
+	inv, err := utils.LoadInventory(cli.Inventory)
+	if err != nil {
+		return nil, err
+	}
+
+	var configs []listenerConfig
+	port := cli.StartingPort
+	for _, entry := range inv.Devices {
+		if entry.Scenario != "" {
+			fd, seq, err := fakedevices.InitScenario(entry.Scenario, tm, baseDir)
+			if err != nil {
+				return nil, err
+			}
+			for i := 0; i < entry.Count; i++ {
+				configs = append(configs, listenerConfig{fd, port, seq})
+				port++
+			}
+		} else {
+			fd, err := fakedevices.InitGeneric(entry.Platform, tm, baseDir)
+			if err != nil {
+				return nil, err
+			}
+			for i := 0; i < entry.Count; i++ {
+				configs = append(configs, listenerConfig{fd, port, nil})
+				port++
+			}
+		}
+	}
+	return configs, nil
 }
 
 func run(ctx context.Context, cli utils.CLI) error {
@@ -38,47 +83,30 @@ func run(ctx context.Context, cli utils.CLI) error {
 		return err
 	}
 
-	var specs []listenerSpec
-
-	if cli.Inventory != "" {
-		inv, err := utils.LoadInventory(cli.Inventory)
-		if err != nil {
-			return err
-		}
-		port := cli.StartingPort
-		for _, entry := range inv.Devices {
-			fd, err := fakedevices.InitGeneric(entry.Platform, myTranscriptMap, baseDir)
-			if err != nil {
-				return err
-			}
-			for i := 0; i < entry.Count; i++ {
-				specs = append(specs, listenerSpec{fd, port})
-				port++
-			}
-		}
-	} else {
-		fd, err := fakedevices.InitGeneric(cli.Platform, myTranscriptMap, baseDir)
-		if err != nil {
-			return err
-		}
-		for port := cli.StartingPort; port < cli.StartingPort+cli.Listeners; port++ {
-			specs = append(specs, listenerSpec{fd, port})
-		}
+	configs, err := resolveListeners(cli, myTranscriptMap, baseDir)
+	if err != nil {
+		return err
 	}
 
 	var wg sync.WaitGroup
-	for _, spec := range specs { // coverage-ignore
-		wg.Add(1)                                       // coverage-ignore
-		go func(fd *fakedevices.FakeDevice, port int) { // coverage-ignore
-			defer wg.Done()                                                                                   // coverage-ignore
-			if err := sshlisteners.GenericListener(ctx, fd, port, handlers.GenericCiscoHandler); err != nil { // coverage-ignore
-				log.Printf("listener on port %d: %v", port, err) // coverage-ignore
-			} // coverage-ignore
-		}(spec.fd, spec.port) // coverage-ignore
-	} // coverage-ignore
+	for _, config := range configs { // coverage-ignore
+		wg.Add(1)
+		go func(cfg listenerConfig) {
+			defer wg.Done()
+			var err error
+			if cfg.sequence != nil {
+				err = sshlisteners.ScenarioListener(ctx, cfg.fd, cfg.sequence, cfg.port)
+			} else {
+				err = sshlisteners.GenericListener(ctx, cfg.fd, cfg.port, handlers.GenericCiscoHandler)
+			}
+			if err != nil {
+				log.Printf("listener on port %d: %v", cfg.port, err)
+			}
+		}(config)
+	}
 
-	wg.Wait()  // coverage-ignore
-	return nil // coverage-ignore
+	wg.Wait()
+	return nil
 }
 
 func main() { // coverage-ignore

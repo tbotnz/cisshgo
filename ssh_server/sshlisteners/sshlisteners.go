@@ -11,6 +11,7 @@ import (
 
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
+	"github.com/tbotnz/cisshgo/utils"
 )
 
 // GenericListener starts an SSH server on the given port and blocks until ctx is cancelled.
@@ -20,12 +21,26 @@ func GenericListener(
 	portNumber int,
 	myHandler handlers.PlatformHandler,
 ) error {
+	return listen(ctx, myFakeDevice, portNumber, myHandler(myFakeDevice.Copy()))
+}
+
+// ScenarioListener starts an SSH server that plays back a scenario sequence.
+func ScenarioListener(
+	ctx context.Context,
+	myFakeDevice *fakedevices.FakeDevice,
+	sequence []utils.SequenceStep,
+	portNumber int,
+) error {
+	return listen(ctx, myFakeDevice, portNumber, handlers.GenericCiscoScenarioHandler(myFakeDevice.Copy(), sequence))
+}
+
+func listen(ctx context.Context, myFakeDevice *fakedevices.FakeDevice, portNumber int, handler ssh.Handler) error {
 	portString := ":" + strconv.Itoa(portNumber)
 	log.Printf("Starting cissh.go ssh server on port %s\n", portString)
 
 	srv := &ssh.Server{
 		Addr:    portString,
-		Handler: myHandler(myFakeDevice.Copy()),
+		Handler: handler,
 		PasswordHandler: func(sshCtx ssh.Context, pass string) bool {
 			return pass == myFakeDevice.Password
 		},

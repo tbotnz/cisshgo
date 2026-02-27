@@ -158,6 +158,14 @@ func TestTranscriptMapIntegrity(t *testing.T) {
 			}
 		}
 	}
+	for name, s := range tm.Scenarios {
+		for i, step := range s.Sequence {
+			referenced[step.Transcript] = true
+			if _, err := os.Stat(step.Transcript); err != nil {
+				t.Errorf("scenario %q step %d (%q): file not found: %s", name, i, step.Command, step.Transcript)
+			}
+		}
+	}
 
 	// Walk transcripts/ and flag unreferenced .txt files
 	err = filepath.WalkDir("transcripts", func(path string, d fs.DirEntry, err error) error {
@@ -175,5 +183,39 @@ func TestTranscriptMapIntegrity(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("walking transcripts dir: %v", err)
+	}
+}
+
+func TestInitScenario(t *testing.T) {
+	if err := os.Chdir(".."); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.Chdir("fakedevices") })
+
+	tm, err := utils.LoadTranscriptMap("transcripts/transcript_map.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fd, steps, err := InitScenario("csr1000v-add-interface", tm, ".")
+	if err != nil {
+		t.Fatalf("InitScenario: %v", err)
+	}
+	if fd.Platform != "csr1000v" {
+		t.Errorf("Platform = %q, want csr1000v", fd.Platform)
+	}
+	if len(steps) != 5 {
+		t.Errorf("steps len = %d, want 5", len(steps))
+	}
+	if steps[0].Command != "show running-config" {
+		t.Errorf("steps[0].Command = %q, want 'show running-config'", steps[0].Command)
+	}
+}
+
+func TestInitScenario_UnknownScenario(t *testing.T) {
+	tm := utils.TranscriptMap{Platforms: map[string]utils.TranscriptMapPlatform{}}
+	_, _, err := InitScenario("nonexistent", tm, ".")
+	if err == nil {
+		t.Error("expected error for unknown scenario")
 	}
 }

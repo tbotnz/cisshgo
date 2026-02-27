@@ -197,3 +197,62 @@ func TestValidateTranscriptMap_MissingFile(t *testing.T) {
 		t.Error("expected error for missing transcript file")
 	}
 }
+
+func TestLoadInventory_BothPlatformAndScenario(t *testing.T) {
+	content := `---
+devices:
+  - platform: csr1000v
+    scenario: csr1000v-add-interface
+    count: 1
+`
+	tmpFile := filepath.Join(t.TempDir(), "inventory.yaml")
+	os.WriteFile(tmpFile, []byte(content), 0644)
+	_, err := LoadInventory(tmpFile)
+	if err == nil {
+		t.Error("expected error when both platform and scenario are set")
+	}
+}
+
+func TestLoadInventory_NeitherPlatformNorScenario(t *testing.T) {
+	content := `---
+devices:
+  - count: 1
+`
+	tmpFile := filepath.Join(t.TempDir(), "inventory.yaml")
+	os.WriteFile(tmpFile, []byte(content), 0644)
+	_, err := LoadInventory(tmpFile)
+	if err == nil {
+		t.Error("expected error when neither platform nor scenario is set")
+	}
+}
+
+func TestValidateTranscriptMap_UnknownScenarioPlatform(t *testing.T) {
+	tm := TranscriptMap{
+		Platforms: map[string]TranscriptMapPlatform{},
+		Scenarios: map[string]Scenario{
+			"test": {Platform: "nonexistent", Sequence: nil},
+		},
+	}
+	if err := ValidateTranscriptMap(tm, "."); err == nil {
+		t.Error("expected error for scenario referencing unknown platform")
+	}
+}
+
+func TestValidateTranscriptMap_ScenarioMissingFile(t *testing.T) {
+	tm := TranscriptMap{
+		Platforms: map[string]TranscriptMapPlatform{
+			"csr1000v": {},
+		},
+		Scenarios: map[string]Scenario{
+			"test": {
+				Platform: "csr1000v",
+				Sequence: []SequenceStep{
+					{Command: "show version", Transcript: "nonexistent.txt"},
+				},
+			},
+		},
+	}
+	if err := ValidateTranscriptMap(tm, t.TempDir()); err == nil {
+		t.Error("expected error for missing scenario transcript file")
+	}
+}

@@ -1,0 +1,6 @@
+Interface              IP Address         Status     Protocol         MTU
+Ethernet1              10.0.0.1/24        up         up              9214
+Ethernet2              10.0.0.2/24        up         up              9214
+Ethernet3              unassigned         down       notconnect      9214
+Loopback0              1.1.1.1/32         up         up             65535
+Management1            192.168.1.10/24    up         up              1500

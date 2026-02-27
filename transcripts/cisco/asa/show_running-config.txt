@@ -1,0 +1,38 @@
+: Saved
+: Serial Number: 9BU2M1EX1EG
+: Hardware:   ASAv
+ASA Version 9.12(4)
+!
+hostname {{.Hostname}}
+enable password 8Ry2YjIyt7RRXU24 encrypted
+!
+interface Management0/0
+ management-only
+ nameif management
+ security-level 100
+ ip address 192.168.1.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ nameif outside
+ security-level 0
+ ip address 10.0.0.1 255.255.255.0
+!
+interface GigabitEthernet0/1
+ nameif inside
+ security-level 100
+ ip address 172.16.0.1 255.255.255.0
+!
+interface GigabitEthernet0/2
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+access-list OUTSIDE_IN extended permit tcp any any eq 443
+!
+route outside 0.0.0.0 0.0.0.0 10.0.0.254 1
+!
+ssh 0.0.0.0 0.0.0.0 management
+ssh timeout 60
+!
+end

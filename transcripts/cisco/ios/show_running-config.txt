@@ -1,0 +1,50 @@
+Building configuration...
+
+Current configuration : 1842 bytes
+!
+version 15.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname {{.Hostname}}
+!
+boot-start-marker
+boot-end-marker
+!
+no aaa new-model
+!
+ip cef
+no ipv6 cef
+!
+interface GigabitEthernet0/0/0
+ ip address 192.168.1.1 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ ip address 10.0.0.1 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+!
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ login
+ transport input ssh
+!
+end

@@ -1,0 +1,38 @@
+! Command: show running-config
+! device: {{.Hostname}} (DCS-7050CX3-32S, EOS-4.27.3F)
+!
+! boot system flash:/EOS-4.27.3F.swi
+!
+transceiver qsfp default-mode 4x10G
+!
+hostname {{.Hostname}}
+!
+spanning-tree mode mstp
+!
+aaa authorization exec default local
+!
+username admin privilege 15 role network-admin secret sha512 $6$xyz
+!
+interface Ethernet1
+   description uplink-1
+   ip address 10.0.0.1/24
+!
+interface Ethernet2
+   description uplink-2
+   ip address 10.0.0.2/24
+!
+interface Ethernet3
+   shutdown
+!
+interface Loopback0
+   ip address 1.1.1.1/32
+!
+interface Management1
+   ip address 192.168.1.10/24
+!
+ip route 0.0.0.0/0 192.168.1.1
+!
+management api http-commands
+   no shutdown
+!
+end

@@ -1,0 +1,23 @@
+fpc0:
+--------------------------------------------------------------------------
+Hostname: {{.Hostname}}
+Model: mx240
+Junos: 21.4R1.12
+JUNOS OS Kernel 64-bit  [20211203.173751_builder_stable_12]
+JUNOS OS libs [20211203.173751_builder_stable_12]
+JUNOS OS runtime [20211203.173751_builder_stable_12]
+JUNOS OS time zone information [20211203.173751_builder_stable_12]
+JUNOS network stack and utilities [20211203.173751_builder_stable_12]
+JUNOS libs [20211203.173751_builder_stable_12]
+JUNOS OS libs compat32 [20211203.173751_builder_stable_12]
+JUNOS OS 32-bit compatibility [20211203.173751_builder_stable_12]
+JUNOS libs compat32 [20211203.173751_builder_stable_12]
+JUNOS routing software, base [20211203.173751_builder_stable_12]
+JUNOS routing software, full [20211203.173751_builder_stable_12]
+JUNOS Packet Forwarding Engine Support (MX Common) [20211203.173751_builder_stable_12]
+JUNOS Online Documentation [20211203.173751_builder_stable_12]
+JUNOS py-base-x86-64 [20211203.173751_builder_stable_12]
+JUNOS py-extensions-x86-64 [20211203.173751_builder_stable_12]
+Serial Number: AA1234567890
+
+{master:0}

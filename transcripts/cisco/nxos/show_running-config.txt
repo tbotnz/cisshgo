@@ -1,0 +1,39 @@
+
+!Command: show running-config
+!Running configuration last done at: Mon Jan 10 09:00:00 2022
+!Time: Mon Jan 10 09:00:01 2022
+
+version 9.3(8) Bios:version 08.38
+
+hostname {{.Hostname}}
+
+feature telnet
+feature ssh
+feature nxapi
+
+username admin password 5 $5$ABCDEFGH$xyz  role network-admin
+
+ip domain-lookup
+ip domain-name lab.local
+
+interface Ethernet1/1
+  ip address 10.0.0.1/24
+  no shutdown
+
+interface Ethernet1/2
+  ip address 10.0.0.2/24
+  no shutdown
+
+interface Ethernet1/3
+  no shutdown
+
+interface Ethernet1/4
+  no shutdown
+
+interface mgmt0
+  ip address 192.168.1.100/24
+
+ip route 0.0.0.0/0 192.168.1.1
+
+line console
+line vty

@@ -1,0 +1,48 @@
+Physical interface: ge-0/0/0, Enabled, Physical link is Up
+  Interface index: 134, SNMP ifIndex: 502
+  Link-level type: Ethernet, MTU: 1514, Speed: 1000mbps
+  Device flags   : Present Running
+  Interface flags: SNMP-Traps
+  Current address: 00:50:56:ab:12:34, Hardware address: 00:50:56:ab:12:34
+  Last flapped   : 2022-01-10 06:00:00 UTC (3w1d 04:12 ago)
+  Input rate     : 1248 bps (2 pps)
+  Output rate    : 856 bps (1 pps)
+
+  Logical interface ge-0/0/0.0 (Index 70) (SNMP ifIndex 520)
+    Flags: Up SNMP-Traps 0x0  Encapsulation: ENET2
+    Input packets : 1234567
+    Output packets: 987654
+    Protocol inet, MTU: 1500
+      Addresses, Flags: Is-Preferred Is-Primary
+        Destination: 10.0.0.0/24, Local: 10.0.0.1, Broadcast: 10.0.0.255
+
+Physical interface: ge-0/0/1, Enabled, Physical link is Up
+  Interface index: 135, SNMP ifIndex: 503
+  Link-level type: Ethernet, MTU: 1514, Speed: 1000mbps
+  Device flags   : Present Running
+  Current address: 00:50:56:ab:12:35, Hardware address: 00:50:56:ab:12:35
+  Last flapped   : 2022-01-10 06:00:00 UTC (3w1d 04:12 ago)
+  Input rate     : 0 bps (0 pps)
+  Output rate    : 0 bps (0 pps)
+
+  Logical interface ge-0/0/1.0 (Index 71) (SNMP ifIndex 521)
+    Flags: Up SNMP-Traps 0x0  Encapsulation: ENET2
+    Input packets : 0
+    Output packets: 0
+    Protocol inet, MTU: 1500
+      Addresses, Flags: Is-Preferred Is-Primary
+        Destination: 172.16.0.0/24, Local: 172.16.0.1, Broadcast: 172.16.0.255
+
+Physical interface: lo0, Enabled, Physical link is Up
+  Interface index: 6, SNMP ifIndex: 6
+  Type: Loopback
+  Device flags   : Present Running Loopback
+  Interface flags: SNMP-Traps
+
+  Logical interface lo0.0 (Index 8) (SNMP ifIndex 16)
+    Flags: SNMP-Traps Encapsulation: Unspecified
+    Protocol inet, MTU: Unlimited
+      Addresses, Flags: Is-Preferred Is-Primary
+        Local: 1.1.1.1
+
+{master:0}

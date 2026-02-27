@@ -32,3 +32,83 @@ platforms:
     context_search:
       "configure terminal": "(config)#"
       "base": "#"
+  ios:
+    vendor: "cisco"
+    hostname: "cisshgo-ios"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/cisco/ios/show_version.txt"
+      "show ip interface brief": "transcripts/cisco/ios/show_ip_interface_brief.txt"
+      "show running-config": "transcripts/cisco/ios/show_running-config.txt"
+      "terminal length 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "(config)#": "#"
+      "#": ">"
+      ">": "exit"
+    context_search:
+      "configure terminal": "(config)#"
+      "enable": "#"
+      "base": ">"
+  asa:
+    vendor: "cisco"
+    hostname: "cisshgo-asa"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/cisco/asa/show_version.txt"
+      "show interface ip brief": "transcripts/cisco/asa/show_interface_ip_brief.txt"
+      "show running-config": "transcripts/cisco/asa/show_running-config.txt"
+      "terminal pager 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "(config)#": "#"
+      "#": ">"
+      ">": "exit"
+    context_search:
+      "configure terminal": "(config)#"
+      "enable": "#"
+      "base": ">"
+  nxos:
+    vendor: "cisco"
+    hostname: "cisshgo-nxos"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/cisco/nxos/show_version.txt"
+      "show ip interface brief": "transcripts/cisco/nxos/show_ip_interface_brief.txt"
+      "show running-config": "transcripts/cisco/nxos/show_running-config.txt"
+      "terminal length 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "(config)#": "#"
+      "#": "exit"
+    context_search:
+      "configure terminal": "(config)#"
+      "base": "#"
+  eos:
+    vendor: "arista"
+    hostname: "cisshgo-eos"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/arista/eos/show_version.txt"
+      "show ip interface brief": "transcripts/arista/eos/show_ip_interface_brief.txt"
+      "show running-config": "transcripts/arista/eos/show_running-config.txt"
+      "terminal length 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "(config)#": "#"
+      "#": ">"
+      ">": "exit"
+    context_search:
+      "configure terminal": "(config)#"
+      "enable": "#"
+      "base": ">"
+  junos:
+    vendor: "juniper"
+    hostname: "cisshgo-junos"
+    password: "admin"
+    command_transcripts:
+      "show version": "transcripts/juniper/junos/show_version.txt"
+      "show interfaces": "transcripts/juniper/junos/show_interfaces.txt"
+      "set cli screen-length 0": "transcripts/generic_empty_return.txt"
+    context_hierarchy:
+      "#": ">"
+      ">": "exit"
+    context_search:
+      "configure": "#"
+      "base": ">"

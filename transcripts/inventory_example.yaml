@@ -2,5 +2,15 @@
 devices:
   - platform: csr1000v
     count: 10
+  - platform: ios
+    count: 10
   - platform: iosxr
     count: 5
+  - platform: asa
+    count: 5
+  - platform: nxos
+    count: 10
+  - platform: eos
+    count: 10
+  - platform: junos
+    count: 10

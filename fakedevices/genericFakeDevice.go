@@ -56,28 +56,10 @@ func InitGeneric(
 	myTranscriptMap utils.TranscriptMap,
 ) (*FakeDevice, error) {
 
-	supportedCommands := make(map[string]string)
-	contextSearch := make(map[string]string)
-	contextHierarchy := make(map[string]string)
-	commandTranscriptFiles := make(map[string]string)
+	p := myTranscriptMap.Platforms[platform]
 
-	// Find the hostname, password, and other info in the data for this device
-	var deviceHostname string
-	var devicePassword string
-	for _, fakeDevicePlatform := range myTranscriptMap.Platforms {
-		for k, v := range fakeDevicePlatform {
-			if k == platform {
-				deviceHostname = v.Hostname
-				devicePassword = v.Password
-				contextSearch = v.ContextSearch
-				contextHierarchy = v.ContextHierarchy
-				commandTranscriptFiles = v.CommandTranscripts
-			}
-		}
-	}
-
-	// Iterate through the command transcripts and read their contents into our supported commands
-	for k, v := range commandTranscriptFiles {
+	supportedCommands := make(SupportedCommands, len(p.CommandTranscripts))
+	for k, v := range p.CommandTranscripts {
 		content, err := readFile(v)
 		if err != nil {
 			return nil, err
@@ -89,12 +71,12 @@ func InitGeneric(
 	myFakeDevice := FakeDevice{
 		Vendor:            vendor,
 		Platform:          platform,
-		Hostname:          deviceHostname,
-		DefaultHostname:   deviceHostname,
-		Password:          devicePassword,
+		Hostname:          p.Hostname,
+		DefaultHostname:   p.Hostname,
+		Password:          p.Password,
 		SupportedCommands: supportedCommands,
-		ContextSearch:     contextSearch,
-		ContextHierarchy:  contextHierarchy,
+		ContextSearch:     p.ContextSearch,
+		ContextHierarchy:  p.ContextHierarchy,
 	}
 
 	return &myFakeDevice, nil

@@ -38,9 +38,9 @@ export CISSHGO_LISTENERS=10
 ./cisshgo
 ```
 
-Ignored when using `-inventory`.
+Ignored when using `--inventory`.
 
-### -p, --startingPort
+### -p, --starting-port
 
 **Type**: `int`  
 **Default**: `10000`  
@@ -60,7 +60,7 @@ export CISSHGO_STARTING_PORT=20000
 
 With default settings (50 listeners, starting port 10000), listeners run on ports 10000-10049.
 
-### -t, --transcriptMap
+### -t, --transcript-map
 
 **Type**: `path`  
 **Default**: `transcripts/transcript_map.yaml`  
@@ -98,7 +98,7 @@ export CISSHGO_PLATFORM=ios
 ./cisshgo
 ```
 
-Ignored when using `-inventory`.
+Ignored when using `--inventory`.
 
 ### -i, --inventory
 
@@ -119,9 +119,9 @@ export CISSHGO_INVENTORY=transcripts/inventory_example.yaml
 ```
 
 When specified:
-- `-listeners` and `-platform` flags are ignored
+- `--listeners` and `--platform` flags are ignored
 - Devices are spawned according to inventory configuration
-- Each device gets a sequential port starting from `-startingPort`
+- Each device gets a sequential port starting from `--starting-port`
 
 See [Configuration](configuration.md#inventory) for inventory format.
 

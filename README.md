@@ -45,7 +45,7 @@ docker run -d -p 10000-10049:10000-10049 ghcr.io/tbotnz/cisshgo:latest
 Or run with custom options:
 
 ```bash
-docker run -d -p 10000:10000 ghcr.io/tbotnz/cisshgo:latest -listeners 1 -startingPort 10000
+docker run -d -p 10000:10000 ghcr.io/tbotnz/cisshgo:latest --listeners 1 --starting-port 10000
 ```
 
 Or build locally:
@@ -124,18 +124,20 @@ Additional commands can be added by modifying `transcripts/transcript_map.yaml`.
 ### Command Line Options
 
 ```text
-  -listeners int
-        How many listeners do you wish to spawn? (default 50)
-  -startingPort int
-        What port do you want to start at? (default 10000)
-  -transcriptMap string
-        What file contains the map of commands to transcribed output? (default "transcripts/transcript_map.yaml")
+  -l, --listeners=50           How many listeners to spawn ($CISSHGO_LISTENERS).
+  -p, --starting-port=10000    Starting port ($CISSHGO_STARTING_PORT).
+  -t, --transcript-map="transcripts/transcript_map.yaml"
+                               Path to transcript map YAML file
+                               ($CISSHGO_TRANSCRIPT_MAP).
+  -P, --platform="csr1000v"    Platform to use when no inventory is provided
+                               ($CISSHGO_PLATFORM).
+  -i, --inventory=STRING       Path to inventory YAML file ($CISSHGO_INVENTORY).
 ```
 
 ### Example: Single Listener
 
 ```bash
-./cisshgo -listeners 1 -startingPort 10000
+./cisshgo --listeners 1 --starting-port 10000
 ```
 
 ## Expanding Platform Support

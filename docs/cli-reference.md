@@ -20,7 +20,7 @@ Number of SSH listeners to spawn.
 
 ```bash
 # Spawn 10 listeners
-./cisshgo -listeners 10
+./cisshgo --listeners 10
 ./cisshgo -l 10
 
 # Using environment variable
@@ -40,7 +40,7 @@ Starting port number for SSH listeners. Listeners are spawned on sequential port
 
 ```bash
 # Start at port 20000
-./cisshgo -startingPort 20000
+./cisshgo --starting-port 20000
 ./cisshgo -p 20000
 
 # Using environment variable
@@ -60,7 +60,7 @@ Path to the transcript map YAML file.
 
 ```bash
 # Use custom transcript map
-./cisshgo -transcriptMap /path/to/custom_map.yaml
+./cisshgo --transcript-map /path/to/custom_map.yaml
 ./cisshgo -t /path/to/custom_map.yaml
 
 # Using environment variable
@@ -80,7 +80,7 @@ Platform to use when no inventory is provided. Must match a platform key in the 
 
 ```bash
 # Use IOS platform
-./cisshgo -platform ios
+./cisshgo --platform ios
 ./cisshgo -P ios
 
 # Using environment variable
@@ -100,7 +100,7 @@ Path to inventory YAML file for multi-device topologies.
 
 ```bash
 # Use inventory file
-./cisshgo -inventory transcripts/inventory_example.yaml
+./cisshgo --inventory transcripts/inventory_example.yaml
 ./cisshgo -i transcripts/inventory_example.yaml
 
 # Using environment variable
@@ -121,21 +121,21 @@ See [Configuration](configuration.md#inventory) for inventory format.
 
 ```bash
 # One CSR1000v on port 10000
-./cisshgo -listeners 1 -startingPort 10000 -platform csr1000v
+./cisshgo --listeners 1 --starting-port 10000 --platform csr1000v
 ```
 
 ### Multiple Platforms
 
 ```bash
 # Use inventory for mixed topology
-./cisshgo -inventory my_topology.yaml -startingPort 20000
+./cisshgo --inventory my_topology.yaml --starting-port 20000
 ```
 
 ### Custom Transcripts
 
 ```bash
 # Use custom transcript map
-./cisshgo -transcriptMap /opt/transcripts/custom.yaml -platform ios
+./cisshgo --transcript-map /opt/transcripts/custom.yaml --platform ios
 ```
 
 ### Environment Variables
@@ -155,18 +155,18 @@ export CISSHGO_TRANSCRIPT_MAP=/opt/transcripts/map.yaml
 # Single listener
 docker run -d -p 10000:10000 \
   ghcr.io/tbotnz/cisshgo:latest \
-  -listeners 1 -startingPort 10000
+  --listeners 1 --starting-port 10000
 
 # Custom platform
 docker run -d -p 10000-10009:10000-10009 \
   ghcr.io/tbotnz/cisshgo:latest \
-  -listeners 10 -platform ios
+  --listeners 10 --platform ios
 
 # With custom transcripts (mount volume)
 docker run -d -p 10000-10049:10000-10049 \
   -v /path/to/transcripts:/transcripts \
   ghcr.io/tbotnz/cisshgo:latest \
-  -transcriptMap /transcripts/custom.yaml
+  --transcript-map /transcripts/custom.yaml
 ```
 
 ## Exit Codes

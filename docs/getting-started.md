@@ -24,7 +24,7 @@ docker run -d -p 10000-10049:10000-10049 ghcr.io/tbotnz/cisshgo:latest
 Run with custom options:
 
 ```bash
-docker run -d -p 10000:10000 ghcr.io/tbotnz/cisshgo:latest -listeners 1 -startingPort 10000
+docker run -d -p 10000:10000 ghcr.io/tbotnz/cisshgo:latest --listeners 1 --starting-port 10000
 ```
 
 ### Building from Source
@@ -57,7 +57,7 @@ Default configuration (50 listeners on ports 10000-10049):
 Single listener on port 10000:
 
 ```bash
-./cisshgo -listeners 1 -startingPort 10000
+./cisshgo --listeners 1 --starting-port 10000
 ```
 
 ### Connect to a Device

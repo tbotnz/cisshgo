@@ -2,6 +2,16 @@
 
 Complete reference for all cisshgo command-line flags and environment variables.
 
+## Quick Reference
+
+| Flag | Short | Default | Description |
+|------|-------|---------|-------------|
+| `--listeners` | `-l` | `50` | Number of SSH listeners to spawn |
+| `--starting-port` | `-p` | `10000` | Starting port number |
+| `--transcript-map` | `-t` | `transcripts/transcript_map.yaml` | Path to transcript map file |
+| `--platform` | `-P` | `csr1000v` | Platform to emulate |
+| `--inventory` | `-i` | - | Path to inventory file (optional) |
+
 ## Usage
 
 ```bash

@@ -87,31 +87,71 @@ The `base` key defines the initial context when a user connects.
 
 ### Scenarios
 
-Scenarios enable stateful command responses. A scenario is a sequence of transcript files that change based on previous commands.
+Scenarios enable stateful command responses that simulate device configuration changes. Unlike static platforms, scenarios define a sequence of commands that, when executed in order, change the device's responses to subsequent commands.
+
+#### Structure
+
+Scenarios are defined in a separate `scenarios:` section at the same level as `platforms:`:
 
 ```yaml
-platforms:
+scenarios:
   csr1000v-add-interface:
-    vendor: "cisco"
-    hostname: "cisshgo1000v"
-    password: "admin"
-    scenario:
-      - trigger: "interface GigabitEthernet3"
-        transcript_updates:
-          "show running-config": "transcripts/scenarios/csr1000v-add-interface/running_config_after.txt"
-    command_transcripts:
-      "show running-config": "transcripts/scenarios/csr1000v-add-interface/running_config_before.txt"
-    context_hierarchy:
-      "(config)#": "#"
-      "#": ">"
-      ">": "exit"
-    context_search:
-      "configure terminal": "(config)#"
-      "enable": "#"
-      "base": ">"
+    platform: csr1000v
+    sequence:
+      - command: "show running-config"
+        transcript: "transcripts/scenarios/csr1000v-add-interface/running_config_before.txt"
+      - command: "interface GigabitEthernet0/0/2"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "ip address 172.16.0.1 255.255.255.0"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "end"
+        transcript: "transcripts/generic_empty_return.txt"
+      - command: "show running-config"
+        transcript: "transcripts/scenarios/csr1000v-add-interface/running_config_after.txt"
 ```
 
-When the trigger command is executed, the specified transcripts are updated for subsequent commands.
+#### Fields
+
+**platform**
+
+The base platform identifier from the `platforms:` section. The scenario inherits all settings (vendor, hostname, password, contexts) from this platform.
+
+**sequence**
+
+An ordered list of command/transcript pairs. Each step defines:
+- `command`: The exact command to match
+- `transcript`: The transcript file to return for that command
+
+#### How Scenarios Work
+
+1. **Initial State**: When a scenario starts, the first command in the sequence is active
+2. **Command Execution**: When a user executes a command that matches the current sequence step, that transcript is returned
+3. **State Progression**: After a sequence command is executed, the scenario advances to the next step
+4. **State Changes**: Subsequent commands (like the second `show running-config`) return different transcripts, simulating configuration changes
+5. **Non-sequence Commands**: Commands not in the sequence fall back to the base platform's command_transcripts
+
+#### Example Flow
+
+Using the `csr1000v-add-interface` scenario above:
+
+```text
+1. User: show running-config
+   → Returns: running_config_before.txt (no GigabitEthernet0/0/2)
+   
+2. User: interface GigabitEthernet0/0/2
+   → Returns: empty (enters config mode)
+   
+3. User: ip address 172.16.0.1 255.255.255.0
+   → Returns: empty (configures IP)
+   
+4. User: end
+   → Returns: empty (exits config mode)
+   
+5. User: show running-config
+   → Returns: running_config_after.txt (now includes GigabitEthernet0/0/2 with IP)
+```
+
+The device appears to have been configured, even though it's just playing back different transcripts.
 
 ## Inventory
 
@@ -137,7 +177,9 @@ The platform identifier from the transcript map.
 
 #### scenario
 
-A scenario identifier (also defined in the transcript map). Mutually exclusive with `platform`.
+A scenario identifier (also defined in the transcript map under `scenarios:`). Mutually exclusive with `platform`.
+
+Scenarios are stateful command sequences - see [Scenarios](#scenarios) for details.
 
 #### count
 

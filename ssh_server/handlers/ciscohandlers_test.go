@@ -413,16 +413,23 @@ func TestHandler_ScenarioSequence(t *testing.T) {
 }
 
 func TestBuildPrompt_Default(t *testing.T) {
-	got := buildPrompt("", "router", "admin", ">")
+	got := buildPrompt("", "router", "admin", ">", "")
 	if got != "router>" {
 		t.Errorf("buildPrompt = %q, want %q", got, "router>")
 	}
 }
 
 func TestBuildPrompt_Format(t *testing.T) {
-	got := buildPrompt("{username}@{hostname}{context}", "router", "admin", ">")
+	got := buildPrompt("{username}@{hostname}{context}", "router", "admin", ">", "")
 	if got != "admin@router>" {
 		t.Errorf("buildPrompt = %q, want %q", got, "admin@router>")
+	}
+}
+
+func TestBuildPrompt_PrefixLine(t *testing.T) {
+	got := buildPrompt("{username}@{hostname}{context}", "router", "admin", "# ", "[edit]")
+	if got != "[edit]\nadmin@router# " {
+		t.Errorf("buildPrompt = %q, want %q", got, "[edit]\nadmin@router# ")
 	}
 }
 

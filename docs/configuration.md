@@ -86,6 +86,25 @@ junos:
   # prompt renders as: admin@mx240>
 ```
 
+#### context_prefix_lines
+
+Optional. A map of context values to prefix lines displayed *above* the prompt. Used for platforms like Junos that show `[edit]` above the prompt in configuration mode.
+
+```yaml
+junos:
+  context_search:
+    "base": "> "
+    "configure": "# "
+  context_prefix_lines:
+    "# ": "[edit]"   # shown above prompt when in config mode
+```
+
+When in config mode, the terminal renders:
+```
+[edit]
+admin@mx240#
+```
+
 #### command_transcripts
 
 Maps CLI commands to transcript files. Commands are matched using fuzzy matching (see [Transcripts](transcripts.md#command-matching)).

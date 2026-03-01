@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os/signal"
 	"path/filepath"
@@ -21,6 +22,12 @@ import (
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
 	"github.com/tbotnz/cisshgo/ssh_server/sshlisteners"
 	"github.com/tbotnz/cisshgo/transcript"
+)
+
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 type listenerConfig struct {
@@ -115,6 +122,9 @@ func main() { // coverage-ignore
 	kong.Parse(&cli,
 		kong.Name("cisshgo"),
 		kong.Description("Lightweight SSH server that emulates network equipment for testing."),
+		kong.Vars{
+			"version": fmt.Sprintf("%s (commit: %s, built: %s)", version, commit, date),
+		},
 	)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

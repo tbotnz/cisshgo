@@ -6,6 +6,7 @@ Complete reference for all cisshgo command-line flags and environment variables.
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
+| `--version` | `-v` | - | Show version information |
 | `--listeners` | `-l` | `50` | Number of SSH listeners to spawn |
 | `--starting-port` | `-p` | `10000` | Starting port number |
 | `--transcript-map` | `-t` | `transcripts/transcript_map.yaml` | Path to transcript map file |
@@ -19,6 +20,21 @@ cisshgo [flags]
 ```
 
 ## Flags
+
+### -v, --version
+
+Show version information including commit hash and build date.
+
+```bash
+# Show version
+./cisshgo --version
+./cisshgo -v
+```
+
+Output:
+```text
+1.0.0 (commit: abc123def, built: 2026-03-01T12:00:00Z)
+```
 
 ### -l, --listeners
 

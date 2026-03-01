@@ -75,6 +75,40 @@ System image file is "bootflash:packages.conf"
 Last reload reason: reload
 ```
 
+#### Using Templates in Practice
+
+1. Create a transcript file `transcripts/cisco/ios/show_version.txt`:
+
+```text
+Cisco IOS Software, {{.Platform}} Software
+ROM: Bootstrap program is IOS
+{{.Hostname}} uptime is 1 day, 2 hours, 30 minutes
+```
+
+2. Reference it in the transcript map:
+
+```yaml
+platforms:
+  ios:
+    hostname: "my-router"
+    command_transcripts:
+      "show version": "transcripts/cisco/ios/show_version.txt"
+```
+
+3. Run and test:
+
+```bash
+./cisshgo --platform ios --listeners 1
+ssh -p 10000 admin@localhost
+```
+
+Output will show:
+```text
+Cisco IOS Software, ios Software
+ROM: Bootstrap program is IOS
+my-router uptime is 1 day, 2 hours, 30 minutes
+```
+
 ### Template Functions
 
 Standard Go template functions are available:

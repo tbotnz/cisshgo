@@ -161,6 +161,29 @@ The device appears to have been configured, even though it's just playing back d
 
 **Sequence completion**: Once all sequence steps are executed, the scenario remains in its final state. The sequence does not reset or loop.
 
+#### Running Scenarios
+
+Scenarios are used via inventory files. Create an inventory file:
+
+```yaml
+devices:
+  - scenario: csr1000v-add-interface
+    count: 1
+```
+
+Then run cisshgo:
+
+```bash
+./cisshgo --inventory my_inventory.yaml --starting-port 10000
+```
+
+Connect and execute the sequence:
+
+```bash
+ssh -p 10000 admin@localhost
+# Execute commands in order to progress through the scenario
+```
+
 ## Inventory
 
 The inventory file defines a multi-device topology with different platforms and counts.
@@ -208,6 +231,40 @@ Example with 6 total devices starting at port 10000:
 - Ports 10000-10001: csr1000v (2 devices)
 - Ports 10002-10004: ios (3 devices)
 - Port 10005: csr1000v-add-interface scenario (1 device)
+
+#### Complete Example
+
+Create `my_lab.yaml`:
+
+```yaml
+devices:
+  - platform: csr1000v
+    count: 2
+  - platform: ios
+    count: 1
+  - scenario: csr1000v-add-interface
+    count: 1
+```
+
+Run cisshgo:
+
+```bash
+./cisshgo --inventory my_lab.yaml --starting-port 10000
+```
+
+Connect to devices:
+
+```bash
+# CSR1000v devices
+ssh -p 10000 admin@localhost
+ssh -p 10001 admin@localhost
+
+# IOS device
+ssh -p 10002 admin@localhost
+
+# Scenario device (stateful)
+ssh -p 10003 admin@localhost
+```
 
 ## Path Resolution
 

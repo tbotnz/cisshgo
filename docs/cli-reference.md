@@ -141,6 +141,20 @@ See [Configuration](configuration.md#inventory) for inventory format.
 ./cisshgo --inventory my_topology.yaml --starting-port 20000
 ```
 
+Example `my_topology.yaml`:
+
+```yaml
+devices:
+  - platform: csr1000v
+    count: 2
+  - platform: ios
+    count: 3
+  - scenario: csr1000v-add-interface
+    count: 1
+```
+
+This spawns 6 devices on ports 20000-20005.
+
 ### Custom Transcripts
 
 ```bash

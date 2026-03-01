@@ -114,6 +114,8 @@ platforms:
     context_search:
       "configure": "#"
       "base": ">"
+    context_prefix_lines:
+      "#": "[edit]"
 
 scenarios:
   csr1000v-add-interface:

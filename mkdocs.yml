@@ -35,6 +35,7 @@ nav:
   - Configuration: configuration.md
   - Transcripts: transcripts.md
   - CLI Reference: cli-reference.md
+  - Migration Guide: migration-v0.2-to-v1.0.md
   - Contributing: contributing.md
 
 markdown_extensions:

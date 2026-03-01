@@ -46,6 +46,7 @@ type FakeDevice struct {
     Vendor            string            // Device vendor (e.g., "cisco")
     Platform          string            // Platform identifier (e.g., "csr1000v")
     Hostname          string            // Device hostname
+    Username          string            // SSH username (from platform config)
     Password          string            // SSH password
     SupportedCommands SupportedCommands // Available commands
     ContextSearch     map[string]string // CLI contexts
@@ -241,7 +242,7 @@ The file should be empty or contain only whitespace.
 If you see errors like `template: ...: executing ... at <.InvalidField>: can't evaluate field`:
 
 - Check that the field name matches exactly (case-sensitive)
-- Available fields: `Vendor`, `Platform`, `Hostname`, `Password`
+- Available fields: `Vendor`, `Platform`, `Hostname`, `Username`, `Password`
 - Use `{{.Hostname}}` not `{{.hostname}}`
 
 ### Command Not Found

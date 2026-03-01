@@ -42,6 +42,9 @@ func listen(ctx context.Context, myFakeDevice *fakedevices.FakeDevice, portNumbe
 		Addr:    portString,
 		Handler: handler,
 		PasswordHandler: func(sshCtx ssh.Context, pass string) bool {
+			if myFakeDevice.Username != "" && sshCtx.User() != myFakeDevice.Username {
+				return false
+			}
 			return pass == myFakeDevice.Password
 		},
 	}

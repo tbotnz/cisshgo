@@ -68,6 +68,8 @@ ssh -p 10000 admin@localhost
 
 Default password: `admin`
 
+> **Note**: The hostname shown in the prompt (e.g., `cisshgo1000v#`) is determined by the platform's configuration in the transcript map. The default platform is `csr1000v` with hostname `cisshgo1000v`.
+
 ### Example Session
 
 ```text

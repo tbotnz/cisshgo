@@ -34,7 +34,7 @@ platforms:
 
 #### Platform Key
 
-The top-level key (e.g., `csr1000v`) is the platform identifier used with `-platform` flag or in inventory files.
+The top-level key (e.g., `csr1000v`) is the platform identifier used with `--platform` flag or in inventory files.
 
 #### vendor
 
@@ -153,6 +153,14 @@ Using the `csr1000v-add-interface` scenario above:
 
 The device appears to have been configured, even though it's just playing back different transcripts.
 
+#### Scenario Behavior
+
+**Out-of-sequence commands**: Commands must be executed in the exact order defined in the sequence. Executing commands out of order or skipping steps will not advance the sequence state.
+
+**Non-sequence commands**: Commands not in the sequence (like `show version`) work normally using the base platform's command transcripts.
+
+**Sequence completion**: Once all sequence steps are executed, the scenario remains in its final state. The sequence does not reset or loop.
+
 ## Inventory
 
 The inventory file defines a multi-device topology with different platforms and counts.
@@ -188,12 +196,12 @@ Number of listeners to spawn for this platform/scenario.
 ### Usage
 
 ```bash
-./cisshgo -inventory transcripts/inventory_example.yaml
+./cisshgo --inventory transcripts/inventory_example.yaml
 ```
 
 When using an inventory file:
-- The `-listeners` flag is ignored
-- Listeners are spawned sequentially starting from `-startingPort`
+- The `--listeners` flag is ignored
+- Listeners are spawned sequentially starting from `--starting-port`
 - Each device gets a unique port
 
 Example with 6 total devices starting at port 10000:

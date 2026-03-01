@@ -199,3 +199,48 @@ command_transcripts:
 ```
 
 The file should be empty or contain only whitespace.
+
+## Troubleshooting
+
+### Template Errors
+
+If you see errors like `template: ...: executing ... at <.InvalidField>: can't evaluate field`:
+
+- Check that the field name matches exactly (case-sensitive)
+- Available fields: `Vendor`, `Platform`, `Hostname`, `Password`
+- Use `{{.Hostname}}` not `{{.hostname}}`
+
+### Command Not Found
+
+If cisshgo returns "Command not found" or no output:
+
+- Verify the command is spelled correctly in `transcript_map.yaml`
+- Check that the command is defined for the current CLI context
+- Try the full command - fuzzy matching may not work for very short inputs (e.g., `s` alone)
+- Use `show version` instead of just `sh` if ambiguous
+
+### Ambiguous Command Errors
+
+If you see `% Ambiguous command`:
+
+- Multiple commands match your input
+- Use more characters to make the command unique
+- Example: `sh` matches both `show` and `shutdown` - use `sho` or `show`
+
+### File Not Found Errors
+
+If cisshgo fails to start with "file not found" or "no such file":
+
+- Check that all transcript paths in `transcript_map.yaml` are correct
+- Paths are relative to the transcript map file location, not your current directory
+- Verify files exist: `ls -la transcripts/cisco/ios/show_version.txt`
+- Check for typos in filenames
+
+### Connection Refused
+
+If SSH connection fails:
+
+- Verify cisshgo is running: check for "Listener started" log messages
+- Check the port number matches: `ssh -p 10000` for default starting port
+- Ensure no firewall is blocking the port
+- Try `netstat -tuln | grep 10000` to verify the port is listening

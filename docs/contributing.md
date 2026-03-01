@@ -17,11 +17,11 @@ go test ./...
 
 cisshgo uses [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow):
 
-1. Fork the repo and create a branch from `main`
+1. Fork the repo and create a branch from `master`
 2. Make your changes
 3. Ensure tests pass and coverage stays above 90%
 4. Ensure code is formatted with `gofmt`
-5. Open a pull request against `main`
+5. Open a pull request against `master`
 
 ### Branch Naming
 
@@ -95,7 +95,7 @@ platforms:
 3. Test it:
 
 ```bash
-./cisshgo -platform ios -listeners 1
+./cisshgo --platform ios --listeners 1
 ssh -p 10000 admin@localhost
 # Try: show interfaces
 ```
@@ -160,7 +160,7 @@ func TestNewPlatformInitialization(t *testing.T) {
 5. Test the platform:
 
 ```bash
-./cisshgo -platform new_platform -listeners 1
+./cisshgo --platform new_platform --listeners 1
 ssh -p 10000 admin@localhost
 ```
 

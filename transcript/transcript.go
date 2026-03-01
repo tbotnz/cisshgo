@@ -29,6 +29,7 @@ type Platform struct {
 	Hostname           string            `yaml:"hostname" json:"hostname"`
 	Username           string            `yaml:"username" json:"username"`
 	Password           string            `yaml:"password" json:"password"`
+	PromptFormat       string            `yaml:"prompt_format" json:"prompt_format"`
 	CommandTranscripts map[string]string `yaml:"command_transcripts" json:"command_transcripts"`
 	ContextSearch      map[string]string `yaml:"context_search" json:"context_search"`
 	ContextHierarchy   map[string]string `yaml:"context_hierarchy" json:"context_hierarchy"`

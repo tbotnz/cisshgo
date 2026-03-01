@@ -21,6 +21,7 @@ type FakeDevice struct {
 	DefaultHostname   string            // Default Hostname of the fake device (for resetting)
 	Username          string            // Expected SSH username (empty = any username accepted)
 	Password          string            // Password of the fake device
+	PromptFormat      string            // Optional prompt format string (e.g. "{username}@{hostname}{context}")
 	SupportedCommands SupportedCommands // What commands this fake device supports
 	ContextSearch     map[string]string // The available CLI prompt/contexts on this fake device
 	ContextHierarchy  map[string]string // The hierarchy of the available contexts
@@ -105,6 +106,7 @@ func InitGeneric(platform string, myTranscriptMap transcript.Map, baseDir string
 		DefaultHostname:   p.Hostname,
 		Username:          p.Username,
 		Password:          p.Password,
+		PromptFormat:      p.PromptFormat,
 		SupportedCommands: supportedCommands,
 		ContextSearch:     p.ContextSearch,
 		ContextHierarchy:  p.ContextHierarchy,

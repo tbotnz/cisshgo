@@ -60,6 +60,32 @@ Also available as `{{.Username}}` in transcript templates.
 
 SSH password for authentication.
 
+#### prompt_format
+
+Optional. A format string controlling how the CLI prompt is constructed. When omitted, the prompt defaults to `{hostname}{context}` (standard Cisco style).
+
+Available variables:
+
+| Variable | Value |
+|----------|-------|
+| `{hostname}` | Device hostname (changes with `hostname` command) |
+| `{username}` | Configured username (from `username` field) |
+| `{context}` | Current CLI context suffix (e.g., `>`, `#`, `(config)#`) |
+
+```yaml
+# Cisco style (default — no prompt_format needed)
+csr1000v:
+  hostname: "router"
+  # prompt renders as: router>
+
+# Junos style
+junos:
+  hostname: "mx240"
+  username: "admin"
+  prompt_format: "{username}@{hostname}{context}"
+  # prompt renders as: admin@mx240>
+```
+
 #### command_transcripts
 
 Maps CLI commands to transcript files. Commands are matched using fuzzy matching (see [Transcripts](transcripts.md#command-matching)).

@@ -47,7 +47,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transc
 		// Interactive shell mode — sequence pointer resets per session
 		seqIdx := 0
 		contextState := myFakeDevice.ContextSearch["base"]
-		t := term.NewTerminal(s, myFakeDevice.Hostname+contextState)
+		t := term.NewTerminal(s, buildPrompt(myFakeDevice.PromptFormat, myFakeDevice.Hostname, myFakeDevice.Username, contextState))
 
 		for {
 			userInput, err := t.ReadLine()
@@ -81,7 +81,7 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	}
 
 	if matchPrompt && !multiplePromptMatches {
-		t.SetPrompt(fd.Hostname + fd.ContextSearch[matchedPrompt])
+		t.SetPrompt(buildPrompt(fd.PromptFormat, fd.Hostname, fd.Username, fd.ContextSearch[matchedPrompt]))
 		*contextState = fd.ContextSearch[matchedPrompt]
 		return false
 	}
@@ -90,7 +90,7 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		if fd.ContextHierarchy[*contextState] == "exit" {
 			return true
 		}
-		t.SetPrompt(fd.Hostname + fd.ContextHierarchy[*contextState])
+		t.SetPrompt(buildPrompt(fd.PromptFormat, fd.Hostname, fd.Username, fd.ContextHierarchy[*contextState]))
 		*contextState = fd.ContextHierarchy[*contextState]
 		return false
 	}
@@ -99,7 +99,7 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		t.Write(append([]byte("Resetting State..."), '\n'))
 		*contextState = fd.ContextSearch["base"]
 		fd.Hostname = fd.DefaultHostname
-		t.SetPrompt(fd.Hostname + *contextState)
+		t.SetPrompt(buildPrompt(fd.PromptFormat, fd.Hostname, fd.Username, *contextState))
 		return false
 	}
 
@@ -108,7 +108,7 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	if userInputFields[0] == "hostname" && *contextState == "(config)#" {
 		fd.Hostname = strings.Join(userInputFields[1:], " ")
 		log.Printf("Setting hostname to %s\n", fd.Hostname)
-		t.SetPrompt(fd.Hostname + *contextState)
+		t.SetPrompt(buildPrompt(fd.PromptFormat, fd.Hostname, fd.Username, *contextState))
 		return false
 	}
 
@@ -158,4 +158,17 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 	}
 	t.Write(append([]byte(output), '\n'))
 	return false
+}
+
+// buildPrompt constructs the terminal prompt string.
+// If format is empty, falls back to hostname+context (default Cisco style).
+func buildPrompt(format, hostname, username, context string) string {
+	if format == "" {
+		return hostname + context
+	}
+	return strings.NewReplacer(
+		"{hostname}", hostname,
+		"{username}", username,
+		"{context}", context,
+	).Replace(format)
 }

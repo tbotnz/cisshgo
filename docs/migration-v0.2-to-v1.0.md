@@ -72,7 +72,7 @@ platforms:
       ">": "exit"
 ```
 
-See the [migration script](migration-script.md) to automate this conversion.
+See the [migration script](#migration-script) to automate this conversion.
 
 ---
 
@@ -196,6 +196,28 @@ cisshgo now handles `SIGINT`/`SIGTERM` and shuts down all listeners cleanly.
 ```bash
 ./cisshgo --version
 ```
+
+---
+
+## Migration Script
+
+A Python script is provided to automate the transcript map schema migration:
+
+```bash
+# Requires Python 3 and PyYAML (pip install pyyaml)
+
+# Preview output:
+python3 scripts/migrate_transcript_map.py transcript_map.yaml
+
+# Migrate in-place:
+python3 scripts/migrate_transcript_map.py transcript_map.yaml > /tmp/map.yaml && mv /tmp/map.yaml transcript_map.yaml
+```
+
+The script handles:
+- v0.2.0 list-of-maps → v1.0.0 map (migrates)
+- Already v1.0.0 format (no-op, reports "no changes needed")
+- Empty platforms list → empty map
+- Missing `platforms` key → no change
 
 ---
 

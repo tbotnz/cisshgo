@@ -411,3 +411,30 @@ func TestHandler_ScenarioSequence(t *testing.T) {
 		t.Errorf("expected 'config after' in output, got:\n%s", out)
 	}
 }
+
+func TestBuildPrompt_Default(t *testing.T) {
+	got := buildPrompt("", "router", "admin", ">")
+	if got != "router>" {
+		t.Errorf("buildPrompt = %q, want %q", got, "router>")
+	}
+}
+
+func TestBuildPrompt_Format(t *testing.T) {
+	got := buildPrompt("{username}@{hostname}{context}", "router", "admin", ">")
+	if got != "admin@router>" {
+		t.Errorf("buildPrompt = %q, want %q", got, "admin@router>")
+	}
+}
+
+func TestHandler_JunosStylePrompt(t *testing.T) {
+	fd := newTestDevice()
+	fd.Username = "admin"
+	fd.PromptFormat = "{username}@{hostname}{context}"
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	out := interact(t, addr, []string{""})
+	if !strings.Contains(out, "admin@testhost") {
+		t.Errorf("expected Junos-style prompt 'admin@testhost', got:\n%s", out)
+	}
+}

@@ -103,6 +103,7 @@ platforms:
     hostname: "cisshgo-junos"
     username: "admin"
     password: "admin"
+    prompt_format: "{username}@{hostname}{context}"
     command_transcripts:
       "show version": "transcripts/juniper/junos/show_version.txt"
       "show interfaces": "transcripts/juniper/junos/show_interfaces.txt"

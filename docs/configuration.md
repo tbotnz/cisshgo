@@ -44,6 +44,18 @@ The device vendor (e.g., `cisco`, `arista`, `juniper`).
 
 The hostname displayed in the CLI prompt. Supports Go template variables (see [Transcripts](transcripts.md)).
 
+#### username
+
+Optional. The SSH username required to authenticate. When set, cisshgo enforces both username and password — connections with a different username are rejected. When omitted, any username is accepted (only the password is checked).
+
+```yaml
+junos:
+  username: "admin"   # only "admin" can connect
+  password: "admin"
+```
+
+Also available as `{{.Username}}` in transcript templates.
+
 #### password
 
 SSH password for authentication.

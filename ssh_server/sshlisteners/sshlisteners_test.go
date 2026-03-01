@@ -104,3 +104,57 @@ func TestGenericListener_PortInUse(t *testing.T) {
 		t.Error("expected error when port is already in use")
 	}
 }
+
+func TestGenericListener_UsernameEnforcement(t *testing.T) {
+	fd := &fakedevices.FakeDevice{
+		Hostname:          "testhost",
+		DefaultHostname:   "testhost",
+		Username:          "admin",
+		Password:          "admin",
+		SupportedCommands: fakedevices.SupportedCommands{},
+		ContextSearch:     map[string]string{"base": ">"},
+		ContextHierarchy:  map[string]string{">": "exit"},
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	addr := ln.Addr().String()
+	ln.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { GenericListener(ctx, fd, port, handlers.GenericCiscoHandler) }()
+
+	for i := 0; i < 20; i++ {
+		conn, dialErr := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if dialErr == nil {
+			conn.Close()
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	cfg := &gossh.ClientConfig{
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
+		Timeout:         2 * time.Second,
+	}
+
+	// Correct username + password — should succeed
+	cfg.User = "admin"
+	cfg.Auth = []gossh.AuthMethod{gossh.Password("admin")}
+	client, err := gossh.Dial("tcp", addr, cfg)
+	if err != nil {
+		t.Fatalf("expected success with correct credentials: %v", err)
+	}
+	client.Close()
+
+	// Wrong username — should fail
+	cfg.User = "wronguser"
+	_, err = gossh.Dial("tcp", addr, cfg)
+	if err == nil {
+		t.Error("expected auth failure with wrong username")
+	}
+}

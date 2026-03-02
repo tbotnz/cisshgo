@@ -153,6 +153,8 @@ scenarios:
         transcript: "generic_empty_return.txt"
       - command: "ip address 172.16.0.1 255.255.255.0"
         transcript: "generic_empty_return.txt"
+      - command: "description added-in-scenario"
+        transcript: "generic_empty_return.txt"
       - command: "no shutdown"
         transcript: "generic_empty_return.txt"
       - command: "end"

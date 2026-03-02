@@ -20,6 +20,7 @@ platforms:
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
+    end_context: "#"
   iosxr:
     vendor: "cisco"
     hostname: "cisshgo-xr"
@@ -34,6 +35,7 @@ platforms:
     context_search:
       "configure terminal": "(config)#"
       "base": "#"
+    end_context: "#"
   ios:
     vendor: "cisco"
     hostname: "cisshgo-ios"
@@ -52,6 +54,7 @@ platforms:
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
+    end_context: "#"
   asa:
     vendor: "cisco"
     hostname: "cisshgo-asa"
@@ -70,6 +73,7 @@ platforms:
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
+    end_context: "#"
   nxos:
     vendor: "cisco"
     hostname: "cisshgo-nxos"
@@ -86,6 +90,7 @@ platforms:
     context_search:
       "configure terminal": "(config)#"
       "base": "#"
+    end_context: "#"
   eos:
     vendor: "arista"
     hostname: "cisshgo-eos"
@@ -104,6 +109,7 @@ platforms:
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
+    end_context: "#"
   junos:
     vendor: "juniper"
     hostname: "cisshgo-junos"

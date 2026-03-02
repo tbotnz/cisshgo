@@ -83,11 +83,16 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	}
 
 	if userInput == "exit" || userInput == "end" {
-		if fd.ContextHierarchy[*contextState] == "exit" {
+		// "end" jumps directly to EndContext if configured (Cisco IOS behavior: always returns to #)
+		target := fd.ContextHierarchy[*contextState]
+		if userInput == "end" && fd.EndContext != "" {
+			target = fd.EndContext
+		}
+		if target == "exit" {
 			return true
 		}
-		t.SetPrompt(devicePrompt(fd, fd.ContextHierarchy[*contextState]))
-		*contextState = fd.ContextHierarchy[*contextState]
+		t.SetPrompt(devicePrompt(fd, target))
+		*contextState = target
 		return false
 	}
 

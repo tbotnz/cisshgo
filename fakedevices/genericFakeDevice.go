@@ -27,6 +27,7 @@ type FakeDevice struct {
 	ContextSearch      map[string]string // The available CLI prompt/contexts on this fake device
 	ContextHierarchy   map[string]string // The hierarchy of the available contexts
 	ContextPrefixLines map[string]string // Optional prefix lines above the prompt, keyed by context value
+	EndContext         string            // If set, "end" jumps directly to this context (e.g. "#") instead of traversing hierarchy
 }
 
 // Copy returns a deep copy of the FakeDevice, safe for use in a separate goroutine.
@@ -118,5 +119,6 @@ func InitGeneric(platform string, myTranscriptMap transcript.Map, baseDir string
 		ContextSearch:      p.ContextSearch,
 		ContextHierarchy:   p.ContextHierarchy,
 		ContextPrefixLines: p.ContextPrefixLines,
+		EndContext:         p.EndContext,
 	}, nil
 }

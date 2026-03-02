@@ -34,6 +34,7 @@ type Platform struct {
 	ContextSearch      map[string]string `yaml:"context_search" json:"context_search"`
 	ContextHierarchy   map[string]string `yaml:"context_hierarchy" json:"context_hierarchy"`
 	ContextPrefixLines map[string]string `yaml:"context_prefix_lines" json:"context_prefix_lines"`
+	EndContext         string            `yaml:"end_context" json:"end_context"`
 }
 
 // Map holds all platforms and scenarios defined in a transcript map YAML file.

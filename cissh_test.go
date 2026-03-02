@@ -21,6 +21,7 @@ platforms:
   csr1000v:
     vendor: "cisco"
     hostname: "testhost"
+    username: "admin"
     password: "admin"
     command_transcripts: {}
     context_search:
@@ -108,6 +109,7 @@ platforms:
   csr1000v:
     vendor: "cisco"
     hostname: "testhost"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "show_version.txt"
@@ -172,6 +174,7 @@ platforms:
   csr1000v:
     vendor: "cisco"
     hostname: "testhost"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "/nonexistent/transcript.txt"

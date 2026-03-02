@@ -18,6 +18,7 @@ func TestGenericListener(t *testing.T) {
 		Platform:        "csr1000v",
 		Hostname:        "testhost",
 		DefaultHostname: "testhost",
+		Username:        "admin",
 		Password:        "admin",
 		SupportedCommands: fakedevices.SupportedCommands{
 			"show version": "version 1.0\n",
@@ -86,6 +87,7 @@ func TestGenericListener(t *testing.T) {
 
 func TestGenericListener_PortInUse(t *testing.T) {
 	fd := &fakedevices.FakeDevice{
+		Username:          "admin",
 		Password:          "admin",
 		SupportedCommands: fakedevices.SupportedCommands{},
 		ContextSearch:     map[string]string{"base": ">"},

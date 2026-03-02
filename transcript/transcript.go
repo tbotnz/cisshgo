@@ -72,6 +72,9 @@ func Validate(tm Map, baseDir string) error {
 	}
 
 	for platform, p := range tm.Platforms {
+		if p.Username == "" {
+			errs = append(errs, fmt.Sprintf("  platform %q: username is required", platform))
+		}
 		for cmd, path := range p.CommandTranscripts {
 			checkPath(fmt.Sprintf("platform %q command %q", platform, cmd), path)
 		}

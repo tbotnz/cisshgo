@@ -130,7 +130,7 @@ func TestValidate(t *testing.T) {
 	}
 	tm := Map{
 		Platforms: map[string]Platform{
-			"csr1000v": {CommandTranscripts: map[string]string{"show version": "show_version.txt"}},
+			"csr1000v": {Username: "admin", CommandTranscripts: map[string]string{"show version": "show_version.txt"}},
 		},
 	}
 	if err := Validate(tm, dir); err != nil {
@@ -138,10 +138,21 @@ func TestValidate(t *testing.T) {
 	}
 }
 
+func TestValidate_MissingUsername(t *testing.T) {
+	tm := Map{
+		Platforms: map[string]Platform{
+			"csr1000v": {CommandTranscripts: map[string]string{}},
+		},
+	}
+	if err := Validate(tm, t.TempDir()); err == nil {
+		t.Error("expected error for platform with empty username")
+	}
+}
+
 func TestValidate_MissingFile(t *testing.T) {
 	tm := Map{
 		Platforms: map[string]Platform{
-			"csr1000v": {CommandTranscripts: map[string]string{"show version": "nonexistent.txt"}},
+			"csr1000v": {Username: "admin", CommandTranscripts: map[string]string{"show version": "nonexistent.txt"}},
 		},
 	}
 	if err := Validate(tm, t.TempDir()); err == nil {
@@ -161,7 +172,7 @@ func TestValidate_UnknownScenarioPlatform(t *testing.T) {
 
 func TestValidate_ScenarioMissingFile(t *testing.T) {
 	tm := Map{
-		Platforms: map[string]Platform{"csr1000v": {}},
+		Platforms: map[string]Platform{"csr1000v": {Username: "admin"}},
 		Scenarios: map[string]Scenario{
 			"test": {
 				Platform: "csr1000v",

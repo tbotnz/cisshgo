@@ -3,6 +3,7 @@ platforms:
   csr1000v:
     vendor: "cisco"
     hostname: "cisshgo1000v"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show ip interface brief": "cisco/csr1000v/show_ip_interface_brief.txt"
@@ -22,6 +23,7 @@ platforms:
   iosxr:
     vendor: "cisco"
     hostname: "cisshgo-xr"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "cisco/iosxr/show_version.txt"
@@ -35,6 +37,7 @@ platforms:
   ios:
     vendor: "cisco"
     hostname: "cisshgo-ios"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "cisco/ios/show_version.txt"
@@ -52,6 +55,7 @@ platforms:
   asa:
     vendor: "cisco"
     hostname: "cisshgo-asa"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "cisco/asa/show_version.txt"
@@ -69,6 +73,7 @@ platforms:
   nxos:
     vendor: "cisco"
     hostname: "cisshgo-nxos"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "cisco/nxos/show_version.txt"
@@ -84,6 +89,7 @@ platforms:
   eos:
     vendor: "arista"
     hostname: "cisshgo-eos"
+    username: "admin"
     password: "admin"
     command_transcripts:
       "show version": "arista/eos/show_version.txt"

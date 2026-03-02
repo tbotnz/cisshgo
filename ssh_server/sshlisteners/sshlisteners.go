@@ -37,7 +37,13 @@ func ScenarioListener(
 
 func listen(ctx context.Context, myFakeDevice *fakedevices.FakeDevice, portNumber int, handler ssh.Handler) error {
 	portString := ":" + strconv.Itoa(portNumber)
-	log.Printf("Starting cissh.go ssh server on port %s\n", portString)
+	if myFakeDevice.ScenarioName != "" {
+		log.Printf("Starting listener on %s [scenario=%s hostname=%s user=%s]",
+			portString, myFakeDevice.ScenarioName, myFakeDevice.Hostname, myFakeDevice.Username)
+	} else {
+		log.Printf("Starting listener on %s [platform=%s hostname=%s user=%s]",
+			portString, myFakeDevice.Platform, myFakeDevice.Hostname, myFakeDevice.Username)
+	}
 
 	srv := &ssh.Server{
 		Addr:    portString,

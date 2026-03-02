@@ -148,21 +148,25 @@ func TestTranscriptMapIntegrity(t *testing.T) {
 	}
 
 	// Track all referenced paths for orphan detection
+	// Paths in the map are relative to the map file's directory (transcripts/)
+	const mapDir = "transcripts"
 	referenced := map[string]bool{}
 
 	for platform, p := range tm.Platforms {
 		for cmd, path := range p.CommandTranscripts {
-			referenced[path] = true
-			if _, err := os.Stat(path); err != nil {
-				t.Errorf("platform %q command %q: file not found: %s", platform, cmd, path)
+			resolved := filepath.Join(mapDir, path)
+			referenced[resolved] = true
+			if _, err := os.Stat(resolved); err != nil {
+				t.Errorf("platform %q command %q: file not found: %s", platform, cmd, resolved)
 			}
 		}
 	}
 	for name, s := range tm.Scenarios {
 		for i, step := range s.Sequence {
-			referenced[step.Transcript] = true
-			if _, err := os.Stat(step.Transcript); err != nil {
-				t.Errorf("scenario %q step %d (%q): file not found: %s", name, i, step.Command, step.Transcript)
+			resolved := filepath.Join(mapDir, step.Transcript)
+			referenced[resolved] = true
+			if _, err := os.Stat(resolved); err != nil {
+				t.Errorf("scenario %q step %d (%q): file not found: %s", name, i, step.Command, resolved)
 			}
 		}
 	}
@@ -197,7 +201,7 @@ func TestInitScenario(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fd, steps, err := InitScenario("csr1000v-add-interface", tm, ".")
+	fd, steps, err := InitScenario("csr1000v-add-interface", tm, "transcripts")
 	if err != nil {
 		t.Fatalf("InitScenario: %v", err)
 	}

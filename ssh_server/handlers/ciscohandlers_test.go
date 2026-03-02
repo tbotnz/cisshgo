@@ -578,3 +578,49 @@ func TestSequenceWithContextSwitches(t *testing.T) {
 		t.Errorf("expected (config-if)# prompt after interface command:\n%s", out)
 	}
 }
+
+// TestScenarioStrictContextSwitch verifies that in scenario mode, context switches
+// that are not the current sequence step are blocked (% Unknown command).
+func TestScenarioStrictContextSwitch(t *testing.T) {
+	fd := newTestDevice()
+	sequence := []transcript.SequenceStep{
+		{Command: "show running-config", Transcript: "output\n"},
+		{Command: "enable", Transcript: ""},
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := ln.Addr().String()
+	ln.Close()
+
+	srv := &ssh.Server{
+		Addr:    addr,
+		Handler: GenericCiscoScenarioHandler(fd, sequence),
+		PasswordHandler: func(ctx ssh.Context, pass string) bool {
+			return ctx.User() == fd.Username && pass == fd.Password
+		},
+	}
+	go func() { srv.ListenAndServe() }()
+	defer srv.Close()
+
+	for i := 0; i < 20; i++ {
+		conn, dialErr := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if dialErr == nil {
+			conn.Close()
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	// Type "enable" before "show running-config" — should be blocked in scenario mode
+	out := interact(t, addr, []string{"enable", "show running-config"})
+	if !strings.Contains(out, "Unknown command") {
+		t.Errorf("expected 'enable' to be blocked before its sequence step, got:\n%s", out)
+	}
+	// show running-config should still work (it's the current step)
+	if !strings.Contains(out, "output") {
+		t.Errorf("expected show running-config to return output, got:\n%s", out)
+	}
+}

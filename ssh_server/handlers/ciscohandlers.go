@@ -82,17 +82,27 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 
 	// Apply context switch if the input matches a context_search key.
 	// Uses starts-with-N-words semantics so "interface Gi0/0/2" matches key "interface".
-	if matchedCtx, ok := matchContextKey(userInput, fd.ContextSearch); ok {
-		t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedCtx]))
-		*contextState = fd.ContextSearch[matchedCtx]
-		return false
+	// In scenario mode (active sequence), context switches only fire when the sequence
+	// step was just handled — enforcing strict command ordering.
+	inScenario := seqIdx != nil && *seqIdx < len(sequence)
+	if !inScenario || sequenceHandled {
+		if matchedCtx, ok := matchContextKey(userInput, fd.ContextSearch); ok {
+			t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedCtx]))
+			*contextState = fd.ContextSearch[matchedCtx]
+			return false
+		}
 	}
 
 	if sequenceHandled {
 		return false
 	}
 
-	if userInput == "exit" || userInput == "end" {
+	if userInput == "exit" {
+		return handleExitEnd(t, userInput, fd, contextState)
+	}
+
+	// In scenario mode, "end" is blocked unless it was the current sequence step
+	if userInput == "end" && !inScenario {
 		return handleExitEnd(t, userInput, fd, contextState)
 	}
 

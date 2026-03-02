@@ -143,10 +143,10 @@ scenarios:
   csr1000v-add-interface:
     platform: csr1000v
     sequence:
-      - command: "show running-config"
-        transcript: "scenarios/csr1000v-add-interface/running_config_before.txt"
       - command: "enable"
         transcript: "generic_empty_return.txt"
+      - command: "show running-config"
+        transcript: "scenarios/csr1000v-add-interface/running_config_before.txt"
       - command: "configure terminal"
         transcript: "generic_empty_return.txt"
       - command: "interface GigabitEthernet0/0/2"

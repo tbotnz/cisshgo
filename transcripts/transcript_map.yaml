@@ -135,9 +135,13 @@ scenarios:
     sequence:
       - command: "show running-config"
         transcript: "scenarios/csr1000v-add-interface/running_config_before.txt"
+      - command: "configure terminal"
+        transcript: "generic_empty_return.txt"
       - command: "interface GigabitEthernet0/0/2"
         transcript: "generic_empty_return.txt"
       - command: "ip address 172.16.0.1 255.255.255.0"
+        transcript: "generic_empty_return.txt"
+      - command: "no shutdown"
         transcript: "generic_empty_return.txt"
       - command: "end"
         transcript: "generic_empty_return.txt"

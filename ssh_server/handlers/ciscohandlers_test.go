@@ -31,12 +31,14 @@ func newTestDevice() *fakedevices.FakeDevice {
 		ContextSearch: map[string]string{
 			"base":               ">",
 			"enable":             "#",
+			"interface":          "(config-if)#",
 			"configure terminal": "(config)#",
 		},
 		ContextHierarchy: map[string]string{
-			">":         "exit",
-			"#":         ">",
-			"(config)#": "#",
+			">":            "exit",
+			"#":            ">",
+			"(config)#":    "#",
+			"(config-if)#": "(config)#",
 		},
 		EndContext: "#",
 	}

@@ -73,3 +73,17 @@ devices:
 		t.Error("expected error when neither platform nor scenario is set")
 	}
 }
+
+func TestLoadInventory_NegativeCount(t *testing.T) {
+	content := `---
+devices:
+  - platform: csr1000v
+    count: -1
+`
+	tmpFile := filepath.Join(t.TempDir(), "inventory.yaml")
+	os.WriteFile(tmpFile, []byte(content), 0644)
+	_, err := LoadInventory(tmpFile)
+	if err == nil {
+		t.Error("expected error for negative count")
+	}
+}

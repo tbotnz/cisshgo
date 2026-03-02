@@ -624,3 +624,36 @@ func TestScenarioStrictContextSwitch(t *testing.T) {
 		t.Errorf("expected show running-config to return output, got:\n%s", out)
 	}
 }
+
+func TestMatchSequenceStep(t *testing.T) {
+	cases := []struct {
+		input string
+		step  string
+		want  bool
+	}{
+		// Standard prefix matching
+		{"show running-config", "show running-config", true},
+		{"sho run", "show running-config", true},
+		{"enable", "enable", true},
+		{"en", "enable", true},
+		// Interface token matching
+		{"interface GigabitEthernet0/0/2", "interface GigabitEthernet0/0/2", true},
+		{"int GigabitEthernet0/0/2", "interface GigabitEthernet0/0/2", true},
+		{"int g0/0/2", "interface GigabitEthernet0/0/2", true},
+		{"int gi0/0/2", "interface GigabitEthernet0/0/2", true},
+		// Wrong suffix — must not match
+		{"int g0/0/3", "interface GigabitEthernet0/0/2", false},
+		// Wrong alpha prefix — must not match
+		{"int gub0/0/2", "interface GigabitEthernet0/0/2", false},
+		{"int fa0/0/2", "interface GigabitEthernet0/0/2", false},
+		// Wrong word count
+		{"interface GigabitEthernet0/0/2 extra", "interface GigabitEthernet0/0/2", false},
+	}
+
+	for _, c := range cases {
+		got := matchSequenceStep(c.input, c.step)
+		if got != c.want {
+			t.Errorf("matchSequenceStep(%q, %q) = %v; want %v", c.input, c.step, got, c.want)
+		}
+	}
+}

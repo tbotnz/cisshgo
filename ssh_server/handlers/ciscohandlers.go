@@ -133,8 +133,7 @@ func handleSequenceStep(t *term.Terminal, userInput string, fd *fakedevices.Fake
 		return false, false
 	}
 	step := sequence[*seqIdx]
-	match, _, multipleMatches := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
-	if !match || multipleMatches {
+	if !matchSequenceStep(userInput, step.Command) {
 		return false, false
 	}
 	output, err := fakedevices.TranscriptReader(step.Transcript, fd)
@@ -216,6 +215,51 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 	}
 	t.Write(append([]byte(output), '\n'))
 	return false
+}
+
+// matchSequenceStep returns true if userInput matches the sequence step command.
+// Uses standard prefix matching for regular words, and for tokens containing a
+// letter/digit boundary (e.g. "g0/0/2"), matches the alpha prefix against the
+// step's alpha prefix and requires an exact suffix match.
+// This allows "int g0/0/2" to match "interface GigabitEthernet0/0/2" without
+// a hardcoded abbreviation table.
+func matchSequenceStep(userInput, stepCmd string) bool {
+	userFields := strings.Fields(strings.ToLower(userInput))
+	stepFields := strings.Fields(strings.ToLower(stepCmd))
+	if len(userFields) != len(stepFields) {
+		return false
+	}
+	for i, uf := range userFields {
+		sf := stepFields[i]
+		uAlpha, uSuffix := splitIfaceToken(uf)
+		sAlpha, sSuffix := splitIfaceToken(sf)
+		if uSuffix != "" || sSuffix != "" {
+			// Interface-style token: alpha prefix must match, suffix must be equal
+			if !strings.HasPrefix(sAlpha, uAlpha) || uSuffix != sSuffix {
+				return false
+			}
+		} else {
+			// Regular word: step word must start with user word (abbreviation)
+			if !strings.HasPrefix(sf, uf) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// splitIfaceToken splits a token like "gigabitethernet0/0/2" into ("gigabitethernet", "0/0/2").
+// Only splits when the suffix starts with a digit (interface-style tokens).
+// Returns (token, "") if there is no letter/digit boundary.
+func splitIfaceToken(token string) (alpha, suffix string) {
+	i := 0
+	for i < len(token) && token[i] >= 'a' && token[i] <= 'z' {
+		i++
+	}
+	if i == 0 || i == len(token) || token[i] < '0' || token[i] > '9' {
+		return token, ""
+	}
+	return token[:i], token[i:]
 }
 
 // buildPrompt constructs the terminal prompt string.

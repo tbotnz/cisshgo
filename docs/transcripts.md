@@ -112,7 +112,7 @@ my-router uptime is 1 day, 2 hours, 30 minutes
 
 ### Template Functions
 
-Standard Go template functions are available:
+Standard Go template functions are available (see [text/template documentation](https://pkg.go.dev/text/template) for the full reference):
 
 - String manipulation: `printf`, `print`, `println`
 - Conditionals: `if`, `else`, `end`

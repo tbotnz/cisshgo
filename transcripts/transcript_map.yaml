@@ -13,10 +13,12 @@ platforms:
       "terminal width 511": "generic_empty_return.txt"
       "write mem": "cisco/csr1000v/write_mem.txt"
     context_hierarchy:
+      "(config-if)#": "(config)#"
       "(config)#": "#"
       "#": ">"
       ">": "exit"
     context_search:
+      "interface": "(config-if)#"
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
@@ -47,10 +49,12 @@ platforms:
       "show running-config": "cisco/ios/show_running-config.txt"
       "terminal length 0": "generic_empty_return.txt"
     context_hierarchy:
+      "(config-if)#": "(config)#"
       "(config)#": "#"
       "#": ">"
       ">": "exit"
     context_search:
+      "interface": "(config-if)#"
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
@@ -66,10 +70,12 @@ platforms:
       "show running-config": "cisco/asa/show_running-config.txt"
       "terminal pager 0": "generic_empty_return.txt"
     context_hierarchy:
+      "(config-if)#": "(config)#"
       "(config)#": "#"
       "#": ">"
       ">": "exit"
     context_search:
+      "interface": "(config-if)#"
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
@@ -85,9 +91,11 @@ platforms:
       "show running-config": "cisco/nxos/show_running-config.txt"
       "terminal length 0": "generic_empty_return.txt"
     context_hierarchy:
+      "(config-if)#": "(config)#"
       "(config)#": "#"
       "#": "exit"
     context_search:
+      "interface": "(config-if)#"
       "configure terminal": "(config)#"
       "base": "#"
     end_context: "#"
@@ -102,10 +110,12 @@ platforms:
       "show running-config": "arista/eos/show_running-config.txt"
       "terminal length 0": "generic_empty_return.txt"
     context_hierarchy:
+      "(config-if)#": "(config)#"
       "(config)#": "#"
       "#": ">"
       ">": "exit"
     context_search:
+      "interface": "(config-if)#"
       "configure terminal": "(config)#"
       "enable": "#"
       "base": ">"
@@ -135,6 +145,8 @@ scenarios:
     sequence:
       - command: "show running-config"
         transcript: "scenarios/csr1000v-add-interface/running_config_before.txt"
+      - command: "enable"
+        transcript: "generic_empty_return.txt"
       - command: "configure terminal"
         transcript: "generic_empty_return.txt"
       - command: "interface GigabitEthernet0/0/2"

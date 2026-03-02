@@ -208,8 +208,8 @@ func TestInitScenario(t *testing.T) {
 	if fd.Platform != "csr1000v" {
 		t.Errorf("Platform = %q, want csr1000v", fd.Platform)
 	}
-	if len(steps) != 7 {
-		t.Errorf("steps len = %d, want 7", len(steps))
+	if len(steps) != 8 {
+		t.Errorf("steps len = %d, want 8", len(steps))
 	}
 	if steps[0].Command != "show running-config" {
 		t.Errorf("steps[0].Command = %q, want 'show running-config'", steps[0].Command)

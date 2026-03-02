@@ -73,27 +73,27 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		return false
 	}
 
-	// Check for context switching commands
-	matchPrompt, matchedPrompt, multiplePromptMatches := cmdmatch.Match(userInput, fd.ContextSearch)
+	// Check sequence step FIRST — if it matches, advance the pointer and write the
+	// transcript. Then fall through to also apply any context switch side effect.
+	sequenceHandled, terminate := handleSequenceStep(t, userInput, fd, sequence, seqIdx)
+	if terminate {
+		return true
+	}
 
-	if matchPrompt && !multiplePromptMatches {
-		t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedPrompt]))
-		*contextState = fd.ContextSearch[matchedPrompt]
+	// Apply context switch if the input matches a context_search key.
+	// Uses starts-with-N-words semantics so "interface Gi0/0/2" matches key "interface".
+	if matchedCtx, ok := matchContextKey(userInput, fd.ContextSearch); ok {
+		t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedCtx]))
+		*contextState = fd.ContextSearch[matchedCtx]
+		return false
+	}
+
+	if sequenceHandled {
 		return false
 	}
 
 	if userInput == "exit" || userInput == "end" {
-		// "end" jumps directly to EndContext if configured (Cisco IOS behavior: always returns to #)
-		target := fd.ContextHierarchy[*contextState]
-		if userInput == "end" && fd.EndContext != "" {
-			target = fd.EndContext
-		}
-		if target == "exit" {
-			return true
-		}
-		t.SetPrompt(devicePrompt(fd, target))
-		*contextState = target
-		return false
+		return handleExitEnd(t, userInput, fd, contextState)
 	}
 
 	if userInput == "reset state" {
@@ -113,29 +113,80 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		return false
 	}
 
-	// Match against supported commands
-	return dispatchCommand(t, userInput, fd, sequence, seqIdx)
+	return dispatchCommand(t, userInput, fd)
 }
 
-// dispatchCommand matches userInput against the active sequence step first, then supported commands.
+// handleSequenceStep checks if userInput matches the current sequence step.
+// Returns (handled, terminate).
+func handleSequenceStep(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []transcript.SequenceStep, seqIdx *int) (bool, bool) {
+	if seqIdx == nil || *seqIdx >= len(sequence) {
+		return false, false
+	}
+	step := sequence[*seqIdx]
+	match, _, multipleMatches := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
+	if !match || multipleMatches {
+		return false, false
+	}
+	output, err := fakedevices.TranscriptReader(step.Transcript, fd)
+	if err != nil {
+		log.Println(err)
+		return false, true
+	}
+	t.Write(append([]byte(output), '\n'))
+	*seqIdx++
+	return true, false
+}
+
+// handleExitEnd processes exit and end commands.
 // Returns true if the session should be terminated.
-func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, sequence []transcript.SequenceStep, seqIdx *int) bool {
-	// Check if the next sequence step matches
-	if seqIdx != nil && *seqIdx < len(sequence) {
-		step := sequence[*seqIdx]
-		match, _, multipleMatches := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
-		if match && !multipleMatches {
-			output, err := fakedevices.TranscriptReader(step.Transcript, fd)
-			if err != nil {
-				log.Println(err)
-				return true
+func handleExitEnd(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string) bool {
+	target := fd.ContextHierarchy[*contextState]
+	if userInput == "end" && fd.EndContext != "" {
+		target = fd.EndContext
+	}
+	if target == "exit" {
+		return true
+	}
+	t.SetPrompt(devicePrompt(fd, target))
+	*contextState = target
+	return false
+}
+
+// matchContextKey returns the context_search key that the input starts with (word-prefix match).
+// The key's words must be a prefix of the input's words; extra input words are allowed.
+// Returns the matched key and true, or "" and false if no match or multiple matches.
+// Skips the "base" key since it is not a real command.
+func matchContextKey(userInput string, contextSearch map[string]string) (string, bool) {
+	inputFields := strings.Fields(strings.ToLower(userInput))
+	var matches []string
+	for key := range contextSearch {
+		if key == "base" {
+			continue
+		}
+		keyFields := strings.Fields(strings.ToLower(key))
+		if len(inputFields) < len(keyFields) {
+			continue
+		}
+		matched := true
+		for i, kf := range keyFields {
+			if !strings.HasPrefix(kf, inputFields[i]) {
+				matched = false
+				break
 			}
-			t.Write(append([]byte(output), '\n'))
-			*seqIdx++
-			return false
+		}
+		if matched {
+			matches = append(matches, key)
 		}
 	}
+	if len(matches) == 1 {
+		return matches[0], true
+	}
+	return "", false
+}
 
+// dispatchCommand matches userInput against supported commands.
+// Returns true if the session should be terminated.
+func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice) bool {
 	match, matchedCommand, multipleMatches := cmdmatch.Match(userInput, fd.SupportedCommands)
 
 	if multipleMatches {

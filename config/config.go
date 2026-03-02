@@ -43,6 +43,9 @@ func LoadInventory(path string) (Inventory, error) {
 		return Inventory{}, fmt.Errorf("parsing inventory: %w", err)
 	}
 	for i, entry := range inv.Devices {
+		if entry.Count < 0 {
+			return Inventory{}, fmt.Errorf("inventory entry %d: count must be non-negative, got %d", i, entry.Count)
+		}
 		if entry.Platform == "" && entry.Scenario == "" {
 			return Inventory{}, fmt.Errorf("inventory entry %d: must set either platform or scenario", i)
 		}

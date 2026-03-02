@@ -31,7 +31,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transc
 		// Exec mode: client sent a command directly (e.g., ssh host "show version")
 		if cmd := s.RawCommand(); cmd != "" {
 			log.Printf("exec: %s", cmd)
-			match, matchedCommand, multipleMatches, _ := cmdmatch.Match(cmd, myFakeDevice.SupportedCommands)
+			match, matchedCommand, multipleMatches := cmdmatch.Match(cmd, myFakeDevice.SupportedCommands)
 			if match && !multipleMatches {
 				output, err := fakedevices.TranscriptReader(
 					myFakeDevice.SupportedCommands[matchedCommand], myFakeDevice,
@@ -74,11 +74,7 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 	}
 
 	// Check for context switching commands
-	matchPrompt, matchedPrompt, multiplePromptMatches, err := cmdmatch.Match(userInput, fd.ContextSearch)
-	if err != nil {
-		log.Println(err) // coverage-ignore // CmdMatch never returns errors
-		return true
-	}
+	matchPrompt, matchedPrompt, multiplePromptMatches := cmdmatch.Match(userInput, fd.ContextSearch)
 
 	if matchPrompt && !multiplePromptMatches {
 		t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedPrompt]))
@@ -122,7 +118,7 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 	// Check if the next sequence step matches
 	if seqIdx != nil && *seqIdx < len(sequence) {
 		step := sequence[*seqIdx]
-		match, _, multipleMatches, _ := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
+		match, _, multipleMatches := cmdmatch.Match(userInput, map[string]string{step.Command: ""})
 		if match && !multipleMatches {
 			output, err := fakedevices.TranscriptReader(step.Transcript, fd)
 			if err != nil {
@@ -135,11 +131,7 @@ func dispatchCommand(t *term.Terminal, userInput string, fd *fakedevices.FakeDev
 		}
 	}
 
-	match, matchedCommand, multipleMatches, err := cmdmatch.Match(userInput, fd.SupportedCommands)
-	if err != nil {
-		log.Println(err) // coverage-ignore // CmdMatch never returns errors
-		return true
-	}
+	match, matchedCommand, multipleMatches := cmdmatch.Match(userInput, fd.SupportedCommands)
 
 	if multipleMatches {
 		t.Write(append([]byte("% Ambiguous command:  \""+userInput+"\""), '\n'))

@@ -2,69 +2,48 @@
 package cmdmatch
 
 import (
-	"fmt"
+	"log"
 	"strings"
 )
 
-// Match searches the provided supportedCommands to find a match for the provided userInput.
-// Returns match, matchedCommand, multipleMatches, error.
-func Match(userInput string, supportedCommands map[string]string) (bool, string, bool, error) {
-	match := false
-	matchedCmd := ""
-	multipleMatches := false
+// Match searches supportedCommands for a prefix match against userInput.
+// Each word in userInput must be a prefix of the corresponding word in the command.
+// Returns (matched, matchedCommand, multipleMatches).
+func Match(userInput string, supportedCommands map[string]string) (bool, string, bool) {
+	userInput = strings.ToLower(strings.TrimSpace(userInput))
+	if userInput == "" {
+		return false, "", false
+	}
+	userFields := strings.Fields(userInput)
 
-	possibleMatches := make(map[string][]string)
-
-	userInput = strings.ToLower(userInput)
-	userInputFields := strings.Fields(userInput)
-
-	for supportedCommand := range supportedCommands {
-		supportedCommand := strings.ToLower(supportedCommand)
-		commandFields := strings.Fields(supportedCommand)
-
-		if strings.Contains(commandFields[0], userInputFields[0]) &&
-			(len(commandFields) == len(userInputFields)) {
-			possibleMatches[supportedCommand] = commandFields
+	var matches []string
+	for cmd := range supportedCommands {
+		cmdFields := strings.Fields(strings.ToLower(cmd))
+		if len(cmdFields) != len(userFields) {
+			continue
+		}
+		if prefixMatch(userFields, cmdFields) {
+			matches = append(matches, cmd)
 		}
 	}
 
-	closestMatch := make(map[string]struct{})
+	switch len(matches) {
+	case 0:
+		return false, "", false
+	case 1:
+		return true, matches[0], false
+	default:
+		log.Printf("ambiguous command %q matches: %v", userInput, matches)
+		return true, "", true
+	}
+}
 
-	for possibleMatch := range possibleMatches {
-		if userInput == possibleMatch {
-			closestMatch[possibleMatch] = struct{}{}
-			break
-		}
-
-		if strings.Contains(possibleMatch, userInput) {
-			closestMatch[possibleMatch] = struct{}{}
-			break
-		}
-
-		for p, possibleMatchField := range possibleMatches[possibleMatch] {
-			if !strings.Contains(possibleMatchField, userInputFields[p]) {
-				break
-			}
-			if p == (len(possibleMatches[possibleMatch]) - 1) {
-				closestMatch[possibleMatch] = struct{}{}
-			}
+// prefixMatch returns true if every userField is a prefix of the corresponding cmdField.
+func prefixMatch(userFields, cmdFields []string) bool {
+	for i, f := range userFields {
+		if !strings.HasPrefix(cmdFields[i], f) {
+			return false
 		}
 	}
-
-	if len(closestMatch) > 1 {
-		fmt.Printf("multiple matchedCmds: %s\n", closestMatch)
-		match = true
-		matchedCmd = ""
-		multipleMatches = true
-	} else if len(closestMatch) < 1 {
-		match = false
-		matchedCmd = ""
-	} else {
-		match = true
-		for k := range closestMatch {
-			matchedCmd = k
-		}
-	}
-
-	return match, matchedCmd, multipleMatches, nil
+	return true
 }

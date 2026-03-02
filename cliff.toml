@@ -1,5 +1,17 @@
 [changelog]
-header = "# Changelog\n\nAll notable changes to this project will be documented in this file.\n"
+header = """# Changelog
+
+All notable changes to this project will be documented in this file.
+
+This project adheres to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and [Semantic Versioning](https://semver.org/).
+
+**Stability commitment (v1.0.0+):** No breaking changes in minor or patch releases.
+Deprecated features will be supported for at least one major version.
+Migration guides will be provided for all major version upgrades.
+
+Changes are generated from [Conventional Commits](https://www.conventionalcommits.org/).
+"""
 body = """
 {% if version %}\
 ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}

@@ -1,3 +1,5 @@
+// Package handlers contains SSH session handlers for specific device types
+// in order to best emulate their actual behavior.
 package handlers
 
 import (

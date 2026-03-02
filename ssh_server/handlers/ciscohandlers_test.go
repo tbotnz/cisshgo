@@ -485,3 +485,96 @@ func TestEndContext_NotSet_TraversesHierarchy(t *testing.T) {
 		t.Errorf("expected end to traverse hierarchy to #, got:\n%s", out)
 	}
 }
+
+func TestMatchContextKey_StartsWithNWords(t *testing.T) {
+	cs := map[string]string{
+		"interface":          "(config-if)#",
+		"configure terminal": "(config)#",
+		"enable":             "#",
+		"base":               ">",
+	}
+
+	cases := []struct {
+		input   string
+		wantKey string
+		wantOK  bool
+	}{
+		{"interface GigabitEthernet0/0/2", "interface", true},
+		{"interface Loopback0", "interface", true},
+		{"int g0/0/2", "interface", true}, // prefix match on first word
+		{"configure terminal", "configure terminal", true},
+		{"conf t", "configure terminal", true},
+		{"enable", "enable", true},
+		{"en", "enable", true},
+		{"base", "", false}, // base is skipped
+		{"show version", "", false},
+		{"", "", false},
+	}
+
+	for _, c := range cases {
+		key, ok := matchContextKey(c.input, cs)
+		if ok != c.wantOK || key != c.wantKey {
+			t.Errorf("matchContextKey(%q) = (%q, %v); want (%q, %v)", c.input, key, ok, c.wantKey, c.wantOK)
+		}
+	}
+}
+
+func TestSequenceWithContextSwitches(t *testing.T) {
+	fd := newTestDevice()
+	sequence := []transcript.SequenceStep{
+		{Command: "show running-config", Transcript: "before\n"},
+		{Command: "enable", Transcript: ""},
+		{Command: "configure terminal", Transcript: ""},
+		{Command: "interface GigabitEthernet0/0/2", Transcript: ""},
+		{Command: "ip address 172.16.0.1 255.255.255.0", Transcript: ""},
+		{Command: "end", Transcript: ""},
+		{Command: "show running-config", Transcript: "after\n"},
+	}
+
+	// Start a scenario server directly
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := ln.Addr().String()
+	ln.Close()
+
+	srv := &ssh.Server{
+		Addr:    addr,
+		Handler: GenericCiscoScenarioHandler(fd, sequence),
+		PasswordHandler: func(ctx ssh.Context, pass string) bool {
+			return ctx.User() == fd.Username && pass == fd.Password
+		},
+	}
+	go func() { srv.ListenAndServe() }()
+	defer srv.Close()
+
+	for i := 0; i < 20; i++ {
+		conn, dialErr := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if dialErr == nil {
+			conn.Close()
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	out := interact(t, addr, []string{
+		"show running-config",
+		"enable",
+		"configure terminal",
+		"interface GigabitEthernet0/0/2",
+		"ip address 172.16.0.1 255.255.255.0",
+		"end",
+		"show running-config",
+	})
+
+	if !strings.Contains(out, "before") {
+		t.Errorf("expected 'before' transcript in output:\n%s", out)
+	}
+	if !strings.Contains(out, "after") {
+		t.Errorf("expected 'after' transcript in output:\n%s", out)
+	}
+	if !strings.Contains(out, "(config-if)#") {
+		t.Errorf("expected (config-if)# prompt after interface command:\n%s", out)
+	}
+}

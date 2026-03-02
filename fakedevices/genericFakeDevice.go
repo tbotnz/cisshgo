@@ -17,6 +17,7 @@ type SupportedCommands map[string]string
 type FakeDevice struct {
 	Vendor             string            // Vendor of this fake device
 	Platform           string            // Platform of this fake device
+	ScenarioName       string            // Scenario name if this device was initialized from a scenario (empty otherwise)
 	Hostname           string            // Hostname of the fake device
 	DefaultHostname    string            // Default Hostname of the fake device (for resetting)
 	Username           string            // Expected SSH username (empty = any username accepted)
@@ -68,6 +69,7 @@ func InitScenario(scenarioName string, tm transcript.Map, baseDir string) (*Fake
 	if err != nil {
 		return nil, nil, err
 	}
+	fd.ScenarioName = scenarioName
 	steps := make([]transcript.SequenceStep, len(s.Sequence))
 	for i, step := range s.Sequence {
 		path := step.Transcript

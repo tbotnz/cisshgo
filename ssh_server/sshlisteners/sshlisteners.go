@@ -6,6 +6,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/gliderlabs/ssh"
 
@@ -51,7 +52,9 @@ func listen(ctx context.Context, myFakeDevice *fakedevices.FakeDevice, portNumbe
 
 	go func() {
 		<-ctx.Done()
-		srv.Shutdown(context.Background())
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		srv.Shutdown(shutdownCtx)
 	}()
 
 	err := srv.ListenAndServe()

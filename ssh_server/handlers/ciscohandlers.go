@@ -80,11 +80,10 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		return true
 	}
 
-	// Apply context switch if the input matches a context_search key.
-	// Uses starts-with-N-words semantics so "interface Gi0/0/2" matches key "interface".
-	// In scenario mode (active sequence), context switches only fire when the sequence
-	// step was just handled — enforcing strict command ordering.
 	inScenario := seqIdx != nil && *seqIdx < len(sequence)
+
+	// Apply context switch if the input matches a context_search key.
+	// In scenario mode, only fires when the sequence step was just handled.
 	if !inScenario || sequenceHandled {
 		if matchedCtx, ok := matchContextKey(userInput, fd.ContextSearch); ok {
 			t.SetPrompt(devicePrompt(fd, fd.ContextSearch[matchedCtx]))
@@ -93,19 +92,23 @@ func handleShellInput(t *term.Terminal, userInput string, fd *fakedevices.FakeDe
 		}
 	}
 
+	// exit/end: always apply when sequence step matched; in non-scenario mode always apply;
+	// in scenario mode "end" is blocked unless it was the current step.
+	if userInput == "exit" || userInput == "end" {
+		if sequenceHandled || !inScenario || userInput == "exit" {
+			return handleExitEnd(t, userInput, fd, contextState)
+		}
+	}
+
 	if sequenceHandled {
 		return false
 	}
 
-	if userInput == "exit" {
-		return handleExitEnd(t, userInput, fd, contextState)
-	}
+	return handleStateCommands(t, userInput, fd, contextState)
+}
 
-	// In scenario mode, "end" is blocked unless it was the current sequence step
-	if userInput == "end" && !inScenario {
-		return handleExitEnd(t, userInput, fd, contextState)
-	}
-
+// handleStateCommands handles reset state, hostname changes, and supported command dispatch.
+func handleStateCommands(t *term.Terminal, userInput string, fd *fakedevices.FakeDevice, contextState *string) bool {
 	if userInput == "reset state" {
 		t.Write(append([]byte("Resetting State..."), '\n'))
 		*contextState = fd.ContextSearch["base"]

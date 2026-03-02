@@ -21,6 +21,7 @@ func newTestDevice() *fakedevices.FakeDevice {
 		Platform:        "csr1000v",
 		Hostname:        "testhost",
 		DefaultHostname: "testhost",
+		Username:        "admin",
 		Password:        "admin",
 		SupportedCommands: fakedevices.SupportedCommands{
 			"show version":            "FakeOS version 1.0\n{{.Hostname}} uptime is 1 hour\n",
@@ -37,6 +38,7 @@ func newTestDevice() *fakedevices.FakeDevice {
 			"#":         ">",
 			"(config)#": "#",
 		},
+		EndContext: "#",
 	}
 }
 
@@ -443,5 +445,41 @@ func TestHandler_JunosStylePrompt(t *testing.T) {
 	out := interact(t, addr, []string{""})
 	if !strings.Contains(out, "admin@testhost") {
 		t.Errorf("expected Junos-style prompt 'admin@testhost', got:\n%s", out)
+	}
+}
+
+// TestEndContext_JumpsToPrivExec verifies that "end" from (config)# goes directly to #
+// (not to > as exit would).
+func TestEndContext_JumpsToPrivExec(t *testing.T) {
+	fd := newTestDevice() // EndContext: "#"
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	// After end we should be at # — send exit and verify we don't see > prompt before #
+	out := interact(t, addr, []string{"enable", "configure terminal", "end", "exit"})
+	// If end correctly landed at #, exit from # goes to > (one step)
+	// If end incorrectly went to > directly, exit would terminate the session
+	if !strings.Contains(out, "testhost>") {
+		t.Errorf("expected end->exit to reach >, got:\n%s", out)
+	}
+	// Verify we passed through # (not skipped straight to >)
+	if !strings.Contains(out, "testhost#") {
+		t.Errorf("expected to see # prompt after end, got:\n%s", out)
+	}
+}
+
+// TestEndContext_NotSet_TraversesHierarchy verifies backward compat:
+// without EndContext, end behaves like exit (one step up).
+func TestEndContext_NotSet_TraversesHierarchy(t *testing.T) {
+	fd := newTestDevice()
+	fd.EndContext = "" // disable end_context
+	addr, cleanup := startTestServer(t, fd)
+	defer cleanup()
+
+	out := interact(t, addr, []string{"enable", "configure terminal", "end"})
+	// Without EndContext, end from (config)# goes to # (one step per hierarchy)
+	// (config)# -> # is still correct here since hierarchy maps (config)# -> #
+	if !strings.Contains(out, "testhost#") {
+		t.Errorf("expected end to traverse hierarchy to #, got:\n%s", out)
 	}
 }

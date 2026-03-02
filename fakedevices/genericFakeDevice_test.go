@@ -211,8 +211,8 @@ func TestInitScenario(t *testing.T) {
 	if len(steps) != 8 {
 		t.Errorf("steps len = %d, want 8", len(steps))
 	}
-	if steps[0].Command != "show running-config" {
-		t.Errorf("steps[0].Command = %q, want 'show running-config'", steps[0].Command)
+	if steps[0].Command != "enable" {
+		t.Errorf("steps[0].Command = %q, want 'enable'", steps[0].Command)
 	}
 }
 

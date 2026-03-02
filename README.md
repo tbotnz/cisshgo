@@ -76,17 +76,12 @@ Releases are automated via GitHub Actions. To create a new release:
 
 2. GitHub Actions will automatically:
    - Build binaries for all platforms (linux/darwin/windows, amd64/arm64)
-   - Create multi-arch Docker images and push to Docker Hub
+   - Create multi-arch Docker images and push to GitHub Container Registry (ghcr.io)
    - Generate SBOMs for security compliance
    - Create GitHub Release with binaries, archives, and checksums
    - Build deb/rpm packages
 
-### Required Secrets
-
-The following secrets must be configured in the GitHub repository:
-
-- `DOCKER_USERNAME` - Docker Hub username
-- `DOCKER_PASSWORD` - Docker Hub token/password
+> No additional secrets are required. Docker images are published to `ghcr.io` using the built-in `GITHUB_TOKEN`.
 
 ## Connecting
 

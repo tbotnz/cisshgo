@@ -68,7 +68,7 @@ ssh -p 10000 admin@localhost
 
 Default password: `admin`
 
-> **Note**: The hostname shown in the prompt (e.g., `cisshgo1000v#`) is determined by the platform's configuration in the transcript map. The default platform is `csr1000v` with hostname `cisshgo1000v`.
+> **Note**: The hostname shown in the prompt (e.g., `cisshgo1000v#`) is determined by the platform's configuration in the transcript map file. The default platform is `csr1000v` with hostname `cisshgo1000v`.
 
 ### Example Session
 
@@ -108,6 +108,6 @@ See [CLI Reference](cli-reference.md) for all available options.
 
 ## Next Steps
 
-- [Configuration](configuration.md) - Learn about transcript maps and inventory files
+- [Configuration](configuration.md) - Learn about transcript map file and inventory files
 - [Transcripts](transcripts.md) - Customize command outputs and add new commands
 - [CLI Reference](cli-reference.md) - Complete CLI flag documentation

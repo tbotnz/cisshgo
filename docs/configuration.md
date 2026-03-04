@@ -2,12 +2,12 @@
 
 cisshgo uses YAML files for configuration. There are two types of configuration files:
 
-1. **Transcript Map** - Defines platforms, commands, and CLI contexts
+1. **Transcript map** - Defines platforms, commands, and CLI contexts
 2. **Inventory** - Defines multi-device topologies
 
 ## Transcript Map
 
-The transcript map (`transcripts/transcript_map.yaml`) defines available platforms and their command responses.
+The transcript map file (`transcripts/transcript_map.yaml`) defines available platforms and their command responses.
 
 ### Basic Structure
 

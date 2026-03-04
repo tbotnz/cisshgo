@@ -82,7 +82,7 @@ With default settings (50 listeners, starting port 10000), listeners run on port
 **Default**: `transcripts/transcript_map.yaml`  
 **Environment**: `CISSHGO_TRANSCRIPT_MAP`
 
-Path to the transcript map YAML file.
+Path to the transcript map file.
 
 ```bash
 # Use custom transcript map

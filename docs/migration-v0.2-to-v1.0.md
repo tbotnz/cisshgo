@@ -76,7 +76,7 @@ See the [migration script](#migration-script) to automate this conversion.
 
 ---
 
-### 3. Transcript Paths Resolved Relative to Map File
+### 3. Transcript Paths Resolved Relative to Transcript Map File
 
 In v0.2.0, transcript paths were resolved relative to the **working directory** of the process. In v1.0.0, they are resolved relative to the **directory containing the transcript map file**.
 
@@ -225,7 +225,7 @@ The script handles:
 
 1. **Update CLI flags** in any scripts or tooling (see [CLI flag table](#1-cli-flag-names))
 2. **Migrate transcript map** from list-of-maps to map format (see [migration script](migration-script.md) or [schema change](#2-transcript-map-yaml-schema))
-3. **Verify transcript paths** resolve correctly from the map file's directory
+3. **Verify transcript paths** resolve correctly from the transcript map file's directory
 4. **Optionally adopt** inventory files, scenarios, or new platform transcripts
 
 ---
@@ -239,7 +239,7 @@ The script handles:
 → Your transcript map uses the old list-of-maps format. Run the [migration script](migration-script.md) or update manually.
 
 **`transcript map validation failed: platform "X" command "Y": <path>`**
-→ Transcript paths are now resolved relative to the map file. Check that paths are correct relative to where your `transcript_map.yaml` lives.
+→ Transcript paths are now resolved relative to the transcript map file. Check that paths are correct relative to where your `transcript_map.yaml` lives.
 
 **`platform "csr1000v" not found in transcript map`**
-→ The `--platform` flag defaults to `csr1000v`. If your map uses a different platform name, pass `--platform <name>`.
+→ The `--platform` flag defaults to `csr1000v`. If your transcript map uses a different platform name, pass `--platform <name>`.

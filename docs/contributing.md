@@ -83,7 +83,7 @@ The simplest contribution is adding output for a new command on an existing plat
 vim transcripts/cisco/ios/show_interfaces.txt
 ```
 
-2. Add the command to `transcripts/transcript_map.yaml`:
+2. Add the command to the transcript map file `transcripts/transcript_map.yaml`:
 
 ```yaml
 platforms:
@@ -128,7 +128,7 @@ mkdir -p transcripts/vendor/platform
    - `show_running-config.txt`
    - `show_ip_interface_brief.txt` (or equivalent)
 
-3. Add platform entry to `transcript_map.yaml`:
+3. Add platform entry to the transcript map file (`transcript_map.yaml`):
 
 ```yaml
 platforms:

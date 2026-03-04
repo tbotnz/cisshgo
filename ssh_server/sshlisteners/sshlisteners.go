@@ -18,38 +18,38 @@ import (
 // GenericListener starts an SSH server on the given port and blocks until ctx is cancelled.
 func GenericListener(
 	ctx context.Context,
-	myFakeDevice *fakedevices.FakeDevice,
-	portNumber int,
+	fd *fakedevices.FakeDevice,
+	port int,
 	myHandler handlers.PlatformHandler,
 ) error {
-	return listen(ctx, myFakeDevice, portNumber, myHandler(myFakeDevice.Copy()))
+	return listen(ctx, fd, port, myHandler(fd.Copy()))
 }
 
 // ScenarioListener starts an SSH server that plays back a scenario sequence.
 func ScenarioListener(
 	ctx context.Context,
-	myFakeDevice *fakedevices.FakeDevice,
+	fd *fakedevices.FakeDevice,
 	sequence []transcript.SequenceStep,
-	portNumber int,
+	port int,
 ) error {
-	return listen(ctx, myFakeDevice, portNumber, handlers.GenericCiscoScenarioHandler(myFakeDevice.Copy(), sequence))
+	return listen(ctx, fd, port, handlers.GenericCiscoScenarioHandler(fd.Copy(), sequence))
 }
 
-func listen(ctx context.Context, myFakeDevice *fakedevices.FakeDevice, portNumber int, handler ssh.Handler) error {
-	portString := ":" + strconv.Itoa(portNumber)
-	if myFakeDevice.ScenarioName != "" {
+func listen(ctx context.Context, fd *fakedevices.FakeDevice, port int, handler ssh.Handler) error {
+	portString := ":" + strconv.Itoa(port)
+	if fd.ScenarioName != "" {
 		log.Printf("Starting listener on %s [scenario=%s hostname=%s user=%s]",
-			portString, myFakeDevice.ScenarioName, myFakeDevice.Hostname, myFakeDevice.Username)
+			portString, fd.ScenarioName, fd.Hostname, fd.Username)
 	} else {
 		log.Printf("Starting listener on %s [platform=%s hostname=%s user=%s]",
-			portString, myFakeDevice.Platform, myFakeDevice.Hostname, myFakeDevice.Username)
+			portString, fd.Platform, fd.Hostname, fd.Username)
 	}
 
 	srv := &ssh.Server{
 		Addr:    portString,
 		Handler: handler,
 		PasswordHandler: func(sshCtx ssh.Context, pass string) bool {
-			return sshCtx.User() == myFakeDevice.Username && pass == myFakeDevice.Password
+			return sshCtx.User() == fd.Username && pass == fd.Password
 		},
 	}
 

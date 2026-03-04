@@ -16,25 +16,25 @@ import (
 )
 
 // GenericCiscoHandler function handles generic Cisco style sessions
-func GenericCiscoHandler(myFakeDevice *fakedevices.FakeDevice) ssh.Handler {
-	return genericCiscoSession(myFakeDevice, nil)
+func GenericCiscoHandler(fd *fakedevices.FakeDevice) ssh.Handler {
+	return genericCiscoSession(fd, nil)
 }
 
 // GenericCiscoScenarioHandler returns an ssh.Handler that plays back a scenario sequence.
-func GenericCiscoScenarioHandler(myFakeDevice *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
-	return genericCiscoSession(myFakeDevice, sequence)
+func GenericCiscoScenarioHandler(fd *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
+	return genericCiscoSession(fd, sequence)
 }
 
-func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
+func genericCiscoSession(fd *fakedevices.FakeDevice, sequence []transcript.SequenceStep) ssh.Handler {
 	return func(s ssh.Session) {
 
 		// Exec mode: client sent a command directly (e.g., ssh host "show version")
 		if cmd := s.RawCommand(); cmd != "" {
 			log.Printf("exec: %s", cmd)
-			match, matchedCommand, multipleMatches := cmdmatch.Match(cmd, myFakeDevice.SupportedCommands)
+			match, matchedCommand, multipleMatches := cmdmatch.Match(cmd, fd.SupportedCommands)
 			if match && !multipleMatches {
 				output, err := fakedevices.TranscriptReader(
-					myFakeDevice.SupportedCommands[matchedCommand], myFakeDevice,
+					fd.SupportedCommands[matchedCommand], fd,
 				)
 				if err == nil {
 					io.WriteString(s, output)
@@ -46,8 +46,8 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transc
 
 		// Interactive shell mode — sequence pointer resets per session
 		seqIdx := 0
-		contextState := myFakeDevice.ContextSearch["base"]
-		t := term.NewTerminal(s, devicePrompt(myFakeDevice, contextState))
+		contextState := fd.ContextSearch["base"]
+		t := term.NewTerminal(s, devicePrompt(fd, contextState))
 
 		for {
 			userInput, err := t.ReadLine()
@@ -56,7 +56,7 @@ func genericCiscoSession(myFakeDevice *fakedevices.FakeDevice, sequence []transc
 			}
 			log.Println(userInput)
 
-			done := handleShellInput(t, userInput, myFakeDevice, &contextState, sequence, &seqIdx)
+			done := handleShellInput(t, userInput, fd, &contextState, sequence, &seqIdx)
 			if done {
 				break
 			}

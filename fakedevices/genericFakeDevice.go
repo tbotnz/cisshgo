@@ -61,16 +61,16 @@ func readFile(filename string) (string, error) {
 
 // InitScenario builds a FakeDevice for a named scenario, loading the base platform
 // and returning the pre-loaded sequence steps alongside the device.
-func InitScenario(scenarioName string, tm transcript.Map, baseDir string) (*FakeDevice, []transcript.SequenceStep, error) {
-	s, ok := tm.Scenarios[scenarioName]
+func InitScenario(name string, tm transcript.Map, baseDir string) (*FakeDevice, []transcript.SequenceStep, error) {
+	s, ok := tm.Scenarios[name]
 	if !ok {
-		return nil, nil, fmt.Errorf("scenario %q not found in transcript map", scenarioName)
+		return nil, nil, fmt.Errorf("scenario %q not found in transcript map", name)
 	}
 	fd, err := InitGeneric(s.Platform, tm, baseDir)
 	if err != nil {
 		return nil, nil, err
 	}
-	fd.ScenarioName = scenarioName
+	fd.ScenarioName = name
 	steps := make([]transcript.SequenceStep, len(s.Sequence))
 	for i, step := range s.Sequence {
 		path := step.Transcript
@@ -89,8 +89,8 @@ func InitScenario(scenarioName string, tm transcript.Map, baseDir string) (*Fake
 // InitGeneric builds a FakeDevice struct for use with cisshgo.
 // baseDir is the directory from which transcript paths are resolved (typically
 // the directory containing the transcript map file).
-func InitGeneric(platform string, myTranscriptMap transcript.Map, baseDir string) (*FakeDevice, error) {
-	p, ok := myTranscriptMap.Platforms[platform]
+func InitGeneric(platform string, tm transcript.Map, baseDir string) (*FakeDevice, error) {
+	p, ok := tm.Platforms[platform]
 	if !ok {
 		return nil, fmt.Errorf("platform %q not found in transcript map", platform)
 	}

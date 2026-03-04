@@ -8,7 +8,7 @@ import (
 )
 
 // TranscriptReader parses a transcript file and populates any variables that may exist in it
-func TranscriptReader(transcript string, fakeDevice *FakeDevice) (string, error) {
+func TranscriptReader(transcript string, fd *FakeDevice) (string, error) {
 
 	// Setup a template with our transcript
 	tmpl, err := template.New("fakeDeviceTemplate").Parse(transcript)
@@ -20,7 +20,7 @@ func TranscriptReader(transcript string, fakeDevice *FakeDevice) (string, error)
 	var renderedTemplate bytes.Buffer
 
 	// Render (Execute) the template with our input
-	if err := tmpl.Execute(&renderedTemplate, fakeDevice); err != nil {
+	if err := tmpl.Execute(&renderedTemplate, fd); err != nil {
 		return "", err
 	}
 

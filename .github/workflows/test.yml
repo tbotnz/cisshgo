@@ -58,6 +58,9 @@ jobs:
       actions: read
       pull-requests: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
       - uses: fgrosse/go-coverage-report@v1.1.1
         with:
           coverage-artifact-name: code-coverage

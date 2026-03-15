@@ -17,11 +17,11 @@ go test ./...
 
 cisshgo uses [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow):
 
-1. Fork the repo and create a branch from `main`
+1. Fork the repo and create a branch from `master`
 2. Make your changes
 3. Ensure tests pass and coverage stays above 90%: `go test -race -coverprofile=coverage.out ./...`
 4. Ensure code is formatted: `gofmt -w ./...`
-5. Open a pull request against `main`
+5. Open a pull request against `master`
 
 Branch naming convention:
 - `feat/short-description` — new features

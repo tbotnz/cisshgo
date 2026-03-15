@@ -59,7 +59,7 @@ snapshot:
   version_template: "{{ .Tag }}"
 
 changelog:
-  sort: asc
+  disable: true
 
 nfpms:
   - id: cisshgo

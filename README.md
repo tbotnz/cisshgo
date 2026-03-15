@@ -67,16 +67,20 @@ goreleaser release --snapshot --clean --skip=publish
 
 Releases are automated via GitHub Actions. To create a new release:
 
-1. Create and push a tag:
+1. Update the changelog and tag:
 
    ```bash
-   git tag v0.1.2
-   git push origin v0.1.2
+   git-cliff --tag v1.2.3 -o CHANGELOG.md
+   git add CHANGELOG.md
+   git commit -m "docs: update changelog for v1.2.3"
+   git tag -a v1.2.3 -m "v1.2.3"
+   git push origin master v1.2.3
    ```
 
 2. GitHub Actions will automatically:
    - Build binaries for all platforms (linux/darwin/windows, amd64/arm64)
    - Create multi-arch Docker images and push to GitHub Container Registry (ghcr.io)
+   - Generate release notes from git-cliff
    - Generate SBOMs for security compliance
    - Create GitHub Release with binaries, archives, and checksums
    - Build deb/rpm packages

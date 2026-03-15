@@ -59,7 +59,7 @@ snapshot:
   version_template: "{{ .Tag }}"
 
 changelog:
-  use: git-cliff
+  sort: asc
 
 nfpms:
   - id: cisshgo

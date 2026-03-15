@@ -10,7 +10,7 @@ Deprecated features will be supported for at least one major version.
 Migration guides will be provided for all major version upgrades.
 
 Changes are generated from [Conventional Commits](https://www.conventionalcommits.org/).
-## [Unreleased]
+## [1.0.0] - 2026-03-15
 
 ### ⚠️ Breaking Changes
 
@@ -19,13 +19,33 @@ Changes are generated from [Conventional Commits](https://www.conventionalcommit
 CLI flags were renamed as part of the Kong migration in #64.
 Users with scripts or tooling using the old flag names must update them.
 
-- V1.0.0 — first stable release with breaking changes from v0.2.0 ([474af1f](https://github.com/tbotnz/cisshgo/commit/474af1f0c9a1a15dc97ef5855ac76968fa3a7f84))
+- Add missing package-level doc comments (#111) ([7f37a4c](https://github.com/tbotnz/cisshgo/commit/7f37a4c1ff6d24e43e06cfa2d654d22505755fe8))
+
+* docs!: v1.0.0 — first stable release with breaking changes from v0.2.0
+
+- Update CHANGELOG header with stability commitment and regenerate (#97) ([16436e1](https://github.com/tbotnz/cisshgo/commit/16436e1bd2007ade9c9e0222f230b16e74da7ded))
+
+* docs!: v1.0.0 — first stable release with breaking changes from v0.2.0
+
 ### 🐛 Bug Fixes
 
 - Change ParseArgs to return int instead of *int for startingPort ([31205b8](https://github.com/tbotnz/cisshgo/commit/31205b818f5d675d0c5e9c52e8c95dee1fec354a))
 - Rename sshlistners package to sshlisteners ([2e7ca9e](https://github.com/tbotnz/cisshgo/commit/2e7ca9e51de2afa5b66930a5309d3886d04a09b9))
 - Eliminate FakeDevice data race and ssh.Handle global state (#60) ([7423e32](https://github.com/tbotnz/cisshgo/commit/7423e322ed7f0ee7bbbcd621345b60283b80a678))
 - Resolve transcript paths relative to transcript map file location (#76) ([1c34c23](https://github.com/tbotnz/cisshgo/commit/1c34c23c0febdf3f186475114c907e9a86ec8958))
+- Validate inventory entry Count is non-negative (#116) ([0ef441a](https://github.com/tbotnz/cisshgo/commit/0ef441a200724e85254832ebcaea6c1b5502bcdf))
+- Add timeout to SSH server graceful shutdown (#117) ([7882ef5](https://github.com/tbotnz/cisshgo/commit/7882ef550fea8a3b63c6b13c4684a06e037693fc))
+- Correct transcript paths to be relative to map file directory (#119) ([c64b783](https://github.com/tbotnz/cisshgo/commit/c64b7834b8d29cfb9b3cd9baba209be4fdf4ff2e))
+- Require username on all platforms — enforce strict auth (#123) ([95d408f](https://github.com/tbotnz/cisshgo/commit/95d408f2c9e3dc13df6df9e5a19323a37beb3e76))
+- Add end_context field so end jumps directly to privileged exec (#126) ([a2e5ab6](https://github.com/tbotnz/cisshgo/commit/a2e5ab6b1a3bbfcee657ae97220efafb1697ddba))
+- Update csr1000v-add-interface scenario to reflect real IOS config workflow (#127) ([22b60da](https://github.com/tbotnz/cisshgo/commit/22b60dae4c1d6c50338fd745784e2e69c1ef0f71))
+- Integrate sequence steps and context switches in handleShellInput (#132) ([54697e0](https://github.com/tbotnz/cisshgo/commit/54697e03cd34f3fc3a9cf614c5b34500da8fc74b))
+- Enforce strict command ordering in scenario mode (#133) ([3f1b123](https://github.com/tbotnz/cisshgo/commit/3f1b1236857c09dbecc0e2a68e9f53196555bad4))
+- Move enable to first step in csr1000v-add-interface scenario (#134) ([40a27bf](https://github.com/tbotnz/cisshgo/commit/40a27bf39d930c2211bb0b56368c301f5a4a392c))
+- Apply end_context when end/exit is a sequence step (#137) ([f32b3b3](https://github.com/tbotnz/cisshgo/commit/f32b3b3b4d0de40f51eb932a7b16d272cdb3861d))
+- Update csr1000v-add-interface scenario transcripts and steps (#138) ([5eaf737](https://github.com/tbotnz/cisshgo/commit/5eaf737d0849070ca521aff552ce70912429039c))
+- Add checkout step to coverage-report job ([b36cfb7](https://github.com/tbotnz/cisshgo/commit/b36cfb7705c0dfcce1d3b7cfd873b2fe9fbaff61))
+- Correct branch references from main to master ([a643619](https://github.com/tbotnz/cisshgo/commit/a643619a458f5ff9ede4030c60504d36a2563e4d))
 
 ### 👷 CI/CD
 
@@ -46,12 +66,17 @@ Users with scripts or tooling using the old flag names must update them.
 - Fix remaining flag format inconsistencies ([eb82291](https://github.com/tbotnz/cisshgo/commit/eb82291c57bc8cc02a423421e295bbba382cfc83))
 - Add comprehensive usage examples for all features ([206e530](https://github.com/tbotnz/cisshgo/commit/206e5305de90e9f3f99c7cefa42dc9e8931a5861))
 - Add migration guide for v0.2.0 to v1.0.0 (#95) ([bf76cb4](https://github.com/tbotnz/cisshgo/commit/bf76cb4d6baa4c9f63ce04a1f0b8e7420040f463))
+- Move project description above badges in README (#112) ([faede0b](https://github.com/tbotnz/cisshgo/commit/faede0bbfc618086af0fd3f44b9c5e8848cbae89))
+- Fix Docker registry references in README (#113) ([574df14](https://github.com/tbotnz/cisshgo/commit/574df140a16172c9177e65ea6f69c1b8ecf4f2f9))
+- Link to text/template docs in transcripts documentation (#114) ([88135cf](https://github.com/tbotnz/cisshgo/commit/88135cf84fe7c4131699ff0d6c95d7b60e1517b6))
+- Fix incorrect branch name in contributing docs (#115) ([37802de](https://github.com/tbotnz/cisshgo/commit/37802de5350f10f39700570a83c10092e9876a81))
 
 ### 🔧 Refactoring
 
 - Change TranscriptMap.Platforms from list-of-maps to map (#62) ([8814135](https://github.com/tbotnz/cisshgo/commit/881413506fcd3ea4c635eec802df19162af8a92f))
 - Replace flag package with Kong for CLI argument parsing (#64) ([0391eba](https://github.com/tbotnz/cisshgo/commit/0391ebab3aef81a13d2349fb2f2686ab59009f72))
 - Split utils package into config, transcript, and cmdmatch ([cf55700](https://github.com/tbotnz/cisshgo/commit/cf55700c1a14c95a8d9b8ef8e6c7458d1b70808e))
+- Rewrite cmdmatch.Match() with cleaner single-pass algorithm (#118) ([c814e20](https://github.com/tbotnz/cisshgo/commit/c814e20ca99897795d05e6878368cbffa5168a5c))
 
 ### 🚀 Features
 
@@ -154,6 +179,48 @@ schema to the v1.0.0 map format. Handles already-migrated files,
 empty platforms, and missing platforms key gracefully.
 
 Also updates migration guide to reference the script.
+
+- Improve startup log message with platform and credential info (#122) ([d100754](https://github.com/tbotnz/cisshgo/commit/d10075429fb176775eee0bb01ce4076567058221))
+
+Log now includes platform (or scenario name), hostname, and username
+for each listener so operators know what is running on each port.
+
+- Add (config-if)# context to Cisco/Arista platforms and update scenario (#130) ([a4aeefb](https://github.com/tbotnz/cisshgo/commit/a4aeefb5ad3115f1116e22d6393c0e7bb48917c5))
+
+Add interface sub-mode context to csr1000v, ios, asa, nxos, eos so
+that 'interface <name>' commands correctly transition to (config-if)#.
+
+- Add (config-if)# to context_hierarchy and context_search for 5 platforms
+- 'interface' prefix match triggers (config-if)# context switch
+- end_context: '#' already handles returning from (config-if)# correctly
+- Add 'enable' step to csr1000v-add-interface scenario for correct flow
+- Update test fixtures and step count (7 -> 8)
+
+Full scenario workflow:
+  show running-config    (at >)
+  enable                 (> -> #)
+  configure terminal     (# -> (config)#)
+  interface Gi0/0/2      ((config)# -> (config-if)#)
+  ip address ...
+  no shutdown
+  end                    ((config-if)# -> # via end_context)
+  show running-config    (at #)
+
+- Match interface abbreviations in sequence steps without static table (#136) ([daeffd0](https://github.com/tbotnz/cisshgo/commit/daeffd0b5ec3c0c8682772adb4af7599a0161188))
+
+Add matchSequenceStep() for sequence step matching that handles
+interface-style tokens (e.g. 'g0/0/2' matching 'GigabitEthernet0/0/2').
+
+For tokens with a letter/digit boundary (alpha prefix + numeric suffix):
+- Step's alpha prefix must start with input's alpha prefix (case-insensitive)
+- Numeric suffix must match exactly
+
+This means 'int g0/0/2' matches 'interface GigabitEthernet0/0/2' but
+'int gub0/0/2' and 'int g0/0/3' do not.
+
+No hardcoded abbreviation table — the sequence step itself provides
+the ground truth. Only applies to sequence matching, not context
+switches or supported commands.
 
 
 ### 🧪 Testing

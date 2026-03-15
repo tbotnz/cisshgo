@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/cli-reference/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/configuration/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/contributing/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/getting-started/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/migration-v0.2-to-v1.0/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tbotnz.github.io/cisshgo/transcripts/</loc>
+         <lastmod>2026-03-15</lastmod>
+    </url>
+</urlset>

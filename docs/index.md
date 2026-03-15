@@ -43,12 +43,12 @@ Cisco IOS XE Software, Version 16.04.01
 ## Project Status
 
 [![CI](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml/badge.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
-[![coverage](https://raw.githubusercontent.com/tbotnz/cisshgo/badges/.badges/main/coverage.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
+[![coverage](https://raw.githubusercontent.com/tbotnz/cisshgo/badges/.badges/master/coverage.svg)](https://github.com/tbotnz/cisshgo/actions/workflows/test.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tbotnz/cisshgo)](https://goreportcard.com/report/github.com/tbotnz/cisshgo)
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/tbotnz/cisshgo/blob/main/LICENSE) file for details.
+MIT License - see [LICENSE](https://github.com/tbotnz/cisshgo/blob/master/LICENSE) file for details.
 
 ## Disclaimer
 

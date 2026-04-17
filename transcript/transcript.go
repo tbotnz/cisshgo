@@ -25,16 +25,17 @@ type Scenario struct {
 
 // Platform defines a simulated device platform and its command transcripts.
 type Platform struct {
-	Vendor             string            `yaml:"vendor" json:"vendor"`
-	Hostname           string            `yaml:"hostname" json:"hostname"`
-	Username           string            `yaml:"username" json:"username"`
-	Password           string            `yaml:"password" json:"password"`
-	PromptFormat       string            `yaml:"prompt_format" json:"prompt_format"`
-	CommandTranscripts map[string]string `yaml:"command_transcripts" json:"command_transcripts"`
-	ContextSearch      map[string]string `yaml:"context_search" json:"context_search"`
-	ContextHierarchy   map[string]string `yaml:"context_hierarchy" json:"context_hierarchy"`
-	ContextPrefixLines map[string]string `yaml:"context_prefix_lines" json:"context_prefix_lines"`
-	EndContext         string            `yaml:"end_context" json:"end_context"`
+	Vendor             string              `yaml:"vendor" json:"vendor"`
+	Hostname           string              `yaml:"hostname" json:"hostname"`
+	Username           string              `yaml:"username" json:"username"`
+	Password           string              `yaml:"password" json:"password"`
+	PromptFormat       string              `yaml:"prompt_format" json:"prompt_format"`
+	CommandTranscripts map[string]string   `yaml:"command_transcripts" json:"command_transcripts"`
+	ContextSearch      map[string]string   `yaml:"context_search" json:"context_search"`
+	ContextHierarchy   map[string]string   `yaml:"context_hierarchy" json:"context_hierarchy"`
+	ContextPrefixLines map[string]string   `yaml:"context_prefix_lines" json:"context_prefix_lines"`
+	ContextCommands    map[string][]string `yaml:"context_commands" json:"context_commands"`
+	EndContext         string              `yaml:"end_context" json:"end_context"`
 }
 
 // Map holds all platforms and scenarios defined in a transcript map YAML file.

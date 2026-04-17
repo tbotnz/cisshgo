@@ -15,19 +15,20 @@ type SupportedCommands map[string]string
 
 // FakeDevice Struct for the device we will be simulating
 type FakeDevice struct {
-	Vendor             string            // Vendor of this fake device
-	Platform           string            // Platform of this fake device
-	ScenarioName       string            // Scenario name if this device was initialized from a scenario (empty otherwise)
-	Hostname           string            // Hostname of the fake device
-	DefaultHostname    string            // Default Hostname of the fake device (for resetting)
-	Username           string            // Expected SSH username (empty = any username accepted)
-	Password           string            // Password of the fake device
-	PromptFormat       string            // Optional prompt format string (e.g. "{username}@{hostname}{context}")
-	SupportedCommands  SupportedCommands // What commands this fake device supports
-	ContextSearch      map[string]string // The available CLI prompt/contexts on this fake device
-	ContextHierarchy   map[string]string // The hierarchy of the available contexts
-	ContextPrefixLines map[string]string // Optional prefix lines above the prompt, keyed by context value
-	EndContext         string            // If set, "end" jumps directly to this context (e.g. "#") instead of traversing hierarchy
+	Vendor             string              // Vendor of this fake device
+	Platform           string              // Platform of this fake device
+	ScenarioName       string              // Scenario name if this device was initialized from a scenario (empty otherwise)
+	Hostname           string              // Hostname of the fake device
+	DefaultHostname    string              // Default Hostname of the fake device (for resetting)
+	Username           string              // Expected SSH username (empty = any username accepted)
+	Password           string              // Password of the fake device
+	PromptFormat       string              // Optional prompt format string (e.g. "{username}@{hostname}{context}")
+	SupportedCommands  SupportedCommands   // What commands this fake device supports
+	ContextSearch      map[string]string   // The available CLI prompt/contexts on this fake device
+	ContextHierarchy   map[string]string   // The hierarchy of the available contexts
+	ContextPrefixLines map[string]string   // Optional prefix lines above the prompt, keyed by context value
+	ContextCommands    map[string][]string // Optional per-context command whitelist; nil means all commands allowed
+	EndContext         string              // If set, "end" jumps directly to this context (e.g. "#") instead of traversing hierarchy
 }
 
 // Copy returns a deep copy of the FakeDevice, safe for use in a separate goroutine.
@@ -48,6 +49,12 @@ func (fd *FakeDevice) Copy() *FakeDevice {
 	c.ContextPrefixLines = make(map[string]string, len(fd.ContextPrefixLines))
 	for k, v := range fd.ContextPrefixLines {
 		c.ContextPrefixLines[k] = v
+	}
+	if fd.ContextCommands != nil {
+		c.ContextCommands = make(map[string][]string, len(fd.ContextCommands))
+		for k, v := range fd.ContextCommands {
+			c.ContextCommands[k] = append([]string(nil), v...)
+		}
 	}
 	return &c
 }
@@ -119,6 +126,7 @@ func InitGeneric(platform string, tm transcript.Map, baseDir string) (*FakeDevic
 		ContextSearch:      p.ContextSearch,
 		ContextHierarchy:   p.ContextHierarchy,
 		ContextPrefixLines: p.ContextPrefixLines,
+		ContextCommands:    p.ContextCommands,
 		EndContext:         p.EndContext,
 	}, nil
 }

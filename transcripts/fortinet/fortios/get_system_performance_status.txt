@@ -1,0 +1,5 @@
+CPU states: 5% user 3% system 0% nice 92% idle
+Memory: 2048 MB total, 742 MB used (36%), 1306 MB free (64%)
+Average network usage: 12 kbps in 9 kbps out
+Average sessions: 124 sessions
+Uptime: 4 days, 6 hours, 21 minutes

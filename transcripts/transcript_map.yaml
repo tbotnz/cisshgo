@@ -138,6 +138,29 @@ platforms:
       "base": ">"
     context_prefix_lines:
       "#": "[edit]"
+  fortios:
+    vendor: "fortinet"
+    hostname: "FGT"
+    username: "admin"
+    password: "admin"
+    prompt_format: "{hostname} {context}"
+    command_transcripts:
+      "get system status": "fortinet/fortios/get_system_status.txt"
+      "get system performance status": "fortinet/fortios/get_system_performance_status.txt"
+      "get router info routing-table all": "fortinet/fortios/get_router_info_routing-table_all.txt"
+      "get router info bgp neighbors": "fortinet/fortios/get_router_info_bgp_neighbors.txt"
+      "get system interface": "fortinet/fortios/get_system_interface.txt"
+      "show system interface": "fortinet/fortios/show_system_interface.txt"
+      "show firewall address": "fortinet/fortios/show_firewall_address.txt"
+      "show firewall addrgrp": "fortinet/fortios/show_firewall_addrgrp.txt"
+      "show firewall policy": "fortinet/fortios/show_firewall_policy.txt"
+      "show vpn ipsec phase1-interface": "fortinet/fortios/show_vpn_ipsec_phase1-interface.txt"
+      "show vpn ipsec phase2-interface": "fortinet/fortios/show_vpn_ipsec_phase2-interface.txt"
+      "show full-configuration": "fortinet/fortios/show_full-configuration.txt"
+    context_hierarchy:
+      "#": "exit"
+    context_search:
+      "base": "#"
 
 scenarios:
   csr1000v-add-interface:

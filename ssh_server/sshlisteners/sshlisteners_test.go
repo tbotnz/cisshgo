@@ -3,6 +3,7 @@ package sshlisteners
 import (
 	"context"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/tbotnz/cisshgo/fakedevices"
 	"github.com/tbotnz/cisshgo/ssh_server/handlers"
+	"github.com/tbotnz/cisshgo/transcript"
 )
 
 func TestGenericListener(t *testing.T) {
@@ -94,16 +96,28 @@ func TestGenericListener_PortInUse(t *testing.T) {
 		ContextHierarchy:  map[string]string{">": "exit"},
 	}
 
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	ln, err := net.Listen("tcp", ":0")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ln.Close()
 	port := ln.Addr().(*net.TCPAddr).Port
 
-	err = GenericListener(context.Background(), fd, port, handlers.GenericCiscoHandler)
-	if err == nil {
-		t.Error("expected error when port is already in use")
+	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- GenericListener(ctx, fd, port, handlers.GenericCiscoHandler)
+	}()
+
+	select {
+	case err = <-errCh:
+		if err == nil {
+			t.Error("expected error when port is already in use")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("GenericListener did not return while port was in use")
 	}
 }
 
@@ -158,5 +172,92 @@ func TestGenericListener_UsernameEnforcement(t *testing.T) {
 	_, err = gossh.Dial("tcp", addr, cfg)
 	if err == nil {
 		t.Error("expected auth failure with wrong username")
+	}
+}
+
+func TestScenarioListener(t *testing.T) {
+	fd := &fakedevices.FakeDevice{
+		Vendor:          "fortinet",
+		Platform:        "fortios",
+		Hostname:        "FGT",
+		DefaultHostname: "FGT",
+		Username:        "admin",
+		Password:        "admin",
+		PromptFormat:    "{hostname} {context}",
+		SupportedCommands: fakedevices.SupportedCommands{
+			"show firewall policy": "fallback\n",
+		},
+		ContextSearch:    map[string]string{"base": "#"},
+		ContextHierarchy: map[string]string{"#": "exit"},
+	}
+	sequence := []transcript.SequenceStep{
+		{Command: "show firewall policy", Transcript: "from sequence\n"},
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	addr := ln.Addr().String()
+	ln.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		_ = ScenarioListener(ctx, fd, sequence, port, handlers.FortiOSScenarioHandler)
+	}()
+
+	for i := 0; i < 20; i++ {
+		conn, dialErr := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if dialErr == nil {
+			conn.Close()
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	config := &gossh.ClientConfig{
+		User:            "admin",
+		Auth:            []gossh.AuthMethod{gossh.Password("admin")},
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
+		Timeout:         2 * time.Second,
+	}
+	client, err := gossh.Dial("tcp", addr, config)
+	if err != nil {
+		t.Fatalf("ssh dial: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		t.Fatalf("new session: %v", err)
+	}
+	defer session.Close()
+
+	if err := session.RequestPty("xterm", 80, 200, gossh.TerminalModes{}); err != nil {
+		t.Fatalf("request pty: %v", err)
+	}
+	stdin, err := session.StdinPipe()
+	if err != nil {
+		t.Fatalf("stdin: %v", err)
+	}
+	stdout, err := session.StdoutPipe()
+	if err != nil {
+		t.Fatalf("stdout: %v", err)
+	}
+	if err := session.Shell(); err != nil {
+		t.Fatalf("shell: %v", err)
+	}
+
+	time.Sleep(150 * time.Millisecond)
+	_, _ = stdin.Write([]byte("show firewall policy\nexit\n"))
+	time.Sleep(150 * time.Millisecond)
+
+	buf := make([]byte, 4096)
+	n, _ := stdout.Read(buf)
+	out := string(buf[:n])
+	if !strings.Contains(out, "from sequence") {
+		t.Fatalf("expected scenario output, got:\n%s", out)
 	}
 }

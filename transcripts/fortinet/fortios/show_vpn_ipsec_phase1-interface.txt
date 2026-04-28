@@ -1,0 +1,10 @@
+config vpn ipsec phase1-interface
+    edit "vpn-branch1"
+        set interface "port2"
+        set peertype any
+        set net-device disable
+        set proposal aes256-sha256
+        set remote-gw 198.51.100.10
+        set psksecret ENC SANITIZEDKEY
+    next
+end

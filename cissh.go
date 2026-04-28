@@ -101,11 +101,12 @@ func run(ctx context.Context, cli config.CLI) error {
 		wg.Add(1)
 		go func(cfg listenerConfig) {
 			defer wg.Done()
+			platformHandler, scenarioHandler := handlers.ResolvePlatformHandlers(cfg.fd.Platform)
 			var err error
 			if cfg.sequence != nil {
-				err = sshlisteners.ScenarioListener(ctx, cfg.fd, cfg.sequence, cfg.port)
+				err = sshlisteners.ScenarioListener(ctx, cfg.fd, cfg.sequence, cfg.port, scenarioHandler)
 			} else {
-				err = sshlisteners.GenericListener(ctx, cfg.fd, cfg.port, handlers.GenericCiscoHandler)
+				err = sshlisteners.GenericListener(ctx, cfg.fd, cfg.port, platformHandler)
 			}
 			if err != nil {
 				log.Printf("listener on port %d: %v", cfg.port, err)

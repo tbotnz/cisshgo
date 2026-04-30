@@ -31,8 +31,9 @@ func ScenarioListener(
 	fd *fakedevices.FakeDevice,
 	sequence []transcript.SequenceStep,
 	port int,
+	myHandler handlers.ScenarioHandler,
 ) error {
-	return listen(ctx, fd, port, handlers.GenericCiscoScenarioHandler(fd.Copy(), sequence))
+	return listen(ctx, fd, port, myHandler(fd.Copy(), sequence))
 }
 
 func listen(ctx context.Context, fd *fakedevices.FakeDevice, port int, handler ssh.Handler) error {

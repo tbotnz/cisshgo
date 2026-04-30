@@ -1,0 +1,2 @@
+== [ port1 ]
+name: port1   mode: dhcp    ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   ring-rx: 0   ring-tx: 0   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable    mtu-override: disable

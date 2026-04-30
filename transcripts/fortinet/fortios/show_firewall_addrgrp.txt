@@ -1,0 +1,5 @@
+config firewall addrgrp
+    edit "grp-dmz"
+        set member "srv-web"
+    next
+end

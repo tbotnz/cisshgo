@@ -1,0 +1,8 @@
+config vpn ipsec phase2-interface
+    edit "vpn-branch1-p2"
+        set phase1name "vpn-branch1"
+        set proposal aes256-sha256
+        set src-subnet 10.0.20.0 255.255.255.0
+        set dst-subnet 10.1.20.0 255.255.255.0
+    next
+end

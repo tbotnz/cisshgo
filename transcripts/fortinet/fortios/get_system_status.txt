@@ -1,0 +1,8 @@
+Version: FortiGate-VM64 v7.2.6,build1575,240201 (GA)
+Virus-DB: 1.00000(2001-01-01 00:00)
+Extended DB: 1.00000(2001-01-01 00:00)
+IPS-DB: 1.00000(2001-01-01 00:00)
+Serial-Number: FGVM00UNITSANITIZED
+Hostname: {{.Hostname}}
+Current virtual domain: root
+System time: Tue Apr 28 12:00:00 2026

@@ -10,7 +10,7 @@ cisshgo is a lightweight SSH server that emulates network devices like Cisco rou
 
 - **Fast & Lightweight**: Written in Go, minimal resource usage
 - **Concurrent**: Spawn multiple device instances simultaneously
-- **Flexible**: Support for multiple vendors and platforms (Cisco IOS/IOS-XR/NX-OS/ASA, Arista EOS, Juniper JunOS)
+- **Flexible**: Support for multiple vendors and platforms (Cisco IOS/IOS-XR/NX-OS/ASA, Arista EOS, Juniper JunOS, Fortinet FortiOS)
 - **Customizable**: Easy to add new commands and platforms via YAML configuration
 - **Stateful**: Scenario support for commands that change device state
 - **Multi-device**: Inventory system for complex network topologies

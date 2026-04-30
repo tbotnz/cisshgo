@@ -3,6 +3,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/gliderlabs/ssh"
 
 	"github.com/tbotnz/cisshgo/fakedevices"
@@ -14,3 +16,13 @@ type PlatformHandler func(*fakedevices.FakeDevice) ssh.Handler
 
 // ScenarioHandler defines a handler type that includes a sequence of steps
 type ScenarioHandler func(*fakedevices.FakeDevice, []transcript.SequenceStep) ssh.Handler
+
+// ResolvePlatformHandlers returns platform-appropriate interactive and scenario handlers.
+func ResolvePlatformHandlers(platform string) (PlatformHandler, ScenarioHandler) {
+	switch strings.ToLower(platform) {
+	case "fortios":
+		return FortiOSHandler, FortiOSScenarioHandler
+	default:
+		return GenericCiscoHandler, GenericCiscoScenarioHandler
+	}
+}

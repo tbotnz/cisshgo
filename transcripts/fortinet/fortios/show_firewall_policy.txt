@@ -1,0 +1,12 @@
+config firewall policy
+    edit 1
+        set name "allow-users-to-web"
+        set srcintf "port1"
+        set dstintf "port2"
+        set srcaddr "net-users"
+        set dstaddr "srv-web"
+        set action accept
+        set schedule "always"
+        set service "HTTP" "HTTPS"
+    next
+end
